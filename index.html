@@ -181,6 +181,27 @@
   <pre id="debug-info" style="white-space:pre-wrap; font-size:11px; color:var(--hint); background:var(--secondary-bg); padding:10px; border-radius:8px; margin:0 4px;"></pre>
 </div>
 
+<!-- ===== ЭКРАН ПРИВЕТСТВИЯ: ТОЧКА ВХОДА С КНОПКИ МЕНЮ ===== -->
+<div id="screen-welcome" class="screen">
+  <div class="card" style="text-align:center;">
+    <div style="font-size:44px; margin-bottom:8px;">🌿</div>
+    <h2 style="margin:0 0 8px;">Bloomind</h2>
+    <p class="hint" style="margin:0;">Я помогу вам не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой. Всё, что вы укажете, использую только для напоминаний.</p>
+  </div>
+  <button class="btn-primary" onclick="startForm()">📝 Заполнить анкету</button>
+  <button class="btn-option" onclick="openProfile()">👤 Профиль</button>
+  <button class="btn-option" onclick="openSupport()">💬 Поддержка</button>
+</div>
+
+<!-- ===== ПОДДЕРЖКА ===== -->
+<div id="screen-support" class="screen">
+  <div class="card">
+    <p style="margin:0 0 10px;">Если что-то пошло не так или остались вопросы — просто напишите об этом прямо в этот чат с ботом, сообщение прочитаю и отвечу лично.</p>
+    <p class="hint" style="margin:0;">Это не автоответчик по FAQ — короткое личное сообщение работает быстрее всего.</p>
+  </div>
+  <button class="btn-option" onclick="showScreen('screen-welcome')">← Назад</button>
+</div>
+
 <!-- ===== ГЛАВНЫЙ ЭКРАН: СПИСОК ПОЛУЧАТЕЛЕЙ ===== -->
 <div id="screen-home" class="screen">
   <div class="stat-card">
@@ -389,6 +410,8 @@
   const SCREEN_TITLES = {
     'screen-loading': 'Bloomind',
     'screen-error': 'Bloomind',
+    'screen-welcome': 'Bloomind',
+    'screen-support': 'Поддержка',
     'screen-home': 'Ваши получатели',
     'screen-form': 'Новый получатель',
     'screen-reminder': 'Напоминание',
@@ -396,25 +419,29 @@
     'screen-profile': 'Профиль'
   };
 
+  function openSupport() {
+    showScreen('screen-support');
+  }
+
   // Правила предложенных поводов по типу получателя — раздел 2 ТЗ "Персонализация и поводы".
   const OCCASION_RULES = {
     'Мама': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, sub: 'подтянем дату сами, каждый год' },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' },
       { type: 'mothersday', emoji: '🍂', label: 'День матери', required: false, auto: true, defaultChecked: false, sub: 'последнее воскресенье ноября, каждый год' }
     ],
     'Жена/партнёрша': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, sub: 'подтянем дату сами, каждый год' },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' },
       { type: 'justbecause', emoji: '💌', label: 'Дарить без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'сами напомним раз в выбранный период' }
     ],
     'Дочь': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, sub: 'подтянем дату сами, каждый год' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' }
     ],
     'Другое': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, sub: 'подтянем дату сами, каждый год' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' }
     ]
   };
 
@@ -539,6 +566,7 @@
       if (!(r.type in profile.occasionSelections)) {
         profile.occasionSelections[r.type] = r.required ? true : !!r.defaultChecked;
       }
+      if (r.hidden) return; // не показываем в чек-листе — уже выставлено выше, подтягивается само
       const checked = profile.occasionSelections[r.type];
       const rowClasses = 'occasion-row' + (checked ? ' checked' : '') + (r.required ? ' disabled' : '');
       const clickAttr = r.required ? '' : ' onclick="toggleOccasion(\'' + r.type + '\')"';
@@ -908,7 +936,13 @@
       return;
     }
 
-    // Menu Button может вести сразу в профиль (?screen=profile), а не на главную.
+    // Кнопка меню Telegram (слева внизу) ведёт на экран приветствия с описанием
+    // сервиса и навигацией — а не сразу в профиль, чтобы новый человек сначала
+    // понял, что это за приложение, а не упирался в пустой личный кабинет.
+    if (urlScreen === 'welcome') {
+      showScreen('screen-welcome');
+      return;
+    }
     if (urlScreen === 'profile') {
       openProfile();
       return;
