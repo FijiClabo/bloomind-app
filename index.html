@@ -6,7 +6,10 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
-    --bg: var(--tg-theme-bg-color, #FFF8F3);
+    /* Фирменный тёплый фон всегда, независимо от тёмной/светлой темы Telegram
+       у пользователя — иначе на тёмной теме фон становится чёрным и всё
+       выглядит как обычная системная форма, а не брендированное приложение. */
+    --bg: #FFF8F3;
     --text: #3A2E2E;
     --hint: #8A7B7B;
     --secondary-bg: #FFFFFF;
@@ -717,11 +720,11 @@
     const occasions = buildOccasionsPayload();
     apiPost({ action: 'submitProfile', userId: userId, name: profile.name, who: profile.who, style: profile.style, address: profile.address, note: profile.note, occasions: occasions })
       .then(function (res) {
-        if (!res.ok) { err.textContent = 'Не получилось сохранить, попробуйте ещё раз.'; return; }
+        if (!res.ok) { err.textContent = 'Не получилось сохранить (' + (res.error || 'ошибка') + '), попробуйте ещё раз.'; return; }
         document.getElementById('success-text').textContent = 'Готово 🌸 Всё запомнил про ' + profile.name + '.';
         showScreen('screen-success');
       })
-      .catch(function () { err.textContent = 'Нет связи с сервером, попробуйте ещё раз.'; });
+      .catch(function (e) { err.textContent = 'Нет связи с сервером: ' + e + '.'; });
   }
 
   // ===== ГЛАВНЫЙ ЭКРАН =====
