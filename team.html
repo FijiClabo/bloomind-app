@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #FFF8F3; --text: #3A2E2E; --hint: #8A7B7B; --secondary-bg: #FFFFFF;
+    --accent: #C97B84; --accent-dark: #B5646F; --accent-soft: #FBEEF0; --border: #F0E2DC;
+    --green: #2E7D32; --green-bg: #E3F3E1; --red: #A32D2D;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; color: inherit; }
+  html, body { margin: 0; background: var(--bg); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); padding-bottom: 70px; }
+  .topbar { padding: 18px 18px 14px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .topbar-title { font-size: 18px; font-weight: 800; }
+  .role-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: var(--accent-soft); color: var(--accent-dark); }
+  .content { padding: 16px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .card { background: var(--secondary-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+  .rec-name { font-weight: 800; font-size: 15px; }
+  .sub-line { font-size: 12.5px; color: var(--hint); margin-top: 2px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge-status { background: var(--accent-soft); color: var(--accent-dark); }
+  .badge-paid-yes { background: var(--green-bg); color: var(--green); }
+  .badge-paid-no { background: var(--border); color: var(--hint); }
+  .row { display: flex; gap: 8px; font-size: 13px; padding: 5px 0; border-top: 1px solid var(--border); }
+  .row-label { color: var(--hint); width: 78px; flex-shrink: 0; }
+  .btn-primary { display: block; width: 100%; text-align: center; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 13.5px; border: none; cursor: pointer; background: var(--text); color: #fff; margin-top: 10px; }
+  .btn-link { background: none; border: none; color: var(--accent-dark); font-size: 12.5px; font-weight: 700; cursor: pointer; padding: 0; }
+  .link-right { text-align: right; margin-top: 6px; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; margin: 16px 0 8px; }
+  .section-label:first-child { margin-top: 0; }
+  input, select { width: 100%; padding: 12px 14px; font-size: 15px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; color: var(--text); margin-bottom: 10px; font-family: inherit; }
+  .field-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; margin: 0 0 5px; }
+  .btn-option { display: block; width: 100%; text-align: center; padding: 11px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; margin-bottom: 8px; }
+  .btn-option.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+  .role-select { display: flex; gap: 8px; margin-bottom: 12px; }
+  .role-select .btn-option { margin-bottom: 0; flex: 1; }
+  .center { text-align: center; padding: 60px 20px; color: var(--hint); font-size: 14px; line-height: 1.5; }
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: #fff; border-top: 1px solid var(--border); padding: 8px 6px 12px; }
+  .tabbar-item { flex: 1; text-align: center; background: none; border: none; cursor: pointer; color: var(--hint); font-size: 11px; font-family: inherit; }
+  .tabbar-item.active { color: var(--accent-dark); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Bloomind — команда</div>
+  <div class="role-badge" id="role-badge"></div>
+</div>
+
+<div class="content">
+  <div id="screen-loading" class="screen active"><p class="center">Загрузка…</p></div>
+  <div id="screen-forbidden" class="screen"><p class="center">Этот раздел только для команды Bloomind. Если это ошибка — напишите владельцу.</p></div>
+
+  <div id="screen-orders" class="screen">
+    <div class="section-label">Заказы</div>
+    <div id="orders-list"></div>
+  </div>
+
+  <div id="screen-deliveries" class="screen">
+    <div class="section-label">Доставки</div>
+    <div id="deliveries-list"></div>
+  </div>
+
+  <div id="screen-team" class="screen">
+    <div class="section-label">Команда</div>
+    <div id="team-list"></div>
+    <button class="btn-primary" onclick="showAddStaffForm()">+ Добавить сотрудника</button>
+    <div class="card" id="add-staff-form" style="display:none; margin-top:10px;">
+      <div class="field-label">Имя (для отображения)</div>
+      <input type="text" id="staff-name" placeholder="Например: Флорист Аня">
+      <div class="field-label">Telegram ID или @username</div>
+      <input type="text" id="staff-idorusername" placeholder="@anya_flowers">
+      <div class="field-label">Роль</div>
+      <div class="role-select">
+        <div class="btn-option selected" data-role="florist" onclick="pickStaffRole('florist', this)">Флорист</div>
+        <div class="btn-option" data-role="courier" onclick="pickStaffRole('courier', this)">Курьер</div>
+        <div class="btn-option" data-role="owner" onclick="pickStaffRole('owner', this)">Владелец</div>
+      </div>
+      <div id="staff-error" class="sub-line" style="margin-bottom:8px;"></div>
+      <button class="btn-primary" onclick="submitAddStaff()">Добавить</button>
+      <button class="btn-link" style="display:block; margin:10px auto 0;" onclick="hideAddStaffForm()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabbar" id="tabbar" style="display:none;"></div>
+
+<input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
+
+<script>
+  const TEAM_API = 'https://ylbzmqvzetseudzfcgod.functions.supabase.co/team-view';
+  const tg = window.Telegram && window.Telegram.WebApp;
+  let myRole = null;
+  let pendingPhotoOccasionId = null;
+  let pendingStaffRole = 'florist';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function apiGet(params) {
+    const full = Object.assign({ initData: tg ? tg.initData : '' }, params);
+    const query = Object.keys(full).map(function (k) { return k + '=' + encodeURIComponent(full[k]); }).join('&');
+    return fetch(TEAM_API + '?' + query).then(function (r) { return r.json(); });
+  }
+  function apiPost(body) {
+    const full = Object.assign({ initData: tg ? tg.initData : '' }, body);
+    return fetch(TEAM_API, { method: 'POST', body: JSON.stringify(full) }).then(function (r) { return r.json(); });
+  }
+  function apiPostForm(form) {
+    form.append('initData', tg ? tg.initData : '');
+    return fetch(TEAM_API, { method: 'POST', body: form }).then(function (r) { return r.json(); });
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tabbar-item').forEach(function (el) { el.classList.toggle('active', el.dataset.screen === id); });
+  }
+
+  function buildTabbar() {
+    const tabs = [];
+    if (myRole === 'owner') tabs.push({ id: 'screen-orders', label: 'Заказы' }, { id: 'screen-deliveries', label: 'Доставки' }, { id: 'screen-team', label: 'Команда' });
+    else if (myRole === 'florist') tabs.push({ id: 'screen-orders', label: 'Заказы' });
+    else if (myRole === 'courier') tabs.push({ id: 'screen-deliveries', label: 'Доставки' });
+
+    const bar = document.getElementById('tabbar');
+    if (tabs.length <= 1) { bar.style.display = 'none'; return tabs; }
+    bar.style.display = 'flex';
+    bar.innerHTML = tabs.map(function (t) {
+      return '<button type="button" class="tabbar-item" data-screen="' + t.id + '" onclick="onTab(\'' + t.id + '\')">' + t.label + '</button>';
+    }).join('');
+    return tabs;
+  }
+
+  function onTab(id) {
+    showScreen(id);
+    if (id === 'screen-orders') loadOrders();
+    if (id === 'screen-deliveries') loadDeliveries();
+    if (id === 'screen-team') loadTeam();
+  }
+
+  function orderCardHtml(o, opts) {
+    const paidClass = o.paid === 'да' ? 'badge-paid-yes' : 'badge-paid-no';
+    const priceLine = o.bouquetPrice
+      ? '<div class="row"><span class="row-label">Сумма</span><span>' + o.bouquetPrice + ' ₽' + (o.deliverySurcharge ? ' + ' + o.deliverySurcharge + ' ₽ доставка' : '') + '</span></div>'
+      : '';
+    let actionHtml = '';
+    if (opts.sendPhoto) {
+      actionHtml = opts.primary
+        ? '<button class="btn-primary" onclick="startSendPhoto(' + o.occasionId + ')">📷 Отправить на согласование</button>'
+        : '<div class="link-right"><button class="btn-link" onclick="startSendPhoto(' + o.occasionId + ')">📷 отправить фото</button></div>';
+    }
+    if (opts.deliverAction) {
+      if (o.status === 'Доставлено') {
+        actionHtml = '<div class="badge badge-paid-yes" style="display:inline-block; margin-top:8px;">Доставлено ✓</div>';
+      } else if (o.status === 'Одобрено') {
+        const mapUrl = 'https://yandex.ru/maps/?text=' + encodeURIComponent(o.address || '');
+        actionHtml = '<div style="display:flex; gap:8px; margin-top:8px; align-items:center;">' +
+          '<a href="' + mapUrl + '" target="_blank" style="font-size:12px; font-weight:700; color:#B5646F; text-decoration:none;">📍 карта</a>' +
+          '<button class="btn-primary" style="margin:0; flex:1;" onclick="markDelivered(' + o.occasionId + ')">✓ Доставлено</button></div>';
+      } else {
+        actionHtml = '<div class="sub-line">Пока не готово к отправке</div>';
+      }
+    }
+    return '<div class="card">' +
+      '<div class="card-top"><div><div class="rec-name">' + escapeHtml(o.recipientName) + '</div>' +
+      '<div class="sub-line">' + escapeHtml(o.occasion) + ' · ' + escapeHtml(o.date) + (o.window ? ' · ' + escapeHtml(o.window) : '') + '</div></div>' +
+      '<div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">' +
+      '<span class="badge badge-status">' + escapeHtml(o.status) + '</span>' +
+      '<span class="badge ' + paidClass + '">' + escapeHtml(o.paid === 'да' ? 'Оплачено' : (o.paid === 'заявлено клиентом' ? 'Клиент заявил' : 'Не оплачено')) + '</span></div></div>' +
+      (o.style ? '<div class="row"><span class="row-label">Стиль</span><span>' + escapeHtml(o.style) + '</span></div>' : '') +
+      (o.address ? '<div class="row"><span class="row-label">Адрес</span><span>' + escapeHtml(o.address) + '</span></div>' : '') +
+      (o.phone ? '<div class="row"><span class="row-label">Телефон</span><span>' + escapeHtml(o.phone) + '</span></div>' : '') +
+      priceLine + actionHtml + '</div>';
+  }
+
+  function loadOrders() {
+    document.getElementById('orders-list').innerHTML = '<p class="center">Загрузка…</p>';
+    apiGet({ action: 'orders' }).then(function (res) {
+      if (!res.ok) { document.getElementById('orders-list').innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
+      const primary = myRole === 'florist';
+      document.getElementById('orders-list').innerHTML = (res.orders || []).map(function (o) {
+        return orderCardHtml(o, { sendPhoto: true, primary: primary });
+      }).join('') || '<p class="center">Заказов нет.</p>';
+    });
+  }
+
+  function loadDeliveries() {
+    document.getElementById('deliveries-list').innerHTML = '<p class="center">Загрузка…</p>';
+    apiGet({ action: 'deliveries' }).then(function (res) {
+      if (!res.ok) { document.getElementById('deliveries-list').innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
+      document.getElementById('deliveries-list').innerHTML = (res.orders || []).map(function (o) {
+        return orderCardHtml(o, { deliverAction: true });
+      }).join('') || '<p class="center">Доставок нет.</p>';
+    });
+  }
+
+  function loadTeam() {
+    document.getElementById('team-list').innerHTML = '<p class="center">Загрузка…</p>';
+    apiGet({ action: 'staff' }).then(function (res) {
+      if (!res.ok) { document.getElementById('team-list').innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
+      const ROLE_LABEL = { owner: 'Владелец', florist: 'Флорист', courier: 'Курьер' };
+      document.getElementById('team-list').innerHTML = (res.staff || []).map(function (s) {
+        return '<div class="card" style="display:flex; justify-content:space-between; align-items:center;">' +
+          '<div><div class="rec-name">' + escapeHtml(s.name) + '</div><div class="sub-line">ID ' + escapeHtml(s.telegram_id) + '</div></div>' +
+          '<div style="display:flex; align-items:center; gap:10px;"><span class="badge badge-status">' + (ROLE_LABEL[s.role] || s.role) + '</span>' +
+          '<button class="btn-link" style="color:#A32D2D;" onclick="removeStaff(\'' + s.telegram_id + '\')">убрать</button></div></div>';
+      }).join('') || '<p class="center">Пока только ты.</p>';
+    });
+  }
+
+  function startSendPhoto(occasionId) {
+    pendingPhotoOccasionId = occasionId;
+    document.getElementById('photo-input').click();
+  }
+  document.getElementById('photo-input').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file || !pendingPhotoOccasionId) return;
+    const form = new FormData();
+    form.append('occasionId', String(pendingPhotoOccasionId));
+    form.append('photo', file);
+    apiPostForm(form).then(function (res) {
+      e.target.value = '';
+      if (res.ok) loadOrders();
+    });
+  });
+
+  function markDelivered(occasionId) {
+    apiPost({ action: 'markDelivered', occasionId: occasionId }).then(function (res) {
+      if (res.ok) loadDeliveries();
+    });
+  }
+
+  function showAddStaffForm() { document.getElementById('add-staff-form').style.display = 'block'; }
+  function hideAddStaffForm() {
+    document.getElementById('add-staff-form').style.display = 'none';
+    document.getElementById('staff-name').value = '';
+    document.getElementById('staff-idorusername').value = '';
+    document.getElementById('staff-error').textContent = '';
+  }
+  function pickStaffRole(role, el) {
+    pendingStaffRole = role;
+    document.querySelectorAll('#add-staff-form .role-select .btn-option').forEach(function (b) { b.classList.remove('selected'); });
+    el.classList.add('selected');
+  }
+  function submitAddStaff() {
+    const name = document.getElementById('staff-name').value.trim();
+    const idOrUsername = document.getElementById('staff-idorusername').value.trim();
+    const err = document.getElementById('staff-error');
+    if (!name || !idOrUsername) { err.textContent = 'Заполните имя и ID/username.'; return; }
+    err.textContent = 'Добавляем…';
+    apiPost({ action: 'addStaff', name: name, idOrUsername: idOrUsername, role: pendingStaffRole }).then(function (res) {
+      if (!res.ok) {
+        err.textContent = res.error === 'not_found'
+          ? 'Не нашли этот username. Попросите сначала написать /start нашему боту и попробуйте снова.'
+          : 'Не получилось: ' + (res.error || 'ошибка');
+        return;
+      }
+      hideAddStaffForm();
+      loadTeam();
+    });
+  }
+  function removeStaff(telegramId) {
+    apiPost({ action: 'removeStaff', telegramId: telegramId }).then(function (res) { if (res.ok) loadTeam(); });
+  }
+
+  function init() {
+    if (tg) { tg.ready(); tg.expand(); }
+    apiGet({ action: 'me' }).then(function (res) {
+      if (!res.ok) { showScreen('screen-forbidden'); return; }
+      myRole = res.role;
+      const ROLE_LABEL = { owner: 'Владелец', florist: 'Флорист', courier: 'Курьер' };
+      document.getElementById('role-badge').textContent = 'Ты: ' + (ROLE_LABEL[myRole] || myRole);
+      const tabs = buildTabbar();
+      if (tabs.length) onTab(tabs[0].id);
+      else showScreen('screen-forbidden');
+    }).catch(function () { showScreen('screen-forbidden'); });
+  }
+  init();
+</script>
+</body>
+</html>
