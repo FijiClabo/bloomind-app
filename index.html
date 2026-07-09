@@ -17,6 +17,11 @@
     --accent-dark: #B5646F;
     --accent-soft: #FBEEF0;
     --border: #F0E2DC;
+    /* Принудительно светлая тема для нативных элементов (кнопки, поля,
+       date-picker, плейсхолдеры) — иначе при тёмной системной теме iOS/Telegram
+       красит их по умолчанию в белый текст на белом фоне, хотя фон и цвет текста
+       у нас всегда светлые (см. --bg/--text выше). */
+    color-scheme: light;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; color: inherit; }
   html, body { margin: 0; background: var(--bg); }
@@ -75,6 +80,17 @@
     box-sizing: border-box;
   }
   input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  input::placeholder, textarea::placeholder { color: var(--hint); opacity: 1; }
+  /* Нативный input[type=date] не поддерживает свой placeholder-текст — кладём
+     оверлей той же формы поверх пустого поля с текстом "Выбрать дату", клики
+     проходят сквозь (pointer-events:none) и открывают обычный пикер. */
+  .date-field { position: relative; margin-bottom: 12px; }
+  .date-field input[type="date"] { margin-bottom: 0; }
+  .date-field .date-placeholder {
+    position: absolute; inset: 0; display: flex; align-items: center;
+    padding: 0 16px; border-radius: 14px; background: var(--secondary-bg);
+    color: var(--hint); font-size: 16px; pointer-events: none;
+  }
   .field-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 5px; }
   .two-up { display: flex; gap: 10px; }
   .two-up > div { flex: 1; }
@@ -317,13 +333,10 @@
     <button class="btn-option" data-value="Жена/партнёрша" onclick="chooseWho('Жена/партнёрша')">Жена / партнёрша</button>
     <button class="btn-option" data-value="Мама" onclick="chooseWho('Мама')">Мама</button>
     <button class="btn-option" data-value="Дочь" onclick="chooseWho('Дочь')">Дочь</button>
-    <button class="btn-option" data-value="Другое" onclick="chooseWhoOther()">Другое</button>
-    <div id="who-other-form" style="display:none;">
-      <div class="field-label">Кем она вам приходится</div>
-      <input type="text" id="input-who-other" placeholder="Например: сестра, подруга, коллега">
-      <p class="hint" id="who-other-error" style="margin:-6px 0 10px;">&nbsp;</p>
-      <button class="btn-primary" onclick="submitWhoOther()">Далее</button>
-    </div>
+    <div class="field-label" style="margin-top:16px;">Или напишите сами</div>
+    <input type="text" id="input-who-other" placeholder="Например: сестра, подруга, коллега">
+    <p class="hint" id="who-other-error" style="margin:-6px 0 10px;">&nbsp;</p>
+    <button class="btn-primary" onclick="submitWhoOther()">Далее</button>
   </div>
 
   <div class="form-step" data-step="occasions">
@@ -334,7 +347,10 @@
     <button class="btn-link" type="button" onclick="showAddOccasionForm()">+ Свой повод</button>
     <div class="card" id="add-occasion-form" style="display:none; margin-top:12px;">
       <input type="text" id="input-custom-label" placeholder="Например: Годовщина знакомства">
-      <input type="date" id="input-custom-date">
+      <div class="date-field">
+        <input type="date" id="input-custom-date" onchange="toggleDatePlaceholder(this, 'custom-date-placeholder')">
+        <span class="date-placeholder" id="custom-date-placeholder" style="display:flex;">Выбрать дату</span>
+      </div>
       <button type="button" class="btn-option selected" id="custom-recurring-toggle" onclick="toggleCustomRecurring()">🔁 Повторять каждый год</button>
       <button type="button" class="btn-primary" onclick="addCustomOccasion()">Добавить повод</button>
       <button type="button" class="btn-link" onclick="hideAddOccasionForm()">Отмена</button>
@@ -342,15 +358,6 @@
     </div>
     <p class="hint" id="occasions-error" style="margin-top:10px;">&nbsp;</p>
     <button class="btn-primary" onclick="submitOccasions()" style="margin-top:6px;">Далее</button>
-  </div>
-
-  <div class="form-step" data-step="date">
-    <button type="button" class="btn-link" onclick="goBack('date')">← Назад</button>
-    <h1>Когда у неё день рождения?</h1>
-    <p class="hint">Понадобится для напоминаний и чтобы понять, какие ещё даты предложить.</p>
-    <input type="date" id="input-date">
-    <button class="btn-primary" onclick="submitDate()">Далее</button>
-    <p class="hint" id="date-error"></p>
   </div>
 
   <div class="form-step" data-step="schoolcheck">
@@ -413,7 +420,7 @@
       <div class="row"><span>Стиль</span><span id="summary-style"></span> <button class="btn-link" onclick="editStep('stylepref')">изменить</button></div>
       <div class="row"><span>Адрес</span><span id="summary-address"></span> <button class="btn-link" onclick="editStep('address')">изменить</button></div>
     </div>
-    <button class="btn-primary" onclick="submitProfile()">Всё верно, сохранить</button>
+    <button class="btn-primary" id="submit-profile-btn" onclick="submitProfile()">Всё верно, сохранить</button>
     <p class="hint" id="submit-error"></p>
   </div>
 
@@ -558,7 +565,7 @@
   let schoolAgeSuggested = false;
   let schoolAge = null;
   let customRecurringOn = true;
-  const steps = ['name', 'who', 'occasions', 'date', 'schoolcheck', 'stylepref', 'address', 'summary'];
+  const steps = ['name', 'who', 'occasions', 'schoolcheck', 'stylepref', 'address', 'summary'];
   const STYLE_OPTIONS = [
     { value: 'Нежный', emoji: '🌸', sub: 'пастель, пионы, эустома' },
     { value: 'Яркий', emoji: '🌺', sub: 'сочные тона, герберы' },
@@ -594,23 +601,23 @@
   // Правила предложенных поводов по типу получателя.
   const OCCASION_RULES = {
     'Мама': [
-      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true },
+      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' },
       { type: 'mothersday', emoji: '🍂', label: 'День матери', required: false, auto: true, defaultChecked: false, sub: 'последнее воскресенье ноября, каждый год' }
     ],
     'Жена/партнёрша': [
-      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true },
+      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' },
       { type: 'anniversary', emoji: '💍', label: 'Годовщина', required: false, auto: false, needsDate: true, defaultChecked: false, sub: 'например, день знакомства или свадьбы — дату укажете сами' },
       { type: 'justbecause', emoji: '💌', label: 'Дарить без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'сами напомним раз в выбранный период' }
     ],
     'Дочь': [
-      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true }
+      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' }
     ],
     'Другое': [
-      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true }
+      { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' }
     ]
   };
 
@@ -690,7 +697,6 @@
   const WHO_FIXED_VALUES = ['Жена/партнёрша', 'Мама', 'Дочь'];
   function populateStepInputs(name) {
     if (name === 'name') document.getElementById('input-name').value = profile.name || '';
-    if (name === 'date') document.getElementById('input-date').value = ruDateToIso(profile.date);
     if (name === 'address') {
       document.getElementById('input-address').value = profile.address || '';
       document.getElementById('input-apartment').value = profile.apartment || '';
@@ -700,22 +706,8 @@
     }
     if (name === 'who') {
       const isCustom = profile.who && WHO_FIXED_VALUES.indexOf(profile.who) === -1;
-      document.getElementById('who-other-form').style.display = isCustom ? 'block' : 'none';
       document.getElementById('input-who-other').value = isCustom ? profile.who : '';
-      if (isCustom) {
-        document.querySelectorAll('[data-step="who"] [data-value]').forEach(function (el) {
-          el.classList.toggle('selected', el.dataset.value === 'Другое');
-        });
-      }
     }
-  }
-
-  function chooseWhoOther() {
-    document.querySelectorAll('[data-step="who"] [data-value]').forEach(function (el) {
-      el.classList.toggle('selected', el.dataset.value === 'Другое');
-    });
-    document.getElementById('who-other-form').style.display = 'block';
-    document.getElementById('input-who-other').focus();
   }
 
   function submitWhoOther() {
@@ -780,7 +772,6 @@
     schoolAge = null;
     customRecurringOn = true;
     document.getElementById('input-name').value = '';
-    document.getElementById('input-date').value = '';
     document.getElementById('input-address').value = '';
     document.getElementById('input-apartment').value = '';
     document.getElementById('input-entrance').value = '';
@@ -790,12 +781,13 @@
     document.getElementById('input-social').value = '';
     document.getElementById('input-custom-label').value = '';
     document.getElementById('input-custom-date').value = '';
-    document.getElementById('date-error').textContent = '';
     document.getElementById('address-error').textContent = '';
     document.getElementById('submit-error').textContent = '';
-    document.getElementById('who-other-form').style.display = 'none';
     document.getElementById('input-who-other').value = '';
     document.getElementById('who-other-error').textContent = '';
+    const submitBtn = document.getElementById('submit-profile-btn');
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '';
     hideAddOccasionForm();
     document.querySelectorAll('.form-step [data-value].selected').forEach(function (el) { el.classList.remove('selected'); });
     showStep('name');
@@ -812,7 +804,7 @@
     profile.who = val;
     profile.occasionSelections = {};
     profile.occasionDates = {};
-    document.getElementById('who-other-form').style.display = 'none';
+    profile.occasionRecurring = {};
     document.getElementById('input-who-other').value = '';
     document.getElementById('who-other-error').textContent = '';
     goNext('who');
@@ -823,6 +815,7 @@
     const rules = getOccasionRules();
     if (!profile.occasionSelections) profile.occasionSelections = {};
     if (!profile.occasionDates) profile.occasionDates = {};
+    if (!profile.occasionRecurring) profile.occasionRecurring = {};
     if (!profile.customOccasions) profile.customOccasions = [];
     const list = document.getElementById('occasions-list');
     let html = '';
@@ -845,7 +838,14 @@
         }).join('') + '</div>';
       }
       if (r.needsDate && checked) {
-        html += '<input type="date" style="margin:-4px 0 12px;" value="' + escapeHtml(profile.occasionDates[r.type] || '') + '" onclick="event.stopPropagation()" onchange="setOccasionDate(\'' + r.type + '\', this.value)">';
+        if (!(r.type in profile.occasionRecurring)) profile.occasionRecurring[r.type] = true;
+        const rec = profile.occasionRecurring[r.type];
+        const dateVal = profile.occasionDates[r.type] || '';
+        html += '<div class="date-field" style="margin:-4px 0 8px;" onclick="event.stopPropagation()">' +
+          '<input type="date" value="' + escapeHtml(dateVal) + '" onchange="setOccasionDate(\'' + r.type + '\', this.value)">' +
+          '<span class="date-placeholder" id="date-placeholder-' + r.type + '" style="display:' + (dateVal ? 'none' : 'flex') + ';">Выбрать дату</span></div>';
+        html += '<button type="button" class="btn-option' + (rec ? ' selected' : '') + '" style="margin:-4px 0 12px; padding:10px 14px; font-size:13px;" onclick="toggleOccasionRecurring(\'' + r.type + '\', event)">' +
+          (rec ? '🔁 Повторять каждый год' : '1️⃣ Разовый повод') + '</button>';
       }
     });
     profile.customOccasions.forEach(function (c, idx) {
@@ -863,6 +863,20 @@
 
   function setOccasionDate(type, val) {
     profile.occasionDates[type] = val;
+    const ph = document.getElementById('date-placeholder-' + type);
+    if (ph) ph.style.display = val ? 'none' : 'flex';
+  }
+
+  function toggleDatePlaceholder(inputEl, placeholderId) {
+    const el = document.getElementById(placeholderId);
+    if (el) el.style.display = inputEl.value ? 'none' : 'flex';
+  }
+
+  function toggleOccasionRecurring(type, ev) {
+    if (ev) ev.stopPropagation();
+    if (!profile.occasionRecurring) profile.occasionRecurring = {};
+    profile.occasionRecurring[type] = !profile.occasionRecurring[type];
+    renderOccasionsStep();
   }
 
   function setJustBecauseInterval(n, ev) {
@@ -879,8 +893,10 @@
     const labelEl = document.getElementById('input-custom-label');
     const dateEl = document.getElementById('input-custom-date');
     const errEl = document.getElementById('custom-occasion-error');
+    const phEl = document.getElementById('custom-date-placeholder');
     if (labelEl) labelEl.value = '';
     if (dateEl) dateEl.value = '';
+    if (phEl) phEl.style.display = 'flex';
     if (errEl) errEl.textContent = '';
   }
 
@@ -914,23 +930,15 @@
     const missing = rules.some(function (r) { return r.needsDate && profile.occasionSelections[r.type] && !profile.occasionDates[r.type]; });
     if (missing) { err.textContent = 'Укажите дату для отмеченного повода выше.'; return; }
     err.textContent = '';
-    goNext('occasions');
-  }
-
-  function submitDate() {
-    const val = document.getElementById('input-date').value;
-    const err = document.getElementById('date-error');
-    if (!val) { err.textContent = 'Выберите дату.'; return; }
-    err.textContent = '';
-    profile.date = toRuDate(val);
 
     schoolAgeSuggested = false;
     schoolAge = null;
-    if (profile.who === 'Дочь') {
-      const age = computeAge(val);
+    const birthdayIso = profile.occasionSelections['birthday'] ? profile.occasionDates['birthday'] : null;
+    if (profile.who === 'Дочь' && birthdayIso) {
+      const age = computeAge(birthdayIso);
       if (age >= 6 && age <= 17) { schoolAgeSuggested = true; schoolAge = age; }
     }
-    goNext('date');
+    goNext('occasions');
   }
 
   function computeAge(isoDate) {
@@ -995,9 +1003,7 @@
   function buildOccasionsPayload() {
     const rules = getOccasionRules();
     const list = [];
-    list.push({ type: 'birthday', label: 'День рождения', date: profile.date, auto: false, recurring: true });
     rules.forEach(function (r) {
-      if (r.type === 'birthday') return;
       if (r.type === 'justbecause') {
         if (profile.occasionSelections && profile.occasionSelections['justbecause']) {
           list.push({ type: 'justbecause', label: 'Без повода', date: null, auto: false, recurring: true, interval: profile.justBecauseInterval || 2 });
@@ -1006,7 +1012,8 @@
       }
       if (r.needsDate) {
         if (profile.occasionSelections && profile.occasionSelections[r.type]) {
-          list.push({ type: r.type, label: r.label, date: toRuDate(profile.occasionDates[r.type]), auto: false, recurring: true });
+          const rec = profile.occasionRecurring && (r.type in profile.occasionRecurring) ? !!profile.occasionRecurring[r.type] : true;
+          list.push({ type: r.type, label: r.label, date: toRuDate(profile.occasionDates[r.type]), auto: false, recurring: rec });
         }
         return;
       }
@@ -1023,6 +1030,30 @@
     return list;
   }
 
+  // Показываем в сводке настоящую дату для авто-поводов (8 марта и т.п.),
+  // а не текст "подтянем сами" — логика зеркалит computeAutoDate на бэкенде
+  // (_shared/dates.ts), чтобы дата совпадала с той, что реально сохранится.
+  function lastSundayOfNovember(year) {
+    const d = new Date(year, 10, 30);
+    d.setDate(30 - d.getDay());
+    return d;
+  }
+  function computeAutoDateDisplay(type) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const year = today.getFullYear();
+    let d;
+    if (type === 'march8') d = new Date(year, 2, 8);
+    else if (type === 'sept1') d = new Date(year, 8, 1);
+    else if (type === 'mothersday') d = lastSundayOfNovember(year);
+    else return '';
+    if (d < today) {
+      d = type === 'mothersday' ? lastSundayOfNovember(year + 1) : new Date(year + 1, d.getMonth(), d.getDate());
+    }
+    const pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+  }
+
   function renderSummary() {
     document.getElementById('summary-name').textContent = profile.name;
     document.getElementById('summary-who').textContent = profile.who;
@@ -1031,7 +1062,7 @@
     const occasions = buildOccasionsPayload();
     const el = document.getElementById('summary-occasions');
     el.innerHTML = occasions.map(function (o) {
-      const valueText = o.auto ? 'подтянем сами' : (o.interval ? ('раз в ' + o.interval + ' мес.') : o.date);
+      const valueText = o.auto ? computeAutoDateDisplay(o.type) : (o.interval ? ('раз в ' + o.interval + ' мес.') : o.date);
       return '<div class="row"><span>' + escapeHtml(o.label) + '</span><span>' + escapeHtml(valueText) + '</span></div>';
     }).join('');
   }
@@ -1043,6 +1074,10 @@
   }
 
   function submitProfile() {
+    const btn = document.getElementById('submit-profile-btn');
+    if (btn.disabled) return; // защита от повторной отправки при двойном тапе
+    btn.disabled = true;
+    btn.style.opacity = '.6';
     const err = document.getElementById('submit-error');
     err.textContent = '';
     const occasions = buildOccasionsPayload();
@@ -1053,11 +1088,20 @@
       occasions: occasions
     })
       .then(function (res) {
-        if (!res.ok) { err.textContent = 'Не получилось сохранить (' + (res.error || 'ошибка') + '), попробуйте ещё раз.'; return; }
+        if (!res.ok) {
+          err.textContent = 'Не получилось сохранить (' + (res.error || 'ошибка') + '), попробуйте ещё раз.';
+          btn.disabled = false;
+          btn.style.opacity = '';
+          return;
+        }
         document.getElementById('success-text').textContent = 'Готово. Всё запомнил про ' + profile.name + '.';
         showScreen('screen-success');
       })
-      .catch(function (e) { err.textContent = 'Нет связи с сервером: ' + e + '.'; });
+      .catch(function (e) {
+        err.textContent = 'Нет связи с сервером: ' + e + '.';
+        btn.disabled = false;
+        btn.style.opacity = '';
+      });
   }
 
   // ===== ГЛАВНЫЙ ЭКРАН =====
