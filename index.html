@@ -55,10 +55,14 @@
     padding: 16px;
     margin-bottom: 12px;
     box-shadow: 0 2px 10px rgba(58,46,46,0.04);
+    overflow: hidden; /* подстраховка от переполнения нативным date-picker'ом на iOS */
   }
   .card-lead { font-size: 14px; line-height: 1.55; }
   input[type="text"], input[type="tel"], input[type="date"], textarea {
+    display: block;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     padding: 15px 16px;
     font-size: 16px;
     font-family: inherit;
@@ -68,6 +72,7 @@
     color: var(--text);
     margin-bottom: 12px;
     resize: none;
+    box-sizing: border-box;
   }
   input:focus, textarea:focus { outline: none; border-color: var(--accent); }
   .field-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 5px; }
@@ -221,15 +226,19 @@
 
 <!-- ===== ЭКРАН ПРИВЕТСТВИЯ: ТОЧКА ВХОДА С КНОПКИ МЕНЮ ===== -->
 <div id="screen-welcome" class="screen">
-  <div class="card" style="text-align:center;">
-    <div style="width:60px;height:60px;border-radius:18px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:28px;margin:8px auto 16px;">🌿</div>
-    <h2 style="margin:0 0 8px;">Bloomind</h2>
-    <p class="hint" style="margin:0;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
+  <div class="hero" style="padding-top:28px;">
+    <div style="width:72px;height:72px;border-radius:22px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px;">🌿</div>
+    <h1 style="margin:0 0 10px;">Bloomind</h1>
+    <p class="hint" style="margin:0 auto; max-width:280px;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
   </div>
-  <button class="btn-option" onclick="showScreen('screen-about')">Как это работает</button>
-  <button class="btn-primary" onclick="startForm()">Заполнить анкету</button>
-  <button class="btn-option" onclick="openProfile()">Профиль</button>
-  <button class="btn-option" onclick="showScreen('screen-support')">Поддержка</button>
+  <div style="margin-top:28px;">
+    <button class="btn-primary" onclick="startForm()">Заполнить анкету</button>
+  </div>
+  <div style="text-align:center; margin-top:14px; display:flex; flex-direction:column; align-items:center; gap:2px;">
+    <button class="btn-link" style="font-size:14px;" onclick="openProfile()">Профиль</button>
+    <button class="btn-link" style="font-size:14px;" onclick="showScreen('screen-about')">Как это работает</button>
+    <button class="btn-link" style="font-size:14px;" onclick="showScreen('screen-support')">Поддержка</button>
+  </div>
 </div>
 
 <!-- ===== РАЗОВОЕ СОГЛАСИЕ (один раз при первом входе) ===== -->
@@ -292,6 +301,7 @@
   <div class="dots" id="form-dots"></div>
 
   <div class="form-step" data-step="name">
+    <button type="button" class="btn-link" onclick="goBack('name')">← Назад</button>
     <div class="hero">
       <div class="hero-emoji">🌸</div>
       <h1>Как зовут того, кому дарим?</h1>
@@ -301,15 +311,23 @@
   </div>
 
   <div class="form-step" data-step="who">
+    <button type="button" class="btn-link" onclick="goBack('who')">← Назад</button>
     <h1>Кем она вам приходится?</h1>
     <p class="hint">&nbsp;</p>
     <button class="btn-option" data-value="Жена/партнёрша" onclick="chooseWho('Жена/партнёрша')">Жена / партнёрша</button>
     <button class="btn-option" data-value="Мама" onclick="chooseWho('Мама')">Мама</button>
     <button class="btn-option" data-value="Дочь" onclick="chooseWho('Дочь')">Дочь</button>
-    <button class="btn-option" data-value="Другое" onclick="chooseWho('Другое')">Другое</button>
+    <button class="btn-option" data-value="Другое" onclick="chooseWhoOther()">Другое</button>
+    <div id="who-other-form" style="display:none;">
+      <div class="field-label">Кем она вам приходится</div>
+      <input type="text" id="input-who-other" placeholder="Например: сестра, подруга, коллега">
+      <p class="hint" id="who-other-error" style="margin:-6px 0 10px;">&nbsp;</p>
+      <button class="btn-primary" onclick="submitWhoOther()">Далее</button>
+    </div>
   </div>
 
   <div class="form-step" data-step="occasions">
+    <button type="button" class="btn-link" onclick="goBack('occasions')">← Назад</button>
     <h1>Какие поводы отмечаем?</h1>
     <p class="hint">Часть предложили сами — можно убрать лишнее или добавить своё.</p>
     <div id="occasions-list"></div>
@@ -327,6 +345,7 @@
   </div>
 
   <div class="form-step" data-step="date">
+    <button type="button" class="btn-link" onclick="goBack('date')">← Назад</button>
     <h1>Когда у неё день рождения?</h1>
     <p class="hint">Понадобится для напоминаний и чтобы понять, какие ещё даты предложить.</p>
     <input type="date" id="input-date">
@@ -335,6 +354,7 @@
   </div>
 
   <div class="form-step" data-step="schoolcheck">
+    <button type="button" class="btn-link" onclick="goBack('schoolcheck')">← Назад</button>
     <h1>Добавить 1 сентября?</h1>
     <p class="hint">Судя по дате рождения, сейчас ей около <span id="schoolcheck-age"></span> лет — похоже, ещё учится. Напомнить и про этот день?</p>
     <button class="btn-primary" onclick="chooseSchoolCheck(true)">Да, добавить</button>
@@ -342,6 +362,7 @@
   </div>
 
   <div class="form-step" data-step="stylepref">
+    <button type="button" class="btn-link" onclick="goBack('stylepref')">← Назад</button>
     <h1>Стиль и предпочтения</h1>
     <p class="hint">Поможет собрать букет, который точно понравится.</p>
     <div id="style-rows"></div>
@@ -354,6 +375,7 @@
   </div>
 
   <div class="form-step" data-step="address">
+    <button type="button" class="btn-link" onclick="goBack('address')">← Назад</button>
     <h1>Как с ней связаться на месте?</h1>
     <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом, вдруг место изменится.</p>
     <div class="field-label">Город, улица, дом</div>
@@ -654,6 +676,58 @@
     document.querySelectorAll('.form-step').forEach(function (el) { el.style.display = (el.dataset.step === name ? 'block' : 'none'); });
     updateFormDots(name);
     markSelectedOption(name, profile[name]);
+    populateStepInputs(name);
+  }
+
+  // При переходе назад (или при редактировании из summary) поля должны
+  // показывать уже введённые значения, а не оставаться пустыми — иначе
+  // выглядит так, будто данные потерялись.
+  function ruDateToIso(ruDate) {
+    if (!ruDate) return '';
+    const parts = ruDate.split('.');
+    return parts[2] + '-' + parts[1] + '-' + parts[0];
+  }
+  const WHO_FIXED_VALUES = ['Жена/партнёрша', 'Мама', 'Дочь'];
+  function populateStepInputs(name) {
+    if (name === 'name') document.getElementById('input-name').value = profile.name || '';
+    if (name === 'date') document.getElementById('input-date').value = ruDateToIso(profile.date);
+    if (name === 'address') {
+      document.getElementById('input-address').value = profile.address || '';
+      document.getElementById('input-apartment').value = profile.apartment || '';
+      document.getElementById('input-entrance').value = profile.entrance || '';
+      document.getElementById('input-intercom').value = profile.intercom || '';
+      document.getElementById('input-phone').value = profile.phone || '';
+    }
+    if (name === 'who') {
+      const isCustom = profile.who && WHO_FIXED_VALUES.indexOf(profile.who) === -1;
+      document.getElementById('who-other-form').style.display = isCustom ? 'block' : 'none';
+      document.getElementById('input-who-other').value = isCustom ? profile.who : '';
+      if (isCustom) {
+        document.querySelectorAll('[data-step="who"] [data-value]').forEach(function (el) {
+          el.classList.toggle('selected', el.dataset.value === 'Другое');
+        });
+      }
+    }
+  }
+
+  function chooseWhoOther() {
+    document.querySelectorAll('[data-step="who"] [data-value]').forEach(function (el) {
+      el.classList.toggle('selected', el.dataset.value === 'Другое');
+    });
+    document.getElementById('who-other-form').style.display = 'block';
+    document.getElementById('input-who-other').focus();
+  }
+
+  function submitWhoOther() {
+    const val = document.getElementById('input-who-other').value.trim();
+    const err = document.getElementById('who-other-error');
+    if (!val) { err.textContent = 'Напишите, кем она вам приходится.'; return; }
+    err.textContent = '';
+    profile.who = val;
+    profile.occasionSelections = {};
+    profile.occasionDates = {};
+    profile.occasionRecurring = {};
+    goNext('who');
   }
 
   function markSelectedOption(stepName, value) {
@@ -684,6 +758,22 @@
     showStep(name);
   }
 
+  // "Назад" всегда доступна — если шаг открыт для точечной правки одного
+  // поля из summary ("изменить"), отменяем правку и возвращаемся в summary;
+  // иначе просто идём на предыдущий видимый шаг. С самого первого шага
+  // "Назад" выводит из анкеты на Главную, ничего не сохраняя.
+  function goBack(currentStep) {
+    if (returnToSummary) {
+      returnToSummary = false;
+      showStep('summary');
+      return;
+    }
+    let idx = steps.indexOf(currentStep) - 1;
+    while (idx >= 0 && !shouldShowStep(steps[idx])) idx--;
+    if (idx < 0) { loadHome(); return; }
+    showStep(steps[idx]);
+  }
+
   function startForm() {
     profile = {};
     schoolAgeSuggested = false;
@@ -703,6 +793,9 @@
     document.getElementById('date-error').textContent = '';
     document.getElementById('address-error').textContent = '';
     document.getElementById('submit-error').textContent = '';
+    document.getElementById('who-other-form').style.display = 'none';
+    document.getElementById('input-who-other').value = '';
+    document.getElementById('who-other-error').textContent = '';
     hideAddOccasionForm();
     document.querySelectorAll('.form-step [data-value].selected').forEach(function (el) { el.classList.remove('selected'); });
     showStep('name');
@@ -719,6 +812,9 @@
     profile.who = val;
     profile.occasionSelections = {};
     profile.occasionDates = {};
+    document.getElementById('who-other-form').style.display = 'none';
+    document.getElementById('input-who-other').value = '';
+    document.getElementById('who-other-error').textContent = '';
     goNext('who');
   }
 
