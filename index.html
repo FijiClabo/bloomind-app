@@ -232,6 +232,17 @@
   <button class="btn-option" onclick="showScreen('screen-support')">Поддержка</button>
 </div>
 
+<!-- ===== РАЗОВОЕ СОГЛАСИЕ (один раз при первом входе) ===== -->
+<div id="screen-consent" class="screen">
+  <div class="hero">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:24px;margin:4px auto 16px;">🔒</div>
+  </div>
+  <h1 style="text-align:center;">Прежде чем начать</h1>
+  <p class="hint" style="text-align:left;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
+  <button class="btn-primary" onclick="giveConsent()">Принимаю и продолжаю</button>
+  <p class="hint" style="text-align:center;">Показывается один раз</p>
+</div>
+
 <!-- ===== О СЕРВИСЕ ===== -->
 <div id="screen-about" class="screen">
   <div class="card" style="background:var(--accent-soft); border:none;">
@@ -461,6 +472,16 @@
   <div class="interval-row" id="reminder-time-slots"></div>
   <input type="text" id="reminder-time-custom" placeholder="Уточните удобное время" style="display:none;">
 
+  <div style="border-top:1.5px dashed var(--border); margin:16px 0;"></div>
+  <div class="field-label" style="margin-top:0;">Размер букета</div>
+  <div class="interval-row" id="reminder-size-row"></div>
+  <div class="card" id="reminder-price-card">
+    <div class="row"><span>Букет</span><span id="price-bouquet">—</span></div>
+    <div class="row"><span>Доставка</span><span id="price-delivery">—</span></div>
+    <div class="row" style="font-weight:800;"><span>Итого</span><span id="price-total">—</span></div>
+  </div>
+  <p class="hint" id="reminder-size-error"></p>
+
   <button class="btn-primary" onclick="confirmReminder()">Подтвердить и оплатить</button>
   <p class="hint" id="reminder-error"></p>
 </div>
@@ -530,6 +551,7 @@
     'screen-loading': { title: 'Bloomind' },
     'screen-error': { title: 'Bloomind' },
     'screen-welcome': { title: 'Bloomind' },
+    'screen-consent': { title: 'Bloomind' },
     'screen-about': { title: 'Как это работает', back: 'screen-welcome' },
     'screen-support': { title: 'Поддержка', eyebrow: 'Bloomind', tab: 'support' },
     'screen-home': { title: 'Ваши получатели', eyebrow: 'Bloomind', tab: 'home' },
@@ -1226,6 +1248,10 @@
   const TIME_SLOTS = ['09:00–13:00', '13:00–17:00', '17:00–21:00'];
   let reminderSelectedSlot = null;
   let reminderAddressMode = 'default';
+  let reminderPricing = { S: 0, M: 0, L: 0 };
+  let reminderFarSurcharge = 0;
+  let reminderIsFarMkad = false;
+  let reminderSelectedSize = null;
 
   function loadReminder(row) {
     reminderRow = row;
@@ -1240,8 +1266,33 @@
       renderReminderAddressChoice();
       reminderSelectedSlot = null;
       renderReminderTimeSlots();
+      reminderPricing = r.pricing || { S: 0, M: 0, L: 0 };
+      reminderFarSurcharge = r.farDeliverySurcharge || 0;
+      reminderIsFarMkad = !!r.isFarMkad;
+      reminderSelectedSize = 'M';
+      renderReminderSizeRow();
+      renderReminderPriceBreakdown();
       showScreen('screen-reminder');
     }).catch(function () { showScreen('screen-error'); });
+  }
+
+  function renderReminderSizeRow() {
+    const el = document.getElementById('reminder-size-row');
+    el.innerHTML = ['S', 'M', 'L'].map(function (size) {
+      return '<button type="button" class="interval-btn' + (reminderSelectedSize === size ? ' selected' : '') + '" onclick="pickReminderSize(\'' + size + '\')">' + size + ' · ' + reminderPricing[size] + ' ₽</button>';
+    }).join('');
+  }
+  function pickReminderSize(size) {
+    reminderSelectedSize = size;
+    renderReminderSizeRow();
+    renderReminderPriceBreakdown();
+  }
+  function renderReminderPriceBreakdown() {
+    const bouquetPrice = reminderSelectedSize ? reminderPricing[reminderSelectedSize] : 0;
+    const surcharge = reminderIsFarMkad ? reminderFarSurcharge : 0;
+    document.getElementById('price-bouquet').textContent = bouquetPrice ? bouquetPrice + ' ₽' : '—';
+    document.getElementById('price-delivery').textContent = reminderIsFarMkad ? (surcharge + ' ₽ (за МКАД)') : 'бесплатно';
+    document.getElementById('price-total').textContent = bouquetPrice ? (bouquetPrice + surcharge) + ' ₽' : '—';
   }
 
   function renderReminderAddressChoice() {
@@ -1281,12 +1332,14 @@
   }
 
   function confirmReminder() {
+    if (!reminderSelectedSize) { document.getElementById('reminder-size-error').textContent = 'Выберите размер букета.'; return; }
+    document.getElementById('reminder-size-error').textContent = '';
     const deliveryAddress = document.getElementById('reminder-address-input').value.trim();
     const deliveryPhone = document.getElementById('reminder-phone-input').value.trim();
     const deliveryWindow = reminderSelectedSlot === -1
       ? document.getElementById('reminder-time-custom').value.trim()
       : (reminderSelectedSlot != null ? TIME_SLOTS[reminderSelectedSlot] : '');
-    apiPost({ action: 'confirmReminder', rowIndex: reminderRow, deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow }).then(function (res) {
+    apiPost({ action: 'confirmReminder', rowIndex: reminderRow, size: reminderSelectedSize, deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
       document.getElementById('success-text').textContent = 'Подтверждено. Реквизиты для оплаты пришли в чат.';
       showScreen('screen-success');
@@ -1352,9 +1405,25 @@
       return;
     }
 
-    if (urlScreen === 'welcome') { showScreen('screen-welcome'); return; }
-    if (urlScreen === 'profile') { openProfile(); return; }
-    loadHome();
+    pendingRoute = function () {
+      if (urlScreen === 'welcome') { showScreen('screen-welcome'); return; }
+      if (urlScreen === 'profile') { openProfile(); return; }
+      loadHome();
+    };
+    checkConsentThenRoute();
+  }
+
+  let pendingRoute = null;
+
+  function checkConsentThenRoute() {
+    apiGet({ action: 'settings', userId: userId }).then(function (res) {
+      if (res.ok && !res.consentedAt) { showScreen('screen-consent'); return; }
+      pendingRoute();
+    }).catch(function () { pendingRoute(); });
+  }
+
+  function giveConsent() {
+    apiPost({ action: 'giveConsent', userId: userId }).then(function () { pendingRoute(); });
   }
 
   init();
