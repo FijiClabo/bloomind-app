@@ -6,9 +6,9 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
-    /* Фирменный тёплый фон всегда, независимо от тёмной/светлой темы Telegram
-       у пользователя — иначе на тёмной теме фон становится чёрным и всё
-       выглядит как обычная системная форма, а не брендированное приложение. */
+    /* Фирменный тёплый фон всегда, независимо от тёмной/светлой темы Telegram —
+       иначе на тёмной теме фон становится чёрным и всё выглядит как обычная
+       системная форма, а не брендированное приложение. */
     --bg: #FFF8F3;
     --text: #3A2E2E;
     --hint: #8A7B7B;
@@ -18,24 +18,25 @@
     --accent-soft: #FBEEF0;
     --border: #F0E2DC;
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; color: inherit; }
   html, body { margin: 0; background: var(--bg); }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     color: var(--text);
     -webkit-font-smoothing: antialiased;
+    padding-bottom: 64px; /* место под нижнее меню */
   }
 
-  /* ===== ВЕРХНЯЯ ЦВЕТНАЯ ПЛАШКА (как у Bunch) ===== */
+  /* ===== ВЕРХНЯЯ ПЛАШКА: лёгкая, без сплошной заливки ===== */
   .topbar {
-    background: var(--accent);
-    padding: 18px 20px 22px;
-    border-radius: 0 0 22px 22px;
-    margin-bottom: 4px;
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
   }
-  .topbar-title { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.2px; }
+  .topbar-back { background: none; border: none; padding: 0; color: var(--accent-dark); font-size: 20px; line-height: 1; cursor: pointer; display: none; }
+  .topbar-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+  .topbar-title { font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
 
-  .content { padding: 18px 20px 40px; }
+  .content { padding: 18px 20px 24px; }
 
   h1 { font-size: 21px; font-weight: 700; margin: 4px 0 6px; line-height: 1.3; }
   p.hint { color: var(--hint); font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
@@ -55,7 +56,8 @@
     margin-bottom: 12px;
     box-shadow: 0 2px 10px rgba(58,46,46,0.04);
   }
-  input[type="text"], input[type="date"], textarea {
+  .card-lead { font-size: 14px; line-height: 1.55; }
+  input[type="text"], input[type="tel"], input[type="date"], textarea {
     width: 100%;
     padding: 15px 16px;
     font-size: 16px;
@@ -67,7 +69,10 @@
     margin-bottom: 12px;
     resize: none;
   }
-  input[type="text"]:focus, input[type="date"]:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  .field-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 5px; }
+  .two-up { display: flex; gap: 10px; }
+  .two-up > div { flex: 1; }
   button { font-family: inherit; }
   .btn-primary {
     display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
@@ -101,6 +106,22 @@
   }
   .style-desc { padding: 10px 16px 14px; font-size: 13px; color: var(--hint); }
 
+  /* Компактный выбор стиля (используется в анкете и на экране получателя) */
+  .style-row {
+    display: flex; justify-content: space-between; align-items: center; padding: 13px 15px;
+    border-radius: 14px; border: 1.5px solid var(--border); background: var(--secondary-bg);
+    margin-bottom: 8px; cursor: pointer;
+  }
+  .style-row.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .style-row-label { font-weight: 700; font-size: 15px; }
+  .style-row-sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
+  .style-check {
+    width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border); background: #fff;
+    flex-shrink: 0; position: relative; box-sizing: border-box;
+  }
+  .style-check.checked { border-color: var(--accent); background: var(--accent); }
+  .style-check.checked::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+
   .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .row:last-child { border-bottom: none; }
   .row > span:first-child { color: var(--hint); font-size: 13px; }
@@ -110,21 +131,26 @@
 
   .hero { text-align: center; padding: 20px 0 8px; }
   .hero-emoji { font-size: 46px; margin-bottom: 12px; }
-
-  /* ===== ГЛАВНЫЙ ЭКРАН: СТАТ-БЛОК КАК У BUNCH ===== */
-  .stat-card {
-    background: var(--accent-soft); border-radius: 20px; padding: 20px 22px; margin-bottom: 18px;
+  .success-icon {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-dark);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 12px auto 16px;
   }
+
+  /* ===== ГЛАВНЫЙ ЭКРАН: СТАТ-БЛОК ===== */
+  .stat-card { background: var(--accent-soft); border-radius: 20px; padding: 20px 22px; margin-bottom: 18px; }
   .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); margin-bottom: 6px; }
   .stat-number { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
   .stat-sub { font-size: 13px; color: var(--hint); }
 
-  .recipient-card { padding: 16px; }
-  .recipient-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .recipient-card { padding: 16px; cursor: pointer; }
   .recipient-name { font-weight: 800; font-size: 16px; }
-  .recipient-meta { font-size: 13px; color: var(--hint); margin-top: 2px; }
+  .recipient-chips { margin-top: 8px; }
+  .chip {
+    display: inline-block; background: var(--accent-soft); color: var(--accent-dark);
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin: 4px 6px 0 0;
+  }
 
-  /* ===== ПУСТОЕ СОСТОЯНИЕ (как пустая корзина у Bunch) ===== */
+  /* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
   .empty-state { text-align: center; padding: 36px 16px; background: var(--secondary-bg); border-radius: 20px; border: 1.5px solid var(--border); margin-bottom: 18px; }
   .empty-state .hero-emoji { font-size: 38px; margin-bottom: 10px; }
   .empty-state h2 { font-size: 17px; font-weight: 800; margin: 0 0 6px; }
@@ -141,36 +167,48 @@
   .occasion-row-label { font-size: 15px; font-weight: 700; }
   .occasion-row-sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
   .occasion-check {
-    width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--border);
+    width: 22px; height: 22px; box-sizing: border-box; border-radius: 6px; border: 1.5px solid var(--border);
     background: #fff; flex-shrink: 0; margin-left: 10px; position: relative;
   }
   .occasion-check.checked { border-color: var(--accent); background: var(--accent); }
   .occasion-check.checked::after {
     content: '✓'; position: absolute; inset: 0; display: flex; align-items: center;
-    justify-content: center; color: #fff; font-size: 14px;
+    justify-content: center; color: #fff; font-size: 14px; line-height: 1;
   }
-  .interval-row { display: flex; gap: 8px; margin: -4px 0 12px; flex-wrap: wrap; }
+  .interval-row { display: flex; gap: 8px; margin: -4px 0 12px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
   .interval-btn {
-    padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--border);
-    background: #fff; font-size: 13px; font-weight: 700; color: var(--hint); cursor: pointer;
+    padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: #fff; font-size: 13px; font-weight: 700; color: var(--hint); cursor: pointer; flex: 1; text-align: center;
   }
   .interval-btn.selected { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
   .occasions-summary-title { font-weight: 700; color: var(--text); font-size: 14px; }
 
-  /* ===== ПРОФИЛЬ ===== */
-  .topbar { position: relative; }
-  .topbar-profile-btn {
-    position: absolute; right: 18px; top: 18px; width: 36px; height: 36px; border-radius: 50%;
-    border: none; background: rgba(255,255,255,.35); color: var(--text); font-size: 16px;
-    cursor: pointer; display: none; align-items: center; justify-content: center;
+  /* ===== НИЖНЕЕ МЕНЮ ===== */
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; display: none; background: #fff;
+    border-top: 1px solid var(--border); padding: 8px 6px 12px; z-index: 10;
   }
+  .tabbar.visible { display: flex; }
+  .tabbar-item { flex: 1; text-align: center; background: none; border: none; cursor: pointer; color: var(--hint); font-size: 11px; font-family: inherit; padding: 4px 0; }
+  .tabbar-item.active { color: var(--accent-dark); font-weight: 700; }
+  .tabbar-dot { width: 6px; height: 6px; border-radius: 50%; margin: 0 auto 5px; background: transparent; }
+  .tabbar-item.active .tabbar-dot { background: var(--accent); }
+
+  /* ===== КАРТОЧКА ПОЛУЧАТЕЛЯ (детально) ===== */
+  .detail-row { display: flex; gap: 10px; align-items: center; }
+  .detail-icon { flex-shrink: 0; color: var(--accent-dark); display: flex; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .03em; margin: 18px 0 8px; }
+  .section-label:first-child { margin-top: 0; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-title" id="topbar-title">Bloomind</div>
-  <button type="button" class="topbar-profile-btn" id="topbar-profile-btn" onclick="openProfile()">👤</button>
+  <button type="button" class="topbar-back" id="topbar-back">&larr;</button>
+  <div>
+    <div class="topbar-eyebrow" id="topbar-eyebrow"></div>
+    <div class="topbar-title" id="topbar-title">Bloomind</div>
+  </div>
 </div>
 <div class="content">
 
@@ -184,28 +222,53 @@
 <!-- ===== ЭКРАН ПРИВЕТСТВИЯ: ТОЧКА ВХОДА С КНОПКИ МЕНЮ ===== -->
 <div id="screen-welcome" class="screen">
   <div class="card" style="text-align:center;">
-    <div style="font-size:44px; margin-bottom:8px;">🌿</div>
+    <div style="width:60px;height:60px;border-radius:18px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:28px;margin:8px auto 16px;">🌿</div>
     <h2 style="margin:0 0 8px;">Bloomind</h2>
-    <p class="hint" style="margin:0;">Я помогу вам не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой. Всё, что вы укажете, использую только для напоминаний.</p>
+    <p class="hint" style="margin:0;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
   </div>
-  <button class="btn-primary" onclick="startForm()">📝 Заполнить анкету</button>
-  <button class="btn-option" onclick="openProfile()">👤 Профиль</button>
-  <button class="btn-option" onclick="openSupport()">💬 Поддержка</button>
+  <button class="btn-option" onclick="showScreen('screen-about')">Как это работает</button>
+  <button class="btn-primary" onclick="startForm()">Заполнить анкету</button>
+  <button class="btn-option" onclick="openProfile()">Профиль</button>
+  <button class="btn-option" onclick="showScreen('screen-support')">Поддержка</button>
+</div>
+
+<!-- ===== О СЕРВИСЕ ===== -->
+<div id="screen-about" class="screen">
+  <div class="card" style="background:var(--accent-soft); border:none;">
+    <p class="card-lead" style="margin:0;">Искать, выбирать, бояться не угадать — это больше не ваша забота. Bloomind помнит даты и вкусы ваших близких и берёт рутину на себя: вам остаётся сказать «да».</p>
+  </div>
+  <div class="card">
+    <b>1. Добавляете важного человека</b>
+    <p class="hint" style="margin:4px 0 0;">Имя, кто он вам, какие поводы помнить, стиль и вкусы — на будущее.</p>
+  </div>
+  <div class="card">
+    <b>2. Напоминаю заранее</b>
+    <p class="hint" style="margin:4px 0 0;">За 3, 5 или 7 дней (выбираете сами в Профиле) пришлю сообщение — подтверждаете и оплачиваете.</p>
+  </div>
+  <div class="card">
+    <b>3. Показываю фото перед отправкой</b>
+    <p class="hint" style="margin:4px 0 0;">Букет собран — присылаю фото в чат. Не нравится — переделаем, до двух раз.</p>
+  </div>
+  <div class="card">
+    <b>4. Уточняю доставку каждый раз</b>
+    <p class="hint" style="margin:4px 0 0;">Адрес и время подтверждаете перед каждым конкретным заказом — мало ли, обстоятельства меняются.</p>
+  </div>
+  <button class="btn-primary" onclick="startForm()">Понятно, поехали</button>
 </div>
 
 <!-- ===== ПОДДЕРЖКА ===== -->
 <div id="screen-support" class="screen">
   <div class="card">
-    <p style="margin:0 0 10px;">Если что-то пошло не так или остались вопросы — просто напишите об этом прямо в этот чат с ботом, сообщение прочитаю и отвечу лично.</p>
-    <p class="hint" style="margin:0;">Это не автоответчик по FAQ — короткое личное сообщение работает быстрее всего.</p>
+    <p style="margin:0;">Если что-то пошло не так или остались вопросы — напишите напрямую, отвечу лично.</p>
   </div>
-  <button class="btn-option" onclick="showScreen('screen-welcome')">← Назад</button>
+  <button class="btn-primary" onclick="openSupportChat()">Написать в поддержку</button>
+  <p class="hint" style="text-align:center; margin-top:2px;">откроется чат с основателем в Telegram</p>
 </div>
 
 <!-- ===== ГЛАВНЫЙ ЭКРАН: СПИСОК ПОЛУЧАТЕЛЕЙ ===== -->
 <div id="screen-home" class="screen">
   <div class="stat-card">
-    <div class="stat-label">Под присмотром</div>
+    <div class="stat-label">Забота о близких</div>
     <div class="stat-number" id="home-stat-count">0</div>
     <div class="stat-sub" id="home-stat-sub">получателей настроено</div>
   </div>
@@ -248,7 +311,8 @@
       <button type="button" class="btn-link" onclick="hideAddOccasionForm()">Отмена</button>
       <p class="hint" id="custom-occasion-error" style="margin:6px 0 0;">&nbsp;</p>
     </div>
-    <button class="btn-primary" onclick="submitOccasions()" style="margin-top:16px;">Далее</button>
+    <p class="hint" id="occasions-error" style="margin-top:10px;">&nbsp;</p>
+    <button class="btn-primary" onclick="submitOccasions()" style="margin-top:6px;">Далее</button>
   </div>
 
   <div class="form-step" data-step="date">
@@ -266,41 +330,37 @@
     <button class="btn-option" onclick="chooseSchoolCheck(false)">Не нужно</button>
   </div>
 
-  <div class="form-step" data-step="style">
-    <h1>Какой стиль ей ближе?</h1>
-    <p class="hint">Выберите один — я запомню на будущее.</p>
-    <div class="style-grid">
-      <button class="style-card" data-value="Нежный" onclick="chooseStyle('Нежный')">
-        <div class="style-photo-wrap">
-          <img class="style-photo" src="https://images.unsplash.com/photo-1558021843-f9ab317ed0eb?fm=jpg&amp;q=60&amp;w=800&amp;auto=format&amp;fit=crop" onerror="this.style.display=&#39;none&#39;;this.nextElementSibling.style.display=&#39;flex&#39;;">
-          <div class="style-fallback">🌸</div>
-          <span class="style-badge">🌸 Нежный</span>
-        </div>
-        <div class="style-desc">пастель, пионы, эустома</div>
-      </button>
-      <button class="style-card" data-value="Яркий" onclick="chooseStyle('Яркий')">
-        <div class="style-photo-wrap">
-          <img class="style-photo" src="https://images.unsplash.com/photo-1769663795207-1b7ed5a691b3?fm=jpg&amp;q=60&amp;w=800&amp;auto=format&amp;fit=crop" onerror="this.style.display=&#39;none&#39;;this.nextElementSibling.style.display=&#39;flex&#39;;">
-          <div class="style-fallback">🌺</div>
-          <span class="style-badge">🌺 Яркий</span>
-        </div>
-        <div class="style-desc">сочные тона, герберы</div>
-      </button>
-      <button class="style-card" data-value="Природный" onclick="chooseStyle('Природный')">
-        <div class="style-photo-wrap">
-          <img class="style-photo" src="https://images.unsplash.com/photo-1758614027459-43e65eda8638?fm=jpg&amp;q=60&amp;w=800&amp;auto=format&amp;fit=crop" onerror="this.style.display=&#39;none&#39;;this.nextElementSibling.style.display=&#39;flex&#39;;">
-          <div class="style-fallback">🌿</div>
-          <span class="style-badge">🌿 Природный</span>
-        </div>
-        <div class="style-desc">зелень, полевые цветы</div>
-      </button>
-    </div>
+  <div class="form-step" data-step="stylepref">
+    <h1>Стиль и предпочтения</h1>
+    <p class="hint">Поможет собрать букет, который точно понравится.</p>
+    <div id="style-rows"></div>
+    <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
+    <div class="field-label">Что нравится, что происходит в жизни (необязательно)</div>
+    <textarea id="input-note" rows="2" placeholder="Например: обожает пионы, недавно переехала"></textarea>
+    <div class="field-label">Соцсети получателя (необязательно)</div>
+    <input type="text" id="input-social" placeholder="instagram.com/имя — поможет лучше понять вкус">
+    <button class="btn-primary" onclick="submitStylePref()">Далее</button>
   </div>
 
   <div class="form-step" data-step="address">
-    <h1>Куда доставлять?</h1>
-    <p class="hint">Адрес получателя — город, улица, дом, квартира. Понадобится, когда придёт время собирать букет.</p>
-    <input type="text" id="input-address" placeholder="Например: Москва, ул. Ленина 10, кв. 5">
+    <h1>Как с ней связаться на месте?</h1>
+    <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом, вдруг место изменится.</p>
+    <div class="field-label">Город, улица, дом</div>
+    <input type="text" id="input-address" placeholder="Например: Москва, ул. Ленина, 10">
+    <div class="two-up">
+      <div>
+        <div class="field-label">Квартира</div>
+        <input type="text" id="input-apartment" placeholder="42">
+      </div>
+      <div>
+        <div class="field-label">Подъезд</div>
+        <input type="text" id="input-entrance" placeholder="2">
+      </div>
+    </div>
+    <div class="field-label">Код домофона</div>
+    <input type="text" id="input-intercom" placeholder="необязательно">
+    <div class="field-label">Телефон получателя</div>
+    <input type="tel" id="input-phone" placeholder="+7 999 000-00-00">
     <button class="btn-primary" onclick="submitAddress()">Далее</button>
     <p class="hint" id="address-error"></p>
   </div>
@@ -317,46 +377,99 @@
       <div id="summary-occasions"></div>
     </div>
     <div class="card">
-      <div class="row"><span>Стиль</span><span id="summary-style"></span> <button class="btn-link" onclick="editStep('style')">изменить</button></div>
+      <div class="row"><span>Стиль</span><span id="summary-style"></span> <button class="btn-link" onclick="editStep('stylepref')">изменить</button></div>
       <div class="row"><span>Адрес</span><span id="summary-address"></span> <button class="btn-link" onclick="editStep('address')">изменить</button></div>
     </div>
-    <p class="hint" style="margin-bottom:8px;">Необязательно: что ей особенно нравится, или что сейчас происходит в жизни? Так букет и открытка будут точнее.</p>
-    <textarea id="input-note" rows="2" placeholder="Например: обожает пионы, недавно переехала"></textarea>
     <button class="btn-primary" onclick="submitProfile()">Всё верно, сохранить</button>
     <p class="hint" id="submit-error"></p>
   </div>
 
 </div>
 
+<!-- ===== ЭКРАН ПОЛУЧАТЕЛЯ ===== -->
+<div id="screen-recipient" class="screen">
+  <div class="section-label">Поводы</div>
+  <div id="recipient-occasions"></div>
+  <button class="btn-link" type="button" onclick="showRecipientAddOccasionForm()">+ Добавить повод</button>
+  <div class="card" id="recipient-add-occasion-form" style="display:none; margin-top:12px;">
+    <input type="text" id="rec-input-custom-label" placeholder="Название повода">
+    <input type="date" id="rec-input-custom-date">
+    <button type="button" class="btn-option selected" id="rec-custom-recurring-toggle" onclick="toggleRecCustomRecurring()">🔁 Повторять каждый год</button>
+    <button type="button" class="btn-primary" onclick="submitRecipientAddOccasion()">Добавить</button>
+    <button type="button" class="btn-link" onclick="hideRecipientAddOccasionForm()">Отмена</button>
+    <p class="hint" id="rec-occasion-error" style="margin:6px 0 0;">&nbsp;</p>
+  </div>
+
+  <div class="section-label">Стиль и предпочтения</div>
+  <div class="card" id="recipient-style-view"></div>
+  <div class="card" id="recipient-style-edit" style="display:none;">
+    <div id="recipient-style-rows"></div>
+    <div class="field-label">Что нравится, что происходит в жизни</div>
+    <textarea id="rec-input-note" rows="2"></textarea>
+    <div class="field-label">Соцсети получателя</div>
+    <input type="text" id="rec-input-social" placeholder="instagram.com/имя">
+    <button class="btn-primary" onclick="saveRecipientStyle()">Сохранить</button>
+    <button class="btn-link" onclick="cancelRecipientStyleEdit()">Отмена</button>
+  </div>
+
+  <div class="section-label">Контакты для доставки</div>
+  <div class="card" id="recipient-address-view"></div>
+  <div class="card" id="recipient-address-edit" style="display:none;">
+    <div class="field-label">Город, улица, дом</div>
+    <input type="text" id="rec-input-address">
+    <div class="two-up">
+      <div><div class="field-label">Квартира</div><input type="text" id="rec-input-apartment"></div>
+      <div><div class="field-label">Подъезд</div><input type="text" id="rec-input-entrance"></div>
+    </div>
+    <div class="field-label">Код домофона</div>
+    <input type="text" id="rec-input-intercom">
+    <button class="btn-primary" onclick="saveRecipientAddress()">Сохранить</button>
+    <button class="btn-link" onclick="cancelRecipientAddressEdit()">Отмена</button>
+  </div>
+  <div class="card" id="recipient-phone-view"></div>
+  <div class="card" id="recipient-phone-edit" style="display:none;">
+    <div class="field-label">Телефон получателя</div>
+    <input type="tel" id="rec-input-phone">
+    <button class="btn-primary" onclick="saveRecipientPhone()">Сохранить</button>
+    <button class="btn-link" onclick="cancelRecipientPhoneEdit()">Отмена</button>
+  </div>
+
+  <button class="btn-option" onclick="deleteRecipient()" style="color:#A32D2D; margin-top:8px;">Удалить получателя</button>
+</div>
+
 <!-- ===== КАРТОЧКА НАПОМИНАНИЯ ===== -->
 <div id="screen-reminder" class="screen">
-  <div class="hero">
-    <div class="hero-emoji">🌷</div>
-    <h1 id="reminder-title"></h1>
+  <h1 id="reminder-title"></h1>
+  <p class="hint" id="reminder-lead">Подтвердите — пришлю реквизиты и договорюсь с флористом. Не готовы сейчас — можно перенести дату.</p>
+  <button class="btn-option" onclick="showPostponeInput()">Перенести дату</button>
+  <div id="postpone-block" style="display:none; margin-top:2px; margin-bottom:14px;">
+    <input type="date" id="input-postpone-date">
+    <button class="btn-primary" onclick="postponeReminder()">Перенести на эту дату</button>
   </div>
-  <div class="card">
-    <div class="row"><span>Кому</span><span id="reminder-name"></span></div>
-    <div class="row"><span>Повод</span><span id="reminder-occasion"></span></div>
-    <div class="row"><span>Дата</span><span id="reminder-date"></span></div>
-    <div class="row"><span>Стиль</span><span id="reminder-style"></span></div>
-    <div class="row"><span>Адрес</span><span id="reminder-address"></span></div>
-  </div>
-  <div class="actions">
-    <button class="btn-primary" onclick="confirmReminder()">✅ Подтвердить и оплатить</button>
-    <button class="btn-option" onclick="showPostponeInput()">📅 Перенести</button>
-    <div id="postpone-block" style="display:none; margin-top:10px;">
-      <input type="date" id="input-postpone-date">
-      <button class="btn-primary" onclick="postponeReminder()">Перенести на эту дату</button>
-    </div>
-    <p class="hint" id="reminder-error"></p>
-  </div>
+
+  <div style="border-top:1.5px dashed var(--border); margin:16px 0;"></div>
+  <div class="section-label" style="margin-top:0;">Куда и как доставить в этот раз</div>
+
+  <div class="field-label">Куда привезти</div>
+  <div class="interval-row" id="reminder-address-choice"></div>
+  <input type="text" id="reminder-address-input" placeholder="Адрес доставки">
+
+  <div class="field-label">Телефон получателя</div>
+  <input type="tel" id="reminder-phone-input">
+
+  <div class="field-label">Когда привезти</div>
+  <div class="interval-row" id="reminder-time-slots"></div>
+  <input type="text" id="reminder-time-custom" placeholder="Уточните удобное время" style="display:none;">
+
+  <button class="btn-primary" onclick="confirmReminder()">Подтвердить и оплатить</button>
+  <p class="hint" id="reminder-error"></p>
 </div>
 
 <!-- ===== УСПЕХ ===== -->
 <div id="screen-success" class="screen">
   <div class="hero">
-    <div class="hero-emoji">✅</div>
-    <p class="center" id="success-text" style="padding:0;">Готово 🌸</p>
+    <div class="success-icon">✓</div>
+    <p class="center" id="success-text" style="padding:0;">Готово.</p>
   </div>
   <button class="btn-primary" onclick="closeApp()">Закрыть</button>
 </div>
@@ -371,33 +484,30 @@
   <div class="card">
     <div class="row" style="border-bottom:none; margin-bottom:8px;"><span class="occasions-summary-title">Напоминать за</span></div>
     <div class="interval-row" id="reminder-days-row"></div>
+    <p class="hint" id="reminder-days-error" style="margin:8px 0 0;"></p>
   </div>
 
-  <div class="card">
-    <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Получатели</span></div>
-    <div id="profile-recipients-list"></div>
-  </div>
+  <div class="section-label">Получатели</div>
+  <div id="profile-recipients-list"></div>
 
-  <div class="card">
+  <div class="card" style="margin-top:16px;">
     <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Оплата и заказы</span></div>
-    <div id="profile-history-list"></div>
+    <p class="hint" style="margin:0;">История появится после первого заказа.</p>
   </div>
-
-  <div class="card">
-    <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">О сервисе</span></div>
-    <p class="hint" style="margin:0;">Bloomind — напоминания о цветах для близких. Ничего не публикуем и не передаём третьим лицам.<br><br>Что-то не работает или есть вопрос — напишите прямо сюда, в этот чат, мы отвечаем лично.</p>
-  </div>
-
-  <button class="btn-option" onclick="loadHome()">← Назад</button>
 </div>
 
+</div>
+
+<div class="tabbar" id="tabbar">
+  <button type="button" class="tabbar-item" data-tab="home" onclick="loadHome()"><span class="tabbar-dot"></span>Главная</button>
+  <button type="button" class="tabbar-item" data-tab="profile" onclick="openProfile()"><span class="tabbar-dot"></span>Профиль</button>
+  <button type="button" class="tabbar-item" data-tab="support" onclick="showScreen('screen-support')"><span class="tabbar-dot"></span>Поддержка</button>
 </div>
 
 <script>
-  // Страница теперь статика на GitHub Pages, а бэкенд — Supabase Edge Function "api"
-  // (см. supabase/functions/api). Адрес формата https://<project-ref>.functions.supabase.co/api —
-  // заменить на реальный после деплоя функций, см. supabase/DEPLOY.md.
+  // Страница — статика на GitHub Pages, бэкенд — Supabase Edge Function "api".
   const API_BASE = 'https://ylbzmqvzetseudzfcgod.functions.supabase.co/api';
+  const SUPPORT_USERNAME = 'dispiss'; // @username основателя — кнопка "Написать в поддержку"
   const tg = window.Telegram && window.Telegram.WebApp;
   let userId = null;
   let profile = {};
@@ -405,43 +515,58 @@
   let schoolAgeSuggested = false;
   let schoolAge = null;
   let customRecurringOn = true;
-  const steps = ['name', 'who', 'occasions', 'date', 'schoolcheck', 'style', 'address', 'summary'];
-
-  const SCREEN_TITLES = {
-    'screen-loading': 'Bloomind',
-    'screen-error': 'Bloomind',
-    'screen-welcome': 'Bloomind',
-    'screen-support': 'Поддержка',
-    'screen-home': 'Ваши получатели',
-    'screen-form': 'Новый получатель',
-    'screen-reminder': 'Напоминание',
-    'screen-success': 'Готово',
-    'screen-profile': 'Профиль'
+  const steps = ['name', 'who', 'occasions', 'date', 'schoolcheck', 'stylepref', 'address', 'summary'];
+  const STYLE_OPTIONS = [
+    { value: 'Нежный', emoji: '🌸', sub: 'пастель, пионы, эустома' },
+    { value: 'Яркий', emoji: '🌺', sub: 'сочные тона, герберы' },
+    { value: 'Природный', emoji: '🌿', sub: 'зелень, полевые цветы' }
+  ];
+  const EMOJI_BY_LABEL = {
+    'День рождения': '🎂', '8 марта': '🌷', 'День матери': '🍂', '1 сентября': '🎒',
+    'Без повода': '💌', 'Годовщина': '💍'
   };
 
-  function openSupport() {
-    showScreen('screen-support');
+  const SCREEN_TITLES = {
+    'screen-loading': { title: 'Bloomind' },
+    'screen-error': { title: 'Bloomind' },
+    'screen-welcome': { title: 'Bloomind' },
+    'screen-about': { title: 'Как это работает', back: 'screen-welcome' },
+    'screen-support': { title: 'Поддержка', eyebrow: 'Bloomind', tab: 'support' },
+    'screen-home': { title: 'Ваши получатели', eyebrow: 'Bloomind', tab: 'home' },
+    'screen-form': { title: 'Новый получатель' },
+    'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
+    'screen-reminder': { title: 'Напоминание' },
+    'screen-success': { title: 'Готово' },
+    'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' }
+  };
+
+  let recipientBackTarget = 'screen-home';
+
+  function openSupportChat() {
+    const url = 'https://t.me/' + SUPPORT_USERNAME;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
   }
 
-  // Правила предложенных поводов по типу получателя — раздел 2 ТЗ "Персонализация и поводы".
+  // Правила предложенных поводов по типу получателя.
   const OCCASION_RULES = {
     'Мама': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true },
       { type: 'mothersday', emoji: '🍂', label: 'День матери', required: false, auto: true, defaultChecked: false, sub: 'последнее воскресенье ноября, каждый год' }
     ],
     'Жена/партнёрша': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' },
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true },
+      { type: 'anniversary', emoji: '💍', label: 'Годовщина', required: false, auto: false, needsDate: true, defaultChecked: false, sub: 'например, день знакомства или свадьбы — дату укажете сами' },
       { type: 'justbecause', emoji: '💌', label: 'Дарить без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'сами напомним раз в выбранный период' }
     ],
     'Дочь': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true }
     ],
     'Другое': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: true, auto: false },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true, sub: 'подтянем дату сами, каждый год' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: true, hidden: true }
     ]
   };
 
@@ -454,18 +579,37 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function setTopbarTitle(id) {
-    const el = document.getElementById('topbar-title');
-    if (el && SCREEN_TITLES[id]) el.textContent = SCREEN_TITLES[id];
+  function shortDate(ruDate) {
+    // "24.07.2026" -> "24.07"
+    return ruDate ? ruDate.slice(0, 5) : '';
+  }
+
+  function setTopbar(id) {
+    const meta = SCREEN_TITLES[id] || { title: 'Bloomind' };
+    const eyebrowEl = document.getElementById('topbar-eyebrow');
+    const titleEl = document.getElementById('topbar-title');
+    const backEl = document.getElementById('topbar-back');
+    if (eyebrowEl) eyebrowEl.textContent = meta.eyebrow || '';
+    if (eyebrowEl) eyebrowEl.style.display = meta.eyebrow ? 'block' : 'none';
+    if (titleEl) titleEl.textContent = meta.title;
+    if (backEl) {
+      const target = meta.back === true ? recipientBackTarget : meta.back;
+      backEl.style.display = target ? 'inline-block' : 'none';
+      backEl.onclick = target ? function () { showScreen(target); } : null;
+    }
+    const tabbarEl = document.getElementById('tabbar');
+    if (tabbarEl) {
+      tabbarEl.classList.toggle('visible', !!meta.tab);
+      document.querySelectorAll('.tabbar-item').forEach(function (el) {
+        el.classList.toggle('active', el.dataset.tab === meta.tab);
+      });
+    }
   }
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
-    setTopbarTitle(id);
-    // Иконка профиля видна только на главной — на остальных экранах уже есть свой путь назад.
-    const profileBtn = document.getElementById('topbar-profile-btn');
-    if (profileBtn) profileBtn.style.display = (id === 'screen-home') ? 'flex' : 'none';
+    setTopbar(id);
   }
 
   function updateFormDots(currentStepName) {
@@ -483,14 +627,13 @@
     showScreen('screen-form');
     if (name === 'occasions') renderOccasionsStep();
     if (name === 'schoolcheck') renderSchoolCheck();
+    if (name === 'stylepref') renderStyleStep();
     if (name === 'summary') renderSummary();
     document.querySelectorAll('.form-step').forEach(function (el) { el.style.display = (el.dataset.step === name ? 'block' : 'none'); });
     updateFormDots(name);
     markSelectedOption(name, profile[name]);
   }
 
-  // Подсвечивает ранее выбранный вариант (нужно, когда возвращаемся на шаг через
-  // "изменить" в резюме — иначе непонятно, что было выбрано до этого).
   function markSelectedOption(stepName, value) {
     const stepEl = document.querySelector('[data-step="' + stepName + '"]');
     if (!stepEl) return;
@@ -498,8 +641,6 @@
     options.forEach(function (el) { el.classList.toggle('selected', el.dataset.value === value); });
   }
 
-  // Экран "1 сентября?" показываем только когда это реально уместно (Дочь школьного возраста) —
-  // остальные шаги всегда идут по порядку.
   function shouldShowStep(name) {
     if (name === 'schoolcheck') return !!schoolAgeSuggested;
     return true;
@@ -526,12 +667,15 @@
     schoolAgeSuggested = false;
     schoolAge = null;
     customRecurringOn = true;
-    // Полностью чистим форму — иначе при добавлении второго получателя поля
-    // остаются заполнены данными первого.
     document.getElementById('input-name').value = '';
     document.getElementById('input-date').value = '';
     document.getElementById('input-address').value = '';
+    document.getElementById('input-apartment').value = '';
+    document.getElementById('input-entrance').value = '';
+    document.getElementById('input-intercom').value = '';
+    document.getElementById('input-phone').value = '';
     document.getElementById('input-note').value = '';
+    document.getElementById('input-social').value = '';
     document.getElementById('input-custom-label').value = '';
     document.getElementById('input-custom-date').value = '';
     document.getElementById('date-error').textContent = '';
@@ -551,7 +695,8 @@
 
   function chooseWho(val) {
     profile.who = val;
-    profile.occasionSelections = {}; // новый "Кто" — правила поводов другие, начинаем чек-лист заново
+    profile.occasionSelections = {};
+    profile.occasionDates = {};
     goNext('who');
   }
 
@@ -559,6 +704,7 @@
   function renderOccasionsStep() {
     const rules = getOccasionRules();
     if (!profile.occasionSelections) profile.occasionSelections = {};
+    if (!profile.occasionDates) profile.occasionDates = {};
     if (!profile.customOccasions) profile.customOccasions = [];
     const list = document.getElementById('occasions-list');
     let html = '';
@@ -566,7 +712,7 @@
       if (!(r.type in profile.occasionSelections)) {
         profile.occasionSelections[r.type] = r.required ? true : !!r.defaultChecked;
       }
-      if (r.hidden) return; // не показываем в чек-листе — уже выставлено выше, подтягивается само
+      if (r.hidden) return;
       const checked = profile.occasionSelections[r.type];
       const rowClasses = 'occasion-row' + (checked ? ' checked' : '') + (r.required ? ' disabled' : '');
       const clickAttr = r.required ? '' : ' onclick="toggleOccasion(\'' + r.type + '\')"';
@@ -579,6 +725,9 @@
         html += '<div class="interval-row">' + [1, 2, 3].map(function (n) {
           return '<button type="button" class="interval-btn' + (iv === n ? ' selected' : '') + '" onclick="setJustBecauseInterval(' + n + ', event)">раз в ' + n + ' мес.</button>';
         }).join('') + '</div>';
+      }
+      if (r.needsDate && checked) {
+        html += '<input type="date" style="margin:-4px 0 12px;" value="' + escapeHtml(profile.occasionDates[r.type] || '') + '" onclick="event.stopPropagation()" onchange="setOccasionDate(\'' + r.type + '\', this.value)">';
       }
     });
     profile.customOccasions.forEach(function (c, idx) {
@@ -594,15 +743,17 @@
     renderOccasionsStep();
   }
 
+  function setOccasionDate(type, val) {
+    profile.occasionDates[type] = val;
+  }
+
   function setJustBecauseInterval(n, ev) {
     if (ev) ev.stopPropagation();
     profile.justBecauseInterval = n;
     renderOccasionsStep();
   }
 
-  function showAddOccasionForm() {
-    document.getElementById('add-occasion-form').style.display = 'block';
-  }
+  function showAddOccasionForm() { document.getElementById('add-occasion-form').style.display = 'block'; }
 
   function hideAddOccasionForm() {
     const form = document.getElementById('add-occasion-form');
@@ -640,11 +791,16 @@
   }
 
   function submitOccasions() {
+    const rules = getOccasionRules();
+    const err = document.getElementById('occasions-error');
+    const missing = rules.some(function (r) { return r.needsDate && profile.occasionSelections[r.type] && !profile.occasionDates[r.type]; });
+    if (missing) { err.textContent = 'Укажите дату для отмеченного повода выше.'; return; }
+    err.textContent = '';
     goNext('occasions');
   }
 
   function submitDate() {
-    const val = document.getElementById('input-date').value; // формат YYYY-MM-DD
+    const val = document.getElementById('input-date').value;
     const err = document.getElementById('date-error');
     if (!val) { err.textContent = 'Выберите дату.'; return; }
     err.textContent = '';
@@ -654,10 +810,7 @@
     schoolAge = null;
     if (profile.who === 'Дочь') {
       const age = computeAge(val);
-      if (age >= 6 && age <= 17) {
-        schoolAgeSuggested = true;
-        schoolAge = age;
-      }
+      if (age >= 6 && age <= 17) { schoolAgeSuggested = true; schoolAge = age; }
     }
     goNext('date');
   }
@@ -681,9 +834,31 @@
     goNext('schoolcheck');
   }
 
-  function chooseStyle(val) {
+  // ===== ШАГ "СТИЛЬ И ПРЕДПОЧТЕНИЯ" =====
+  function renderStyleStep() {
+    const el = document.getElementById('style-rows');
+    el.innerHTML = STYLE_OPTIONS.map(function (s) {
+      const on = profile.style === s.value;
+      return '<div class="style-row' + (on ? ' selected' : '') + '" onclick="pickStyle(\'' + s.value + '\')">' +
+        '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
+        '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
+    }).join('');
+    document.getElementById('input-note').value = profile.note || '';
+    document.getElementById('input-social').value = profile.socialMedia || '';
+  }
+
+  function pickStyle(val) {
     profile.style = val;
-    goNext('style');
+    renderStyleStep();
+  }
+
+  function submitStylePref() {
+    const err = document.getElementById('style-error');
+    if (!profile.style) { err.textContent = 'Выберите стиль.'; return; }
+    err.textContent = '';
+    profile.note = document.getElementById('input-note').value.trim();
+    profile.socialMedia = document.getElementById('input-social').value.trim();
+    goNext('stylepref');
   }
 
   function submitAddress() {
@@ -692,11 +867,13 @@
     if (!val) { err.textContent = 'Укажите адрес — без него не получится доставить букет.'; return; }
     err.textContent = '';
     profile.address = val;
+    profile.apartment = document.getElementById('input-apartment').value.trim();
+    profile.entrance = document.getElementById('input-entrance').value.trim();
+    profile.intercom = document.getElementById('input-intercom').value.trim();
+    profile.phone = document.getElementById('input-phone').value.trim();
     goNext('address');
   }
 
-  // Собирает финальный список поводов из чек-листа + условного "1 сентября" + своих поводов —
-  // используется и для сводки, и для отправки на сервер.
   function buildOccasionsPayload() {
     const rules = getOccasionRules();
     const list = [];
@@ -706,6 +883,12 @@
       if (r.type === 'justbecause') {
         if (profile.occasionSelections && profile.occasionSelections['justbecause']) {
           list.push({ type: 'justbecause', label: 'Без повода', date: null, auto: false, recurring: true, interval: profile.justBecauseInterval || 2 });
+        }
+        return;
+      }
+      if (r.needsDate) {
+        if (profile.occasionSelections && profile.occasionSelections[r.type]) {
+          list.push({ type: r.type, label: r.label, date: toRuDate(profile.occasionDates[r.type]), auto: false, recurring: true });
         }
         return;
       }
@@ -736,7 +919,7 @@
   }
 
   function toRuDate(isoDate) {
-    // input[type=date] отдаёт YYYY-MM-DD, бэкенд ждёт ДД.ММ.ГГГГ
+    if (!isoDate) return '';
     const parts = isoDate.split('-');
     return parts[2] + '.' + parts[1] + '.' + parts[0];
   }
@@ -744,12 +927,16 @@
   function submitProfile() {
     const err = document.getElementById('submit-error');
     err.textContent = '';
-    profile.note = document.getElementById('input-note').value.trim();
     const occasions = buildOccasionsPayload();
-    apiPost({ action: 'submitProfile', userId: userId, name: profile.name, who: profile.who, style: profile.style, address: profile.address, note: profile.note, occasions: occasions })
+    apiPost({
+      action: 'submitProfile', userId: userId, name: profile.name, who: profile.who, style: profile.style,
+      note: profile.note, socialMedia: profile.socialMedia,
+      address: profile.address, apartment: profile.apartment, entrance: profile.entrance, intercom: profile.intercom, phone: profile.phone,
+      occasions: occasions
+    })
       .then(function (res) {
         if (!res.ok) { err.textContent = 'Не получилось сохранить (' + (res.error || 'ошибка') + '), попробуйте ещё раз.'; return; }
-        document.getElementById('success-text').textContent = 'Готово 🌸 Всё запомнил про ' + profile.name + '.';
+        document.getElementById('success-text').textContent = 'Готово. Всё запомнил про ' + profile.name + '.';
         showScreen('screen-success');
       })
       .catch(function (e) { err.textContent = 'Нет связи с сервером: ' + e + '.'; });
@@ -761,6 +948,12 @@
     if (mod10 === 1 && mod100 !== 11) return 'повод';
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return 'повода';
     return 'поводов';
+  }
+
+  function occasionChipText(o) {
+    const emoji = EMOJI_BY_LABEL[o.type] || '✨';
+    if (o.type === 'Без повода') return emoji + ' раз в ' + (o.intervalMonths || 2) + ' мес.';
+    return emoji + ' ' + shortDate(o.date);
   }
 
   function loadHome() {
@@ -784,10 +977,9 @@
         recipients.forEach(function (r) {
           const div = document.createElement('div');
           div.className = 'card recipient-card';
-          const rowsHtml = (r.occasions || []).map(function (o) {
-            return '<div class="row"><span>' + escapeHtml(o.type) + '</span><span>' + escapeHtml(o.date) + '</span></div>';
-          }).join('');
-          div.innerHTML = '<div class="recipient-name" style="margin-bottom:8px;">' + escapeHtml(r.name) + '</div>' + rowsHtml;
+          const chipsHtml = (r.occasions || []).map(function (o) { return '<span class="chip">' + escapeHtml(occasionChipText(o)) + '</span>'; }).join('');
+          div.innerHTML = '<div class="recipient-name">' + escapeHtml(r.name) + '</div><div class="recipient-chips">' + chipsHtml + '</div>';
+          div.addEventListener('click', function () { openRecipient(r.recipientId, 'screen-home'); });
           list.appendChild(div);
         });
       }
@@ -796,8 +988,6 @@
   }
 
   // ===== ПРОФИЛЬ =====
-  // Переиспользуем тот же action=list, что и главная — не нужен отдельный эндпоинт
-  // для списка получателей и истории поводов, только для настройки "напоминать за".
   function openProfile() {
     showScreen('screen-loading');
     Promise.all([
@@ -810,21 +1000,21 @@
 
       const recipients = (listRes.ok && listRes.recipients) ? listRes.recipients : [];
       const recEl = document.getElementById('profile-recipients-list');
-      recEl.innerHTML = recipients.length
-        ? recipients.map(function (r) { return '<div class="row"><span>' + escapeHtml(r.name) + '</span><span>' + escapeHtml(r.who) + '</span></div>'; }).join('')
-        : '<p class="hint" style="margin:0;">Пока никого нет.</p>';
-
-      const rows = [];
-      recipients.forEach(function (r) {
-        (r.occasions || []).forEach(function (o) {
-          rows.push({ name: r.name, type: o.type, status: o.status });
+      recEl.innerHTML = '';
+      if (!recipients.length) {
+        recEl.innerHTML = '<p class="hint" style="margin:0 0 12px;">Пока никого нет.</p>';
+      } else {
+        recipients.forEach(function (r) {
+          const div = document.createElement('div');
+          div.className = 'card recipient-card';
+          const n = (r.occasions || []).length;
+          div.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+            '<div style="font-weight:700;">' + escapeHtml(r.name) + '</div><span style="color:var(--hint);">&rsaquo;</span></div>' +
+            '<div class="hint" style="margin-top:2px; font-size:12px;">' + n + ' ' + occasionsWord(n) + ' настроено</div>';
+          div.addEventListener('click', function () { openRecipient(r.recipientId, 'screen-profile'); });
+          recEl.appendChild(div);
         });
-      });
-      const histEl = document.getElementById('profile-history-list');
-      histEl.innerHTML = rows.length
-        ? rows.map(function (o) { return '<div class="row"><span>' + escapeHtml(o.name) + ' · ' + escapeHtml(o.type) + '</span><span>' + escapeHtml(o.status) + '</span></div>'; }).join('')
-        : '<p class="hint" style="margin:0;">Пока нет заказов.</p>';
-
+      }
       showScreen('screen-profile');
     }).catch(function () { showScreen('screen-error'); });
   }
@@ -837,13 +1027,206 @@
   }
 
   function saveReminderDays(n) {
-    apiPost({ action: 'saveSettings', userId: userId, reminderDays: n }).then(function (res) {
-      if (res.ok) renderReminderDays(n);
+    const err = document.getElementById('reminder-days-error');
+    if (err) err.textContent = '';
+    apiPost({ action: 'saveSettings', userId: userId, reminderDays: n })
+      .then(function (res) {
+        if (res.ok) { renderReminderDays(n); return; }
+        if (err) err.textContent = 'Не сохранилось (' + (res.error || 'ошибка') + ').';
+      })
+      .catch(function (e) { if (err) err.textContent = 'Нет связи с сервером: ' + e + '.'; });
+  }
+
+  // ===== ЭКРАН ПОЛУЧАТЕЛЯ =====
+  let currentRecipient = null;
+  let recCustomRecurringOn = true;
+
+  function openRecipient(id, backTo) {
+    recipientBackTarget = backTo || 'screen-home';
+    showScreen('screen-loading');
+    apiGet({ action: 'recipient', id: id, userId: userId }).then(function (res) {
+      if (!res.ok) { showScreen('screen-error'); return; }
+      currentRecipient = res.recipient;
+      SCREEN_TITLES['screen-recipient'].title = currentRecipient.name;
+      renderRecipientScreen();
+      showScreen('screen-recipient');
+    }).catch(function () { showScreen('screen-error'); });
+  }
+
+  function renderRecipientScreen() {
+    const r = currentRecipient;
+
+    const occEl = document.getElementById('recipient-occasions');
+    occEl.innerHTML = (r.occasions || []).map(function (o) {
+      const emoji = EMOJI_BY_LABEL[o.type] || '✨';
+      const canEditDate = (o.type === 'День рождения' || !EMOJI_BY_LABEL[o.type]);
+      const action = canEditDate
+        ? '<span class="btn-link" onclick="showEditOccasionDate(' + o.rowIndex + ', this)">изменить</span>'
+        : '<span class="btn-link" onclick="removeOccasion(' + o.rowIndex + ')">убрать</span>';
+      return '<div class="card" data-occasion="' + o.rowIndex + '"><div class="row" style="border-bottom:none;">' +
+        '<div><div style="font-weight:700;">' + emoji + ' ' + escapeHtml(o.type) + '</div>' +
+        '<div class="hint" style="font-size:12px; margin-top:2px;">' + escapeHtml(o.date) + ' &middot; ' + escapeHtml(o.status) + '</div></div>' +
+        action + '</div></div>';
+    }).join('');
+
+    document.getElementById('recipient-style-view').innerHTML =
+      '<div class="row" style="border-bottom:none;"><div><div style="font-weight:700;">' + escapeHtml(r.style || '—') + '</div>' +
+      (r.note ? '<div class="hint" style="font-size:12px; margin-top:2px;">' + escapeHtml(r.note) + '</div>' : '') +
+      (r.socialMedia ? '<div class="hint" style="font-size:12px; margin-top:2px;">' + escapeHtml(r.socialMedia) + '</div>' : '') +
+      '</div><span class="btn-link" onclick="editRecipientStyle()">изменить</span></div>';
+
+    document.getElementById('recipient-address-view').innerHTML =
+      '<div class="row" style="border-bottom:none;"><span>' + escapeHtml(r.address || 'адрес не указан') + '</span>' +
+      '<span class="btn-link" onclick="editRecipientAddress()">изменить</span></div>';
+
+    document.getElementById('recipient-phone-view').innerHTML =
+      '<div class="row" style="border-bottom:none;"><span>' + escapeHtml(r.phone || 'телефон не указан') + '</span>' +
+      '<span class="btn-link" onclick="editRecipientPhone()">изменить</span></div>';
+
+    document.getElementById('recipient-style-edit').style.display = 'none';
+    document.getElementById('recipient-address-edit').style.display = 'none';
+    document.getElementById('recipient-phone-edit').style.display = 'none';
+    document.getElementById('recipient-style-view').style.display = 'block';
+    document.getElementById('recipient-address-view').style.display = 'block';
+    document.getElementById('recipient-phone-view').style.display = 'block';
+  }
+
+  function showEditOccasionDate(occasionId, linkEl) {
+    const wrap = linkEl.closest('.card');
+    if (wrap.querySelector('input')) return;
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.style.margin = '8px 0 0';
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary';
+    btn.style.marginTop = '8px';
+    btn.textContent = 'Сохранить дату';
+    // Простая замена даты — переносим повод: удаляем старый, добавляем новый с той же меткой типа.
+    btn.onclick = function () {
+      if (!input.value) return;
+      const occ = (currentRecipient.occasions || []).find(function (o) { return o.rowIndex === occasionId; });
+      if (!occ) return;
+      apiPost({ action: 'removeOccasion', userId: userId, occasionId: occasionId }).then(function () {
+        return apiPost({
+          action: 'addOccasion', userId: userId, recipientId: currentRecipient.recipientId,
+          occasion: { type: 'custom', label: occ.type, date: toRuDate(input.value), auto: false, recurring: occ.recurring }
+        });
+      }).then(function () { openRecipient(currentRecipient.recipientId, recipientBackTarget); });
+    };
+    wrap.appendChild(input);
+    wrap.appendChild(btn);
+  }
+
+  function removeOccasion(occasionId) {
+    apiPost({ action: 'removeOccasion', userId: userId, occasionId: occasionId }).then(function () {
+      openRecipient(currentRecipient.recipientId, recipientBackTarget);
+    });
+  }
+
+  function showRecipientAddOccasionForm() { document.getElementById('recipient-add-occasion-form').style.display = 'block'; }
+  function hideRecipientAddOccasionForm() {
+    document.getElementById('recipient-add-occasion-form').style.display = 'none';
+    document.getElementById('rec-input-custom-label').value = '';
+    document.getElementById('rec-input-custom-date').value = '';
+    document.getElementById('rec-occasion-error').textContent = '';
+  }
+  function toggleRecCustomRecurring() {
+    recCustomRecurringOn = !recCustomRecurringOn;
+    const btn = document.getElementById('rec-custom-recurring-toggle');
+    btn.classList.toggle('selected', recCustomRecurringOn);
+    btn.textContent = recCustomRecurringOn ? '🔁 Повторять каждый год' : '1️⃣ Разовый повод';
+  }
+  function submitRecipientAddOccasion() {
+    const label = document.getElementById('rec-input-custom-label').value.trim();
+    const dateVal = document.getElementById('rec-input-custom-date').value;
+    const err = document.getElementById('rec-occasion-error');
+    if (!label || !dateVal) { err.textContent = 'Укажите название и дату.'; return; }
+    err.textContent = '';
+    apiPost({
+      action: 'addOccasion', userId: userId, recipientId: currentRecipient.recipientId,
+      occasion: { type: 'custom', label: label, date: toRuDate(dateVal), auto: false, recurring: recCustomRecurringOn }
+    }).then(function (res) {
+      if (!res.ok) { err.textContent = 'Не получилось (' + (res.error || 'ошибка') + ').'; return; }
+      hideRecipientAddOccasionForm();
+      openRecipient(currentRecipient.recipientId, recipientBackTarget);
+    });
+  }
+
+  function editRecipientStyle() {
+    const el = document.getElementById('recipient-style-rows');
+    el.innerHTML = STYLE_OPTIONS.map(function (s) {
+      const on = currentRecipient.style === s.value;
+      return '<div class="style-row' + (on ? ' selected' : '') + '" data-style="' + s.value + '" onclick="pickRecipientStyle(\'' + s.value + '\')">' +
+        '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
+        '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
+    }).join('');
+    document.getElementById('rec-input-note').value = currentRecipient.note || '';
+    document.getElementById('rec-input-social').value = currentRecipient.socialMedia || '';
+    document.getElementById('recipient-style-view').style.display = 'none';
+    document.getElementById('recipient-style-edit').style.display = 'block';
+  }
+  function pickRecipientStyle(val) {
+    currentRecipient._pendingStyle = val;
+    document.querySelectorAll('#recipient-style-rows .style-row').forEach(function (el) {
+      const on = el.dataset.style === val;
+      el.classList.toggle('selected', on);
+      el.querySelector('.style-check').classList.toggle('checked', on);
+    });
+  }
+  function saveRecipientStyle() {
+    const style = currentRecipient._pendingStyle || currentRecipient.style;
+    const note = document.getElementById('rec-input-note').value.trim();
+    const socialMedia = document.getElementById('rec-input-social').value.trim();
+    apiPost({ action: 'updateRecipient', userId: userId, recipientId: currentRecipient.recipientId, style: style, note: note, socialMedia: socialMedia })
+      .then(function () { openRecipient(currentRecipient.recipientId, recipientBackTarget); });
+  }
+  function cancelRecipientStyleEdit() { renderRecipientScreen(); }
+
+  function editRecipientAddress() {
+    document.getElementById('rec-input-address').value = currentRecipient.addressParts.line;
+    document.getElementById('rec-input-apartment').value = currentRecipient.addressParts.apartment;
+    document.getElementById('rec-input-entrance').value = currentRecipient.addressParts.entrance;
+    document.getElementById('rec-input-intercom').value = currentRecipient.addressParts.intercom;
+    document.getElementById('recipient-address-view').style.display = 'none';
+    document.getElementById('recipient-address-edit').style.display = 'block';
+  }
+  function saveRecipientAddress() {
+    apiPost({
+      action: 'updateRecipient', userId: userId, recipientId: currentRecipient.recipientId,
+      address: document.getElementById('rec-input-address').value.trim(),
+      apartment: document.getElementById('rec-input-apartment').value.trim(),
+      entrance: document.getElementById('rec-input-entrance').value.trim(),
+      intercom: document.getElementById('rec-input-intercom').value.trim()
+    }).then(function () { openRecipient(currentRecipient.recipientId, recipientBackTarget); });
+  }
+  function cancelRecipientAddressEdit() { renderRecipientScreen(); }
+
+  function editRecipientPhone() {
+    document.getElementById('rec-input-phone').value = currentRecipient.phone;
+    document.getElementById('recipient-phone-view').style.display = 'none';
+    document.getElementById('recipient-phone-edit').style.display = 'block';
+  }
+  function saveRecipientPhone() {
+    apiPost({ action: 'updateRecipient', userId: userId, recipientId: currentRecipient.recipientId, phone: document.getElementById('rec-input-phone').value.trim() })
+      .then(function () { openRecipient(currentRecipient.recipientId, recipientBackTarget); });
+  }
+  function cancelRecipientPhoneEdit() { renderRecipientScreen(); }
+
+  function deleteRecipient() {
+    if (!confirm('Удалить получателя вместе со всеми поводами? Это необратимо.')) return;
+    apiPost({ action: 'deleteRecipient', userId: userId, recipientId: currentRecipient.recipientId }).then(function () {
+      showScreen(recipientBackTarget);
+      if (recipientBackTarget === 'screen-profile') openProfile(); else loadHome();
     });
   }
 
   // ===== КАРТОЧКА НАПОМИНАНИЯ =====
   let reminderRow = null;
+  let reminderDefaultAddress = '';
+  const TIME_SLOTS = ['09:00–13:00', '13:00–17:00', '17:00–21:00'];
+  let reminderSelectedSlot = null;
+  let reminderAddressMode = 'default';
+
   function loadReminder(row) {
     reminderRow = row;
     showScreen('screen-loading');
@@ -851,33 +1234,73 @@
       if (!res.ok) { showScreen('screen-error'); return; }
       const r = res.recipient;
       document.getElementById('reminder-title').textContent = r.occasion + ' у ' + r.name;
-      document.getElementById('reminder-name').textContent = r.name;
-      document.getElementById('reminder-occasion').textContent = r.occasion;
-      document.getElementById('reminder-date').textContent = r.date;
-      document.getElementById('reminder-style').textContent = r.style;
-      document.getElementById('reminder-address').textContent = r.address || '—';
+      reminderDefaultAddress = r.defaultAddress || '';
+      document.getElementById('reminder-phone-input').value = r.defaultPhone || '';
+      reminderAddressMode = reminderDefaultAddress ? 'default' : 'custom';
+      renderReminderAddressChoice();
+      reminderSelectedSlot = null;
+      renderReminderTimeSlots();
       showScreen('screen-reminder');
     }).catch(function () { showScreen('screen-error'); });
   }
 
+  function renderReminderAddressChoice() {
+    const el = document.getElementById('reminder-address-choice');
+    el.innerHTML = ['Обычный адрес', 'Другой адрес'].map(function (label, i) {
+      const mode = i === 0 ? 'default' : 'custom';
+      return '<button type="button" class="interval-btn' + (reminderAddressMode === mode ? ' selected' : '') + '" onclick="setReminderAddressMode(\'' + mode + '\')">' + label + '</button>';
+    }).join('');
+    const input = document.getElementById('reminder-address-input');
+    if (reminderAddressMode === 'default') {
+      input.value = reminderDefaultAddress;
+    } else if (input.value === reminderDefaultAddress) {
+      input.value = '';
+    }
+  }
+  function setReminderAddressMode(mode) {
+    reminderAddressMode = mode;
+    renderReminderAddressChoice();
+  }
+
+  function renderReminderTimeSlots() {
+    const el = document.getElementById('reminder-time-slots');
+    el.innerHTML = TIME_SLOTS.map(function (s, i) {
+      return '<button type="button" class="interval-btn" style="font-variant-numeric:tabular-nums;" data-slot="' + i + '" onclick="pickReminderSlot(' + i + ')">' + s + '</button>' ;
+    }).join('') + '<button type="button" class="btn-link" style="flex-basis:100%; text-align:left;" onclick="pickReminderSlot(-1)">не подходит — уточню сам</button>';
+    updateReminderSlotHighlight();
+  }
+  function pickReminderSlot(i) {
+    reminderSelectedSlot = i;
+    document.getElementById('reminder-time-custom').style.display = (i === -1) ? 'block' : 'none';
+    updateReminderSlotHighlight();
+  }
+  function updateReminderSlotHighlight() {
+    document.querySelectorAll('#reminder-time-slots [data-slot]').forEach(function (el) {
+      el.classList.toggle('selected', Number(el.dataset.slot) === reminderSelectedSlot);
+    });
+  }
+
   function confirmReminder() {
-    apiPost({ action: 'confirmReminder', rowIndex: reminderRow }).then(function (res) {
+    const deliveryAddress = document.getElementById('reminder-address-input').value.trim();
+    const deliveryPhone = document.getElementById('reminder-phone-input').value.trim();
+    const deliveryWindow = reminderSelectedSlot === -1
+      ? document.getElementById('reminder-time-custom').value.trim()
+      : (reminderSelectedSlot != null ? TIME_SLOTS[reminderSelectedSlot] : '');
+    apiPost({ action: 'confirmReminder', rowIndex: reminderRow, deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
-      document.getElementById('success-text').textContent = 'Подтверждено 🌸 Реквизиты для оплаты пришли в чат.';
+      document.getElementById('success-text').textContent = 'Подтверждено. Реквизиты для оплаты пришли в чат.';
       showScreen('screen-success');
     });
   }
 
-  function showPostponeInput() {
-    document.getElementById('postpone-block').style.display = 'block';
-  }
+  function showPostponeInput() { document.getElementById('postpone-block').style.display = 'block'; }
 
   function postponeReminder() {
     const val = document.getElementById('input-postpone-date').value;
     if (!val) return;
     apiPost({ action: 'postponeReminder', rowIndex: reminderRow, newDate: toRuDate(val) }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
-      document.getElementById('success-text').textContent = 'Перенесено 🌿 Напомню заново, когда дата приблизится.';
+      document.getElementById('success-text').textContent = 'Перенесено. Напомню заново, когда дата приблизится.';
       showScreen('screen-success');
     });
   }
@@ -887,9 +1310,6 @@
   }
 
   // ===== СЕТЕВЫЕ ЗАПРОСЫ =====
-  // initData — подписанная Telegram строка, бэкенд проверяет её подпись и достаёт
-  // настоящий userId сам, не доверяя тому, что прислал клиент (см. verifyInitData
-  // в supabase/functions/_shared/telegram.ts). Добавляем её автоматически, где есть.
   function apiGet(params) {
     const full = Object.assign({}, params);
     if (tg && tg.initData) full.initData = tg.initData;
@@ -912,12 +1332,8 @@
     const urlScreen = params.get('screen');
     const urlRow = params.get('row');
 
-    // Домен страницы подтверждён в BotFather (/setdomain) — значит Telegram реально
-    // передаёт initDataUnsafe и через inline-кнопку, и через Menu Button. Это основной
-    // источник userId; ?userId= в ссылке — резервный вариант (например, для старых кнопок).
     userId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || urlUserId;
 
-    // Карточка напоминания открывается по конкретной строке и не требует userId вообще.
     if (urlScreen === 'reminder' && urlRow) {
       loadReminder(urlRow);
       return;
@@ -936,17 +1352,8 @@
       return;
     }
 
-    // Кнопка меню Telegram (слева внизу) ведёт на экран приветствия с описанием
-    // сервиса и навигацией — а не сразу в профиль, чтобы новый человек сначала
-    // понял, что это за приложение, а не упирался в пустой личный кабинет.
-    if (urlScreen === 'welcome') {
-      showScreen('screen-welcome');
-      return;
-    }
-    if (urlScreen === 'profile') {
-      openProfile();
-      return;
-    }
+    if (urlScreen === 'welcome') { showScreen('screen-welcome'); return; }
+    if (urlScreen === 'profile') { openProfile(); return; }
     loadHome();
   }
 
