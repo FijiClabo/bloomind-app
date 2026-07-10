@@ -1829,17 +1829,19 @@
       actionHtml + '</div>';
   }
 
-  // Телефон ЗАКАЗЧИКА (не получателя букета) — только для крайних случаев,
-  // заполняется по желанию в Профиле. Показываем звонок/сообщение по тому,
-  // что клиент сам выбрал как удобный способ связи.
+  // Имя и телефон ЗАКАЗЧИКА (не получателя букета) — имя спрашивает бот сам
+  // при /start, телефон заполняется по желанию в Профиле. Показываем
+  // звонок/сообщение по тому, что клиент сам выбрал как удобный способ связи.
   function clientContactHtml(o) {
-    if (!o.clientPhone) return '';
+    if (!o.clientName && !o.clientPhone) return '';
+    const nameLine = o.clientName ? '<div class="team-row"><span class="team-row-label">Заказчик</span><span>' + escapeHtml(o.clientName) + '</span></div>' : '';
+    if (!o.clientPhone) return nameLine;
     const digits = o.clientPhone.replace(/[^\d+]/g, '');
     const pref = o.clientContactPref;
     let links = '';
     if (pref === 'calls' || pref === 'both') links += '<a href="tel:' + digits + '" style="font-size:12px; font-weight:700; color:var(--accent-dark); text-decoration:none; margin-right:10px;">📞 позвонить</a>';
     if (pref === 'messages' || pref === 'both') links += '<a href="sms:' + digits + '" style="font-size:12px; font-weight:700; color:var(--accent-dark); text-decoration:none;">💬 написать</a>';
-    return '<div class="team-row"><span class="team-row-label">Телефон заказчика</span><span>' + escapeHtml(o.clientPhone) + '</span></div>' +
+    return nameLine + '<div class="team-row"><span class="team-row-label">Телефон заказчика</span><span>' + escapeHtml(o.clientPhone) + '</span></div>' +
       (links ? '<div style="margin:2px 0 8px;">' + links + '</div>' : '');
   }
 
