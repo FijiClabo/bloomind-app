@@ -137,6 +137,10 @@
     margin-bottom: 8px; cursor: pointer;
   }
   .style-row.selected { border-color: var(--accent); background: var(--accent-soft); }
+  /* "Доверяю вам" — визуально отдельный вариант среди направлений стиля,
+     чтобы было видно, что это не просто ещё один цвет, а другой принцип. */
+  .style-row-trust { border-style: dashed; }
+  .style-row-trust.selected { border-style: solid; }
   .style-row-label { font-weight: 700; font-size: 15px; }
   .style-row-sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
   .style-check {
@@ -386,16 +390,27 @@
     <button class="btn-option" onclick="chooseSchoolCheck(false)">Не нужно</button>
   </div>
 
-  <div class="form-step" data-step="stylepref">
-    <button type="button" class="btn-link" onclick="goBack('stylepref')">← Назад</button>
-    <h1>Стиль и предпочтения</h1>
-    <p class="hint">Поможет собрать букет, который точно понравится.</p>
-    <div id="style-rows"></div>
-    <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
-    <div class="field-label">Что нравится, что происходит в жизни (необязательно)</div>
-    <textarea id="input-note" rows="2" placeholder="Например: обожает пионы, недавно переехала"></textarea>
+  <div class="form-step" data-step="about">
+    <button type="button" class="btn-link" onclick="goBack('about')">← Назад</button>
+    <h1>Расскажите о ней</h1>
+    <p class="hint">Один раз, максимально подробно — дальше мы будем ориентироваться на это и на историю заказов, вам не придётся объяснять снова.</p>
+    <div class="field-label">Какая она, что любит</div>
+    <textarea id="input-note" rows="3" placeholder="Например: любит пионы и пастельные тона, не любит резкие запахи и лилии"></textarea>
+    <p class="hint" id="about-error" style="margin:-6px 0 14px;">&nbsp;</p>
     <div class="field-label">Соцсети получателя (необязательно)</div>
     <input type="text" id="input-social" placeholder="instagram.com/имя — поможет лучше понять вкус">
+    <div class="field-label">Фото букета, который ей нравился (необязательно)</div>
+    <input type="file" id="input-recipient-ref-photo" accept="image/*" style="display:none;">
+    <button type="button" class="btn-option" onclick="document.getElementById('input-recipient-ref-photo').click()">📎 Прикрепить фото</button>
+    <button class="btn-primary" onclick="submitAbout()">Далее</button>
+  </div>
+
+  <div class="form-step" data-step="stylepref">
+    <button type="button" class="btn-link" onclick="goBack('stylepref')">← Назад</button>
+    <h1>Какой стиль?</h1>
+    <p class="hint">Можно выбрать направление, а можно доверить решение нам.</p>
+    <div id="style-rows"></div>
+    <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
     <button class="btn-primary" onclick="submitStylePref()">Далее</button>
   </div>
 
@@ -522,6 +537,7 @@
   <div style="border-top:1.5px dashed var(--border); margin:16px 0;"></div>
   <div class="field-label" style="margin-top:0;">Размер букета</div>
   <div class="interval-row" id="reminder-size-row"></div>
+  <input type="number" id="reminder-custom-budget-input" placeholder="Своя сумма, ₽" style="display:none; margin-top:8px;">
   <div class="card" id="reminder-price-card">
     <div class="row"><span>Букет</span><span id="price-bouquet">—</span></div>
     <div class="row"><span>Доставка</span><span id="price-delivery">—</span></div>
@@ -639,11 +655,12 @@
   let schoolAgeSuggested = false;
   let schoolAge = null;
   let customRecurringOn = true;
-  const steps = ['name', 'who', 'occasions', 'schoolcheck', 'stylepref', 'address', 'summary'];
+  const steps = ['name', 'who', 'occasions', 'schoolcheck', 'about', 'stylepref', 'address', 'summary'];
   const STYLE_OPTIONS = [
     { value: 'Нежный', emoji: '🌸', sub: 'пастель, пионы, эустома' },
     { value: 'Яркий', emoji: '🌺', sub: 'сочные тона, герберы' },
-    { value: 'Природный', emoji: '🌿', sub: 'зелень, полевые цветы' }
+    { value: 'Природный', emoji: '🌿', sub: 'зелень, полевые цветы' },
+    { value: 'Доверяю вам', emoji: '💫', sub: 'решайте сами, ориентируясь на описание выше' }
   ];
   const EMOJI_BY_LABEL = {
     'День рождения': '🎂', '8 марта': '🌷', 'День матери': '🍂', '1 сентября': '🎒',
@@ -822,6 +839,7 @@
     showScreen('screen-form');
     if (name === 'occasions') renderOccasionsStep();
     if (name === 'schoolcheck') renderSchoolCheck();
+    if (name === 'about') renderAboutStep();
     if (name === 'stylepref') renderStyleStep();
     if (name === 'summary') renderSummary();
     document.querySelectorAll('.form-step').forEach(function (el) { el.style.display = (el.dataset.step === name ? 'block' : 'none'); });
@@ -923,6 +941,8 @@
     document.getElementById('input-phone').value = '';
     document.getElementById('input-note').value = '';
     document.getElementById('input-social').value = '';
+    document.getElementById('input-recipient-ref-photo').value = '';
+    document.getElementById('about-error').textContent = '';
     document.getElementById('input-custom-label').value = '';
     document.getElementById('input-custom-date').value = '';
     document.getElementById('address-error').textContent = '';
@@ -1104,17 +1124,37 @@
     goNext('schoolcheck');
   }
 
-  // ===== ШАГ "СТИЛЬ И ПРЕДПОЧТЕНИЯ" =====
+  // ===== ШАГ "РАССКАЖИТЕ О НЕЙ" (обязателен всегда, для любого режима) =====
+  // Это единственный источник контекста для флориста — используется и когда
+  // клиент сам выбрал стиль (как подсказка), и когда доверил выбор целиком
+  // (как единственный ориентир), плюс попадает в личное дело получателя.
+  function renderAboutStep() {
+    document.getElementById('input-note').value = profile.note || '';
+    document.getElementById('input-social').value = profile.socialMedia || '';
+  }
+
+  function submitAbout() {
+    const err = document.getElementById('about-error');
+    const note = document.getElementById('input-note').value.trim();
+    if (!note) { err.textContent = 'Расскажите о ней хотя бы в двух словах — это важно для подбора букета.'; return; }
+    err.textContent = '';
+    profile.note = note;
+    profile.socialMedia = document.getElementById('input-social').value.trim();
+    const photoInput = document.getElementById('input-recipient-ref-photo');
+    profile.refPhoto = (photoInput.files && photoInput.files[0]) ? photoInput.files[0] : null;
+    goNext('about');
+  }
+
+  // ===== ШАГ "СТИЛЬ" =====
   function renderStyleStep() {
     const el = document.getElementById('style-rows');
     el.innerHTML = STYLE_OPTIONS.map(function (s) {
       const on = profile.style === s.value;
-      return '<div class="style-row' + (on ? ' selected' : '') + '" onclick="pickStyle(\'' + s.value + '\')">' +
+      const trustClass = s.value === 'Доверяю вам' ? ' style-row-trust' : '';
+      return '<div class="style-row' + (on ? ' selected' : '') + trustClass + '" onclick="pickStyle(\'' + s.value + '\')">' +
         '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
         '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
     }).join('');
-    document.getElementById('input-note').value = profile.note || '';
-    document.getElementById('input-social').value = profile.socialMedia || '';
   }
 
   function pickStyle(val) {
@@ -1126,8 +1166,6 @@
     const err = document.getElementById('style-error');
     if (!profile.style) { err.textContent = 'Выберите стиль.'; return; }
     err.textContent = '';
-    profile.note = document.getElementById('input-note').value.trim();
-    profile.socialMedia = document.getElementById('input-social').value.trim();
     goNext('stylepref');
   }
 
@@ -1563,8 +1601,11 @@
   let reminderAddressMode = 'default';
   let reminderPricing = { S: 0, M: 0, L: 0 };
   let reminderFarSurcharge = 0;
+  let reminderNearFee = 500;
   let reminderIsFarMkad = false;
   let reminderSelectedSize = null;
+  // S/M/L остаются как есть в базе — на экране показываем понятные названия.
+  const SIZE_LABELS = { S: 'Компакт', M: 'Средний', L: 'Большой' };
 
   function loadReminder(row) {
     reminderRow = row;
@@ -1581,6 +1622,7 @@
       renderReminderTimeSlots();
       reminderPricing = r.pricing || { S: 0, M: 0, L: 0 };
       reminderFarSurcharge = r.farDeliverySurcharge || 0;
+      reminderNearFee = r.nearDeliveryFee != null ? r.nearDeliveryFee : 500;
       reminderIsFarMkad = !!r.isFarMkad;
       reminderSelectedSize = 'M';
       renderReminderSizeRow();
@@ -1591,9 +1633,14 @@
 
   function renderReminderSizeRow() {
     const el = document.getElementById('reminder-size-row');
-    el.innerHTML = ['S', 'M', 'L'].map(function (size) {
-      return '<button type="button" class="interval-btn' + (reminderSelectedSize === size ? ' selected' : '') + '" onclick="pickReminderSize(\'' + size + '\')">' + size + ' · ' + reminderPricing[size] + ' ₽</button>';
+    let html = ['S', 'M', 'L'].map(function (size) {
+      return '<button type="button" class="interval-btn' + (reminderSelectedSize === size ? ' selected' : '') + '" onclick="pickReminderSize(\'' + size + '\')">' + SIZE_LABELS[size] + ' · ' + reminderPricing[size] + ' ₽</button>';
     }).join('');
+    // "Другое" — для случая, когда хочется больше, чем "Большой" (10к) —
+    // ручной ввод суммы. Не замена трём пакетам, а вариант сверху.
+    html += '<button type="button" class="interval-btn' + (reminderSelectedSize === 'custom' ? ' selected' : '') + '" onclick="pickReminderSize(\'custom\')">Другое</button>';
+    el.innerHTML = html;
+    document.getElementById('reminder-custom-budget-input').style.display = (reminderSelectedSize === 'custom') ? 'block' : 'none';
   }
   function pickReminderSize(size) {
     reminderSelectedSize = size;
@@ -1601,12 +1648,20 @@
     renderReminderPriceBreakdown();
   }
   function renderReminderPriceBreakdown() {
-    const bouquetPrice = reminderSelectedSize ? reminderPricing[reminderSelectedSize] : 0;
-    const surcharge = reminderIsFarMkad ? reminderFarSurcharge : 0;
+    let bouquetPrice = 0;
+    if (reminderSelectedSize === 'custom') {
+      bouquetPrice = parseInt(document.getElementById('reminder-custom-budget-input').value, 10) || 0;
+    } else if (reminderSelectedSize) {
+      bouquetPrice = reminderPricing[reminderSelectedSize];
+    }
+    // Доставка теперь не бывает бесплатной — либо базовая плата по городу,
+    // либо доплата за МКАД вместо неё (не в дополнение).
+    const deliveryFee = reminderIsFarMkad ? reminderFarSurcharge : reminderNearFee;
     document.getElementById('price-bouquet').textContent = bouquetPrice ? bouquetPrice + ' ₽' : '—';
-    document.getElementById('price-delivery').textContent = reminderIsFarMkad ? (surcharge + ' ₽ (за МКАД)') : 'бесплатно';
-    document.getElementById('price-total').textContent = bouquetPrice ? (bouquetPrice + surcharge) + ' ₽' : '—';
+    document.getElementById('price-delivery').textContent = deliveryFee + ' ₽' + (reminderIsFarMkad ? ' (за МКАД)' : '');
+    document.getElementById('price-total').textContent = bouquetPrice ? (bouquetPrice + deliveryFee) + ' ₽' : '—';
   }
+  document.getElementById('reminder-custom-budget-input').addEventListener('input', renderReminderPriceBreakdown);
 
   function renderReminderAddressChoice() {
     const el = document.getElementById('reminder-address-choice');
@@ -1646,13 +1701,23 @@
 
   function confirmReminder() {
     if (!reminderSelectedSize) { document.getElementById('reminder-size-error').textContent = 'Выберите размер букета.'; return; }
+    let customBudget = null;
+    if (reminderSelectedSize === 'custom') {
+      customBudget = parseInt(document.getElementById('reminder-custom-budget-input').value, 10) || 0;
+      if (customBudget < 10000) { document.getElementById('reminder-size-error').textContent = 'Укажите сумму больше 10 000 ₽ — иначе выберите один из готовых вариантов.'; return; }
+    }
     document.getElementById('reminder-size-error').textContent = '';
     const deliveryAddress = document.getElementById('reminder-address-input').value.trim();
     const deliveryPhone = document.getElementById('reminder-phone-input').value.trim();
     const deliveryWindow = reminderSelectedSlot === -1
       ? document.getElementById('reminder-time-custom').value.trim()
       : (reminderSelectedSlot != null ? TIME_SLOTS[reminderSelectedSlot] : '');
-    apiPost({ action: 'confirmReminder', rowIndex: reminderRow, size: reminderSelectedSize, deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow }).then(function (res) {
+    apiPost({
+      action: 'confirmReminder', rowIndex: reminderRow,
+      size: reminderSelectedSize === 'custom' ? null : reminderSelectedSize,
+      customBudget: customBudget,
+      deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow
+    }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
       document.getElementById('success-text').textContent = 'Подтверждено. Реквизиты для оплаты пришли в чат.';
       showScreen('screen-success');
