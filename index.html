@@ -399,9 +399,6 @@
     <p class="hint" id="about-error" style="margin:-6px 0 14px;">&nbsp;</p>
     <div class="field-label">Соцсети получателя (необязательно)</div>
     <input type="text" id="input-social" placeholder="instagram.com/имя — поможет лучше понять вкус">
-    <div class="field-label">Фото букета, который ей нравился (необязательно)</div>
-    <input type="file" id="input-recipient-ref-photo" accept="image/*" style="display:none;">
-    <button type="button" class="btn-option" onclick="document.getElementById('input-recipient-ref-photo').click()">📎 Прикрепить фото</button>
     <button class="btn-primary" onclick="submitAbout()">Далее</button>
   </div>
 
@@ -941,7 +938,6 @@
     document.getElementById('input-phone').value = '';
     document.getElementById('input-note').value = '';
     document.getElementById('input-social').value = '';
-    document.getElementById('input-recipient-ref-photo').value = '';
     document.getElementById('about-error').textContent = '';
     document.getElementById('input-custom-label').value = '';
     document.getElementById('input-custom-date').value = '';
@@ -1140,8 +1136,6 @@
     err.textContent = '';
     profile.note = note;
     profile.socialMedia = document.getElementById('input-social').value.trim();
-    const photoInput = document.getElementById('input-recipient-ref-photo');
-    profile.refPhoto = (photoInput.files && photoInput.files[0]) ? photoInput.files[0] : null;
     goNext('about');
   }
 
