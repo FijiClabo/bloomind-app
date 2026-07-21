@@ -310,13 +310,17 @@
 
 <!-- ===== РАЗОВОЕ СОГЛАСИЕ (один раз при первом входе) ===== -->
 <div id="screen-consent" class="screen">
-  <div class="hero">
-    <div style="width:52px;height:52px;border-radius:var(--radius-md);background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:24px;margin:4px auto 16px;">🔒</div>
+  <div style="display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 8px 8px;">
+    <div style="width:68px; height:68px; border-radius:var(--radius-lg); background:var(--accent-soft); display:flex; align-items:center; justify-content:center; color:var(--accent-dark); margin-bottom:20px;">
+      <svg width="30" height="30" viewBox="0 0 28 28"><rect x="7" y="13" width="14" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect><path d="M10.5 13V9a3.5 3.5 0 0 1 7 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><circle cx="14" cy="18" r="1.5" fill="currentColor"></circle></svg>
+    </div>
+    <h1 style="font-size:21px; margin:0 0 14px;">Прежде чем начать</h1>
+    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
   </div>
-  <h1 style="text-align:center;">Прежде чем начать</h1>
-  <p class="hint" style="text-align:left;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
-  <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Принимаю и продолжаю</button>
-  <p class="hint" id="consent-error" style="text-align:center;">Показывается один раз</p>
+  <div style="margin-top:30px;">
+    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Принимаю и продолжаю</button>
+    <p class="hint" id="consent-error" style="text-align:center; margin-top:12px;">Показывается один раз</p>
+  </div>
 </div>
 
 <!-- ===== О СЕРВИСЕ ===== -->
