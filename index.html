@@ -4,22 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Фирменный тёплый фон всегда, независимо от тёмной/светлой темы Telegram —
-       иначе на тёмной теме фон становится чёрным и всё выглядит как обычная
-       системная форма, а не брендированное приложение. */
-    --bg: #FFF8F3;
+    /* Тёплая тема (redesign) — фирменный фон всегда, независимо от тёмной/
+       светлой темы Telegram, иначе на тёмной теме фон становится чёрным и
+       всё выглядит как обычная системная форма, а не брендированное приложение. */
+    --bg: #FBF6F1;
     --text: #3A2E2E;
     --hint: #8A7B7B;
     --secondary-bg: #FFFFFF;
+    --card-bg: #FFFFFF;
     --accent: #C97B84;
     --accent-dark: #B5646F;
-    --accent-soft: #FBEEF0;
+    --accent-soft: #F3E3E0;
+    --accent-soft-alt: #FBEEF0;
+    --accent-muted: #E3CFC8;
     --border: #F0E2DC;
     --green: #2E7D32;
     --green-bg: #E3F3E1;
     --red: #A32D2D;
+    /* Серифный акцент для заголовков/логотипа — обычный текст остаётся на
+       системном sans-serif, серифом выделяются только крупные заголовки. */
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-display-style: italic;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --shadow-card: 0 2px 10px rgba(58,46,46,0.05);
     /* Принудительно светлая тема для нативных элементов (кнопки, поля,
        date-picker, плейсхолдеры) — иначе при тёмной системной теме iOS/Telegram
        красит их по умолчанию в белый текст на белом фоне, хотя фон и цвет текста
@@ -42,7 +54,7 @@
   }
   .topbar-back { background: none; border: none; padding: 0; color: var(--accent-dark); font-size: 20px; line-height: 1; cursor: pointer; display: none; }
   .topbar-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
-  .topbar-title { font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
+  .topbar-title { font-family: var(--font-display); font-style: var(--font-display-style); font-size: 22px; line-height: 1.1; }
 
   .content { padding: 18px 20px 24px; }
 
@@ -72,12 +84,12 @@
   .tour-skip { display: block; text-align: right; background: none; border: none; padding: 0 0 10px; color: var(--hint); font-size: 14px; cursor: pointer; }
 
   .card {
-    background: var(--secondary-bg);
+    background: var(--card-bg);
     border: 1.5px solid var(--border);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 16px;
     margin-bottom: 12px;
-    box-shadow: 0 2px 10px rgba(58,46,46,0.04);
+    box-shadow: var(--shadow-card);
     overflow: hidden; /* подстраховка от переполнения нативным date-picker'ом на iOS */
   }
   .card-lead { font-size: 14px; line-height: 1.55; }
@@ -89,9 +101,9 @@
     padding: 15px 16px;
     font-size: 16px;
     font-family: inherit;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: 1.5px solid var(--border);
-    background: var(--secondary-bg);
+    background: var(--card-bg);
     color: var(--text);
     margin-bottom: 12px;
     resize: none;
@@ -106,7 +118,7 @@
   .date-field input[type="date"] { margin-bottom: 0; }
   .date-field .date-placeholder {
     position: absolute; inset: 0; display: flex; align-items: center;
-    padding: 0 16px; border-radius: 14px; background: var(--secondary-bg);
+    padding: 0 16px; border-radius: var(--radius-md); background: var(--card-bg);
     color: var(--hint); font-size: 16px; pointer-events: none;
   }
   .field-label { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: .03em; margin: 0 0 5px; }
@@ -115,17 +127,17 @@
   button { font-family: inherit; }
   .btn-primary {
     display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
-    border-radius: 14px; border: none; margin-bottom: 10px; cursor: pointer;
+    border-radius: var(--radius-md); border: none; margin-bottom: 10px; cursor: pointer;
     background: var(--text); color: #fff;
     box-shadow: 0 4px 14px rgba(58,46,46,0.18);
   }
   .btn-primary:active { opacity: .85; }
   .btn-option {
     display: block; width: 100%; text-align: left; padding: 16px 18px; font-size: 16px;
-    border-radius: 14px; border: 1.5px solid var(--border); margin-bottom: 10px; cursor: pointer;
-    background: var(--secondary-bg); color: var(--text);
+    border-radius: var(--radius-md); border: 1.5px solid var(--border); margin-bottom: 10px; cursor: pointer;
+    background: var(--card-bg); color: var(--text);
   }
-  .btn-option.selected { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+  .btn-option.selected { border-color: var(--accent); background: var(--accent-soft-alt); font-weight: 700; }
   .btn-link { background: none; color: var(--accent-dark); border: none; padding: 4px 0; width: auto; font-size: 13px; font-weight: 700; cursor: pointer; }
 
   .actions { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -133,9 +145,9 @@
   .style-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
   .style-card {
     display: block; width: 100%; padding: 0; text-align: left; cursor: pointer;
-    border: 2px solid var(--border); border-radius: 20px; overflow: hidden; background: var(--secondary-bg);
+    border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--card-bg);
   }
-  .style-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .style-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft-alt); }
   .style-photo-wrap { position: relative; }
   .style-photo { width: 100%; height: 168px; object-fit: cover; display: block; background: var(--border); }
   .style-fallback { width: 100%; height: 168px; display: none; align-items: center; justify-content: center; font-size: 44px; background: linear-gradient(135deg, var(--accent-soft), var(--border)); }
@@ -148,10 +160,10 @@
   /* Компактный выбор стиля (используется в анкете и на экране получателя) */
   .style-row {
     display: flex; justify-content: space-between; align-items: center; padding: 13px 15px;
-    border-radius: 14px; border: 1.5px solid var(--border); background: var(--secondary-bg);
+    border-radius: var(--radius-md); border: 1.5px solid var(--border); background: var(--card-bg);
     margin-bottom: 8px; cursor: pointer;
   }
-  .style-row.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .style-row.selected { border-color: var(--accent); background: var(--accent-soft-alt); }
   /* "Доверяю вам" — визуально отдельный вариант среди направлений стиля,
      чтобы было видно, что это не просто ещё один цвет, а другой принцип. */
   .style-row-trust { border-style: dashed; }
@@ -180,7 +192,7 @@
   }
 
   /* ===== ГЛАВНЫЙ ЭКРАН: СТАТ-БЛОК ===== */
-  .stat-card { background: var(--accent-soft); border-radius: 20px; padding: 20px 22px; margin-bottom: 18px; }
+  .stat-card { background: var(--accent-soft); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 18px; }
   .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--accent-dark); margin-bottom: 6px; }
   .stat-number { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
   .stat-sub { font-size: 13px; color: var(--hint); }
@@ -194,7 +206,7 @@
   }
 
   /* ===== ПУСТОЕ СОСТОЯНИЕ ===== */
-  .empty-state { text-align: center; padding: 36px 16px; background: var(--secondary-bg); border-radius: 20px; border: 1.5px solid var(--border); margin-bottom: 18px; }
+  .empty-state { text-align: center; padding: 36px 16px; background: var(--card-bg); border-radius: var(--radius-lg); border: 1.5px solid var(--border); margin-bottom: 18px; }
   .empty-state .hero-emoji { font-size: 38px; margin-bottom: 10px; }
   .empty-state h2 { font-size: 17px; font-weight: 800; margin: 0 0 6px; }
   .empty-state p { font-size: 14px; color: var(--hint); margin: 0; line-height: 1.5; }
@@ -202,10 +214,10 @@
   /* ===== ЧЕК-ЛИСТ ПОВОДОВ ===== */
   .occasion-row {
     display: flex; align-items: center; justify-content: space-between; padding: 15px 16px;
-    border-radius: 14px; border: 1.5px solid var(--border); background: var(--secondary-bg);
+    border-radius: var(--radius-md); border: 1.5px solid var(--border); background: var(--card-bg);
     margin-bottom: 10px; cursor: pointer;
   }
-  .occasion-row.checked { border-color: var(--accent); background: var(--accent-soft); }
+  .occasion-row.checked { border-color: var(--accent); background: var(--accent-soft-alt); }
   .occasion-row.disabled { cursor: default; opacity: .9; }
   .occasion-row-label { font-size: 15px; font-weight: 700; }
   .occasion-row-sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
@@ -223,12 +235,12 @@
     padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--border);
     background: #fff; font-size: 13px; font-weight: 700; color: var(--hint); cursor: pointer; flex: 1; text-align: center;
   }
-  .interval-btn.selected { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft); }
+  .interval-btn.selected { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-soft-alt); }
   .occasions-summary-title { font-weight: 700; color: var(--text); font-size: 14px; }
 
   /* ===== НИЖНЕЕ МЕНЮ ===== */
   .tabbar {
-    position: fixed; left: 0; right: 0; bottom: 0; display: none; background: #fff;
+    position: fixed; left: 0; right: 0; bottom: 0; display: none; background: var(--card-bg);
     border-top: 1px solid var(--border); padding: 8px 6px 12px; z-index: 10;
   }
   .tabbar.visible { display: flex; }
@@ -280,11 +292,13 @@
 <!-- ===== ЭКРАН ПРИВЕТСТВИЯ: ТОЧКА ВХОДА С КНОПКИ МЕНЮ ===== -->
 <div id="screen-welcome" class="screen">
   <div class="hero" style="padding-top:28px;">
-    <div style="width:72px;height:72px;border-radius:22px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 18px;">🌿</div>
-    <h1 style="margin:0 0 10px;">Bloomind</h1>
-    <p class="hint" style="margin:0 auto; max-width:280px;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
+    <div style="width:68px;height:68px;border-radius:var(--radius-lg);background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent-dark);margin:0 auto 20px;">
+      <svg width="32" height="32" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="14" cy="14" r="4.5" fill="currentColor"></circle></svg>
+    </div>
+    <div style="font-family:var(--font-display);font-style:var(--font-display-style);font-size:36px;margin-bottom:14px;">Bloomind</div>
+    <p class="hint" style="margin:0 auto; max-width:270px;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
   </div>
-  <div style="margin-top:28px;">
+  <div style="margin-top:30px;">
     <button class="btn-primary" onclick="startForm()">Заполнить анкету</button>
   </div>
   <div style="text-align:center; margin-top:14px; display:flex; flex-direction:column; align-items:center; gap:2px;">
@@ -297,7 +311,7 @@
 <!-- ===== РАЗОВОЕ СОГЛАСИЕ (один раз при первом входе) ===== -->
 <div id="screen-consent" class="screen">
   <div class="hero">
-    <div style="width:52px;height:52px;border-radius:16px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:24px;margin:4px auto 16px;">🔒</div>
+    <div style="width:52px;height:52px;border-radius:var(--radius-md);background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:24px;margin:4px auto 16px;">🔒</div>
   </div>
   <h1 style="text-align:center;">Прежде чем начать</h1>
   <p class="hint" style="text-align:left;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
@@ -487,6 +501,14 @@
 
 <!-- ===== ЭКРАН ПОЛУЧАТЕЛЯ ===== -->
 <div id="screen-recipient" class="screen">
+  <div class="card" id="recipient-upcoming-card" style="display:none; background:var(--accent-soft); border:none; padding:18px 20px;">
+    <div class="section-label" style="margin:0 0 6px;">Ближайшее событие</div>
+    <div style="font-weight:800; font-size:16px; margin-bottom:2px;" id="recipient-upcoming-label"></div>
+    <div class="hint" style="font-size:13px; margin-bottom:14px;" id="recipient-upcoming-sub"></div>
+    <button class="btn-primary" id="recipient-upcoming-reminder-btn" style="margin-bottom:8px; display:none;">Открыть напоминание</button>
+    <button class="btn-link" id="recipient-upcoming-tracking-btn" style="display:none;">Посмотреть статус заказа</button>
+  </div>
+
   <div class="section-label">Поводы</div>
   <div id="recipient-occasions"></div>
   <button class="btn-link" type="button" onclick="showRecipientAddOccasionForm()">+ Добавить повод</button>
@@ -571,7 +593,7 @@
   </div>
   <p class="hint" id="reminder-size-error"></p>
 
-  <button class="btn-primary" onclick="confirmReminder()">Подтвердить и оплатить</button>
+  <button class="btn-primary" onclick="confirmReminder()">Подтвердить</button>
   <p class="hint" id="reminder-error"></p>
 </div>
 
@@ -581,7 +603,33 @@
     <div class="success-icon">✓</div>
     <p class="center" id="success-text" style="padding:0;">Готово.</p>
   </div>
-  <button class="btn-primary" onclick="closeApp()">Закрыть</button>
+  <button class="btn-primary" id="success-cta-btn" onclick="closeApp()">Закрыть</button>
+</div>
+
+<!-- ===== СТАТУС ЗАКАЗА ===== -->
+<div id="screen-tracking" class="screen">
+  <h1 id="tracking-title" style="margin-bottom:4px;"></h1>
+  <p class="hint" id="tracking-subtitle" style="margin-top:0;"></p>
+  <div id="tracking-stages" style="display:flex; margin:22px 0 26px;"></div>
+
+  <div class="card" id="tracking-photo-card" style="display:none; padding:16px;">
+    <div id="tracking-photo-wrap" style="width:100%; height:180px; border-radius:var(--radius-md); background:var(--accent-soft); display:flex; align-items:center; justify-content:center; color:var(--hint); font-size:12px; margin-bottom:14px; overflow:hidden;">
+      <span id="tracking-photo-placeholder">загружаю фото…</span>
+    </div>
+    <div id="tracking-photo-actions">
+      <button class="btn-primary" onclick="trackingApprove()">Всё отлично</button>
+      <button class="btn-option" onclick="trackingRedo()" style="margin-top:8px;">Хочу другой вариант</button>
+    </div>
+  </div>
+
+  <div class="card" id="tracking-final-photo-card" style="display:none; padding:16px;">
+    <div id="tracking-final-photo-wrap" style="width:100%; height:180px; border-radius:var(--radius-md); background:var(--accent-soft); display:flex; align-items:center; justify-content:center; color:var(--hint); font-size:12px; overflow:hidden;">
+      <span>загружаю фото…</span>
+    </div>
+  </div>
+
+  <p class="hint" id="tracking-note" style="display:none;"></p>
+  <p class="hint" id="tracking-error"></p>
 </div>
 
 <!-- ===== ПРОФИЛЬ ===== -->
@@ -705,6 +753,7 @@
     'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
     'screen-reminder': { title: 'Напоминание' },
     'screen-success': { title: 'Готово' },
+    'screen-tracking': { title: 'Статус заказа', back: true },
     'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' },
     'screen-team-orders': { title: 'Заказы', eyebrow: 'Команда', tab: 'team-orders' },
     'screen-team-florist': { title: 'Флорист', eyebrow: 'Команда', tab: 'team-florist' },
@@ -1299,8 +1348,7 @@
           btn.style.opacity = '';
           return;
         }
-        document.getElementById('success-text').textContent = 'Готово. Всё запомнил про ' + profile.name + '.';
-        showScreen('screen-success');
+        showSuccess('Готово. Всё запомнил про ' + profile.name + '.', 'Закрыть', closeApp);
       })
       .catch(function (e) {
         err.textContent = 'Нет связи с сервером: ' + e + '.';
@@ -1441,6 +1489,37 @@
   let currentRecipient = null;
   let recCustomRecurringOn = true;
 
+  // Ближайшее активное событие получателя: приоритет отдаём поводу, который
+  // ждёт подтверждения размера (нужно действие "прямо сейчас"), иначе — самому
+  // раннему поводу, который уже в процессе (черновик/оплата/сборка/доставка).
+  function renderRecipientUpcoming(r) {
+    const card = document.getElementById('recipient-upcoming-card');
+    const occasions = r.occasions || [];
+    let pick = occasions.find(function (o) { return o.status === 'Напоминание отправлено'; });
+    if (!pick) {
+      const TRACKABLE = ['Подтверждено', 'На согласовании', 'Ожидает оплаты', 'Оплачено', 'Готов к доставке'];
+      pick = occasions.filter(function (o) { return TRACKABLE.indexOf(o.status) !== -1; })[0];
+    }
+    if (!pick) { card.style.display = 'none'; return; }
+
+    card.style.display = 'block';
+    document.getElementById('recipient-upcoming-label').textContent = (EMOJI_BY_LABEL[pick.type] || '✨') + ' ' + pick.type;
+    document.getElementById('recipient-upcoming-sub').textContent = pick.date + ' · ' + pick.status;
+
+    const reminderBtn = document.getElementById('recipient-upcoming-reminder-btn');
+    const trackingBtn = document.getElementById('recipient-upcoming-tracking-btn');
+    reminderBtn.style.display = 'none';
+    trackingBtn.style.display = 'none';
+
+    if (pick.status === 'Напоминание отправлено') {
+      reminderBtn.style.display = 'block';
+      reminderBtn.onclick = function () { loadReminder(pick.rowIndex); };
+    } else {
+      trackingBtn.style.display = 'block';
+      trackingBtn.onclick = function () { openTracking(pick.rowIndex, 'screen-recipient'); };
+    }
+  }
+
   function openRecipient(id, backTo) {
     recipientBackTarget = backTo || 'screen-home';
     showScreen('screen-loading');
@@ -1456,6 +1535,9 @@
   function renderRecipientScreen() {
     const r = currentRecipient;
 
+    const TRACKABLE_STATUSES = ['Подтверждено', 'На согласовании', 'Ожидает оплаты', 'Оплачено', 'Готов к доставке'];
+    renderRecipientUpcoming(r);
+
     const occEl = document.getElementById('recipient-occasions');
     occEl.innerHTML = (r.occasions || []).map(function (o) {
       const emoji = EMOJI_BY_LABEL[o.type] || '✨';
@@ -1463,10 +1545,13 @@
       const action = canEditDate
         ? '<span class="btn-link" onclick="showEditOccasionDate(' + o.rowIndex + ', this)">изменить</span>'
         : '<span class="btn-link" onclick="removeOccasion(' + o.rowIndex + ')">убрать</span>';
+      const trackLink = TRACKABLE_STATUSES.indexOf(o.status) !== -1
+        ? '<div style="margin-top:8px;"><span class="btn-link" onclick="openTracking(' + o.rowIndex + ', \'screen-recipient\')">Статус заказа →</span></div>'
+        : '';
       return '<div class="card" data-occasion="' + o.rowIndex + '"><div class="row" style="border-bottom:none;">' +
         '<div><div style="font-weight:700;">' + emoji + ' ' + escapeHtml(o.type) + '</div>' +
         '<div class="hint" style="font-size:12px; margin-top:2px;">' + escapeHtml(o.date) + ' &middot; ' + escapeHtml(o.status) + '</div></div>' +
-        action + '</div></div>';
+        action + '</div>' + trackLink + '</div>';
     }).join('');
 
     document.getElementById('recipient-style-view').innerHTML =
@@ -1746,8 +1831,12 @@
       deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow
     }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
-      document.getElementById('success-text').textContent = 'Подтверждено. Реквизиты для оплаты пришли в чат.';
-      showScreen('screen-success');
+      trackingRow = reminderRow;
+      showSuccess(
+        'Подтверждено. Флорист начнёт собирать и пришлёт фото черновика на согласование — оплата будет после того, как вам всё понравится.',
+        'Посмотреть статус заказа',
+        function () { openTracking(trackingRow, 'screen-success'); }
+      );
     });
   }
 
@@ -1758,13 +1847,121 @@
     if (!val) return;
     apiPost({ action: 'postponeReminder', rowIndex: reminderRow, newDate: toRuDate(val) }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
-      document.getElementById('success-text').textContent = 'Перенесено. Напомню заново, когда дата приблизится.';
-      showScreen('screen-success');
+      showSuccess('Перенесено. Напомню заново, когда дата приблизится.', 'Закрыть', closeApp);
     });
   }
 
   function closeApp() {
     if (tg) { tg.close(); } else { loadHome(); }
+  }
+
+  // Единая CTA-кнопка на экране успеха — текст и переход зависят от того,
+  // что только что произошло (как в макете: одна кнопка с разным текстом,
+  // а не набор скрытых/показанных кнопок).
+  function showSuccess(text, ctaLabel, ctaAction) {
+    document.getElementById('success-text').textContent = text;
+    const btn = document.getElementById('success-cta-btn');
+    btn.textContent = ctaLabel;
+    btn.onclick = ctaAction;
+    showScreen('screen-success');
+  }
+
+  // ===== СТАТУС ЗАКАЗА (черновик-фото, одобрение/переделка, финальное фото) =====
+  const TRACKING_STAGE_LABELS = ['Собираем', 'Фото на проверку', 'В пути', 'Доставлено'];
+  let trackingRow = null;
+  let trackingBackTarget = 'screen-home';
+
+  function openTracking(rowIndex, backTo) {
+    trackingRow = rowIndex;
+    trackingBackTarget = backTo || recipientBackTarget || 'screen-home';
+    recipientBackTarget = trackingBackTarget;
+    showScreen('screen-loading');
+    apiGet({ action: 'tracking', userId: userId, row: rowIndex }).then(function (res) {
+      if (!res.ok) { showScreen('screen-error'); return; }
+      renderTrackingScreen(res);
+      showScreen('screen-tracking');
+    }).catch(function () { showScreen('screen-error'); });
+  }
+
+  function renderTrackingScreen(res) {
+    document.getElementById('tracking-title').textContent = res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel : 'Заказ';
+    document.getElementById('tracking-subtitle').textContent = res.recipientName ? 'Для: ' + res.recipientName : '';
+
+    const stagesEl = document.getElementById('tracking-stages');
+    stagesEl.innerHTML = TRACKING_STAGE_LABELS.map(function (label, i) {
+      const done = i < res.stage;
+      const active = i === res.stage;
+      const dotColor = (done || active) ? 'var(--accent)' : 'var(--border)';
+      const textColor = active ? 'var(--text)' : 'var(--hint)';
+      const fontWeight = active ? '700' : '400';
+      return '<div style="flex:1; display:flex; flex-direction:column; align-items:center; position:relative;">' +
+        '<div style="width:10px; height:10px; border-radius:50%; background:' + dotColor + '; margin-bottom:8px;"></div>' +
+        '<div style="font-size:11px; text-align:center; color:' + textColor + '; font-weight:' + fontWeight + ';">' + label + '</div>' +
+        '</div>';
+    }).join('');
+
+    const photoCard = document.getElementById('tracking-photo-card');
+    const finalCard = document.getElementById('tracking-final-photo-card');
+    const noteEl = document.getElementById('tracking-note');
+    document.getElementById('tracking-error').textContent = '';
+
+    if (res.showPhotoReview) {
+      photoCard.style.display = 'block';
+      finalCard.style.display = 'none';
+      document.getElementById('tracking-photo-actions').style.display = res.redoExhausted ? 'none' : 'block';
+      loadTrackingPhoto('tracking-photo-wrap');
+    } else {
+      photoCard.style.display = 'none';
+    }
+
+    if (res.showFinalPhoto) {
+      finalCard.style.display = 'block';
+      loadTrackingPhoto('tracking-final-photo-wrap');
+    } else if (!res.showPhotoReview) {
+      finalCard.style.display = 'none';
+    }
+
+    if (res.redoExhausted) {
+      noteEl.style.display = 'block';
+      noteEl.textContent = 'Мы попробовали дважды подобрать вариант — свяжитесь с нами напрямую, обсудим детали лично.';
+    } else if (res.status === 'Ожидает оплаты') {
+      noteEl.style.display = 'block';
+      noteEl.textContent = 'Черновик одобрен — реквизиты для оплаты пришли в чат.';
+    } else {
+      noteEl.style.display = 'none';
+    }
+  }
+
+  function loadTrackingPhoto(wrapId) {
+    // trackingPhoto отдаёт бинарные данные картинки, а не JSON — грузим через
+    // <img src>, собирая ссылку вручную с теми же параметрами, что и apiGet.
+    const wrap = document.getElementById(wrapId);
+    const params = { action: 'trackingPhoto', userId: userId, row: trackingRow };
+    if (tg && tg.initData) params.initData = tg.initData;
+    const query = Object.keys(params).map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
+    const img = new Image();
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.onerror = function () { wrap.innerHTML = '<span>фото пока недоступно</span>'; };
+    img.onload = function () { wrap.innerHTML = ''; wrap.appendChild(img); };
+    img.src = API_BASE + '?' + query;
+  }
+
+  function trackingApprove() {
+    document.getElementById('tracking-error').textContent = '';
+    apiPost({ action: 'approveDraft', userId: userId, rowIndex: trackingRow }).then(function (res) {
+      if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
+      openTracking(trackingRow, trackingBackTarget);
+    });
+  }
+
+  function trackingRedo() {
+    document.getElementById('tracking-error').textContent = '';
+    apiPost({ action: 'redoDraft', userId: userId, rowIndex: trackingRow }).then(function (res) {
+      if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
+      openTracking(trackingRow, trackingBackTarget);
+    });
   }
 
   // ===== СЕТЕВЫЕ ЗАПРОСЫ =====
