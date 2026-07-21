@@ -276,7 +276,7 @@
 <div class="topbar">
   <button type="button" class="topbar-back" id="topbar-back">&larr;</button>
   <div>
-    <div class="topbar-eyebrow" id="topbar-eyebrow"></div>
+    <button type="button" class="topbar-eyebrow" id="topbar-eyebrow" style="background:none; border:none; padding:0; font:inherit; cursor:pointer;"></button>
     <div class="topbar-title" id="topbar-title">Bloomind</div>
   </div>
 </div>
@@ -369,6 +369,18 @@
   </div>
   <div id="home-list"></div>
   <button class="btn-primary" onclick="startForm()">+ Добавить получателя</button>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <button onclick="startQuickOrder()" class="btn-option" style="flex:1;">Заказать разово</button>
+    <button onclick="startRushOrder()" class="btn-option" style="flex:1;">⚡ Срочно, за 3 часа</button>
+  </div>
+</div>
+
+<!-- ===== СРОЧНЫЙ ЗАКАЗ: выбор получателя ===== -->
+<div id="screen-rush-pick" class="screen">
+  <h1>⚡ Срочно, за 3 часа</h1>
+  <p class="hint">Кому везём? Можно выбрать уже сохранённого получателя или оформить нового.</p>
+  <div id="rush-pick-list"></div>
+  <button class="btn-primary" onclick="rushPickNew()" style="margin-top:10px;">+ Новый получатель</button>
 </div>
 
 <!-- ===== ОНБОРДИНГ-ТУР: показывается один раз поверх главного экрана ===== -->
@@ -451,10 +463,13 @@
 
   <div class="form-step" data-step="stylepref">
     <button type="button" class="btn-link" onclick="goBack('stylepref')">← Назад</button>
-    <h1>Какой стиль?</h1>
-    <p class="hint">Можно выбрать направление, а можно доверить решение нам.</p>
+    <h1>Стиль и бюджет</h1>
+    <p class="hint">Можно выбрать несколько направлений, а можно доверить решение нам. Через несколько заказов мы изучим вкусы и начнём предлагать варианты сами.</p>
     <div id="style-rows"></div>
     <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
+    <div class="field-label" style="margin-top:18px;">Обычный бюджет букета</div>
+    <p class="hint" style="margin-top:-6px;">Подставим по умолчанию, когда подойдёт дата — там же можно будет изменить.</p>
+    <div class="two-up" id="default-size-row"></div>
     <button class="btn-primary" onclick="submitStylePref()">Далее</button>
   </div>
 
@@ -462,22 +477,34 @@
     <button type="button" class="btn-link" onclick="goBack('address')">← Назад</button>
     <h1>Как с ней связаться на месте?</h1>
     <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом, вдруг место изменится.</p>
-    <div class="field-label">Город, улица, дом</div>
-    <input type="text" id="input-address" placeholder="Например: Москва, ул. Ленина, 10">
+    <div class="field-label">Город</div>
+    <input type="text" id="input-city" placeholder="Москва">
+    <div class="field-label">Улица</div>
+    <input type="text" id="input-street" placeholder="ул. Ленина">
     <div class="two-up">
+      <div>
+        <div class="field-label">Дом, корпус</div>
+        <input type="text" id="input-house" placeholder="10, корп. 2">
+      </div>
       <div>
         <div class="field-label">Квартира</div>
         <input type="text" id="input-apartment" placeholder="42">
       </div>
+    </div>
+    <div class="two-up">
       <div>
         <div class="field-label">Подъезд</div>
         <input type="text" id="input-entrance" placeholder="2">
+      </div>
+      <div>
+        <div class="field-label">Этаж</div>
+        <input type="text" id="input-floor" placeholder="5">
       </div>
     </div>
     <div class="field-label">Код домофона</div>
     <input type="text" id="input-intercom" placeholder="необязательно">
     <div class="field-label">Телефон получателя</div>
-    <input type="tel" id="input-phone" placeholder="+7 999 000-00-00">
+    <input type="tel" id="input-phone" placeholder="+7 (999) 000-00-00" oninput="formatPhoneInput(this)">
     <button class="btn-primary" onclick="submitAddress()">Далее</button>
     <p class="hint" id="address-error"></p>
   </div>
@@ -485,11 +512,12 @@
   <div class="form-step" data-step="summary">
     <h1>Проверим, всё ли верно</h1>
     <p class="hint">Можно поправить любой пункт отдельно.</p>
-    <div class="card">
+    <p class="hint" id="summary-quick-note" style="display:none;">Разовый заказ — эту карточку не сохраняем и не будем напоминать про неё в будущем.</p>
+    <div class="card" id="summary-who-card">
       <div class="row"><span>Кому</span><span id="summary-name"></span> <button class="btn-link" onclick="editStep('name')">изменить</button></div>
-      <div class="row"><span>Кто</span><span id="summary-who"></span> <button class="btn-link" onclick="editStep('who')">изменить</button></div>
+      <div class="row" id="summary-who-row"><span>Кто</span><span id="summary-who"></span> <button class="btn-link" onclick="editStep('who')">изменить</button></div>
     </div>
-    <div class="card">
+    <div class="card" id="summary-occasions-card">
       <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Поводы</span> <button class="btn-link" onclick="editStep('occasions')">изменить</button></div>
       <div id="summary-occasions"></div>
     </div>
@@ -565,6 +593,7 @@
 <!-- ===== КАРТОЧКА НАПОМИНАНИЯ ===== -->
 <div id="screen-reminder" class="screen">
   <h1 id="reminder-title"></h1>
+  <div class="card" id="reminder-rush-banner" style="display:none; background:var(--accent-soft); border:none; font-weight:700;">⚡ Экспресс за 3 часа — доплата 700 ₽ за срочность.</div>
   <p class="hint" id="reminder-lead">Подтвердите — пришлю реквизиты и договорюсь с флористом. Не готовы сейчас — можно перенести дату.</p>
   <button class="btn-option" onclick="showPostponeInput()">Перенести дату</button>
   <div id="postpone-block" style="display:none; margin-top:2px; margin-bottom:14px;">
@@ -580,7 +609,7 @@
   <input type="text" id="reminder-address-input" placeholder="Адрес доставки">
 
   <div class="field-label">Телефон получателя</div>
-  <input type="tel" id="reminder-phone-input">
+  <input type="tel" id="reminder-phone-input" placeholder="+7 (999) 000-00-00" oninput="formatPhoneInput(this)">
 
   <div class="field-label">Когда привезти</div>
   <div class="interval-row" id="reminder-time-slots"></div>
@@ -608,6 +637,22 @@
     <p class="center" id="success-text" style="padding:0;">Готово.</p>
   </div>
   <button class="btn-primary" id="success-cta-btn" onclick="closeApp()">Закрыть</button>
+</div>
+
+<!-- ===== ОПЛАТА (плейсхолдер до подключения ЮKassa) ===== -->
+<div id="screen-payment" class="screen">
+  <h1>Оплата</h1>
+  <p class="hint" id="payment-lead">Черновик одобрен — осталось оплатить, и флорист доведёт букет до финального вида.</p>
+
+  <div class="card" id="payment-price-card">
+    <div class="row"><span>Букет</span><span id="payment-price-bouquet">—</span></div>
+    <div class="row"><span>Доставка</span><span id="payment-price-delivery">—</span></div>
+    <div class="row" style="font-weight:800;"><span>Итого</span><span id="payment-price-total">—</span></div>
+  </div>
+
+  <button class="btn-primary" id="payment-pay-btn" onclick="payForOrder()">Оплатить</button>
+  <p class="hint" id="payment-footnote">Откроется безопасная страница оплаты — реализуем на следующем этапе. Пока отметим как оплаченное, а флорист сверит поступление вручную.</p>
+  <p class="hint" id="payment-error"></p>
 </div>
 
 <!-- ===== СТАТУС ЗАКАЗА ===== -->
@@ -653,7 +698,7 @@
     <div class="row" style="border-bottom:none; margin-bottom:8px;"><span class="occasions-summary-title">Ваш телефон</span></div>
     <p class="hint" style="margin:0 0 10px;">Необязательно. Нужен только в крайних случаях — если у команды возникнет срочный вопрос по заказу (например, уточнить адрес).</p>
     <div class="field-label">Телефон</div>
-    <input type="tel" id="input-contact-phone" placeholder="+7 900 000-00-00">
+    <input type="tel" id="input-contact-phone" placeholder="+7 (900) 000-00-00" oninput="formatPhoneInput(this)">
     <div class="field-label">Как удобнее связаться</div>
     <div class="team-role-select" id="contact-pref-row">
       <div class="btn-option" data-pref="calls" onclick="pickContactPref('calls', this)">Звонки</div>
@@ -695,6 +740,16 @@
   <div id="team-deliveries-list"></div>
 </div>
 
+<!-- ===== КОМАНДА: КЛИЕНТЫ (CRM-сводка, только владелец) ===== -->
+<div id="screen-team-clients" class="screen">
+  <div class="stat-card">
+    <div class="stat-label">Клиентская база</div>
+    <div class="stat-number" id="team-clients-stat-count">0</div>
+    <div class="stat-sub" id="team-clients-stat-sub">получателей</div>
+  </div>
+  <div id="team-clients-list"></div>
+</div>
+
 <!-- ===== КОМАНДА: СОСТАВ ===== -->
 <div id="screen-team-staff" class="screen">
   <div id="team-staff-list"></div>
@@ -734,6 +789,15 @@
   let schoolAge = null;
   let customRecurringOn = true;
   const steps = ['name', 'who', 'occasions', 'schoolcheck', 'about', 'stylepref', 'address', 'summary'];
+  // "Разовый заказ" и "Срочно за 3 часа" (для нового получателя) переиспользуют
+  // ту же форму, но без шагов "Кем приходится"/"Поводы"/"Расскажите о ней" —
+  // это одноразовая покупка, а не создание долгосрочного профиля с напоминаниями.
+  const QUICK_STEPS = ['name', 'stylepref', 'address', 'summary'];
+  let quickMode = false;
+  // Срочный заказ ставит доплату 700₽ независимо от того, идёт ли он через
+  // быструю форму (новый получатель) или через уже сохранённого — поэтому
+  // это отдельный флаг, а не часть quickMode.
+  let reminderRush = false;
   const STYLE_OPTIONS = [
     { value: 'Нежный', emoji: '🌸', sub: 'пастель, пионы, эустома' },
     { value: 'Яркий', emoji: '🌺', sub: 'сочные тона, герберы' },
@@ -753,16 +817,19 @@
     'screen-about': { title: 'Как это работает', back: 'screen-welcome' },
     'screen-support': { title: 'Поддержка', eyebrow: 'Bloomind', tab: 'support' },
     'screen-home': { title: 'Ваши получатели', eyebrow: 'Bloomind', tab: 'home' },
+    'screen-rush-pick': { title: 'Срочный заказ', back: 'screen-home' },
     'screen-form': { title: 'Новый получатель' },
     'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
     'screen-reminder': { title: 'Напоминание' },
     'screen-success': { title: 'Готово' },
+    'screen-payment': { title: 'Оплата', back: true },
     'screen-tracking': { title: 'Статус заказа', back: true },
     'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' },
     'screen-team-orders': { title: 'Заказы', eyebrow: 'Команда', tab: 'team-orders' },
     'screen-team-florist': { title: 'Флорист', eyebrow: 'Команда', tab: 'team-florist' },
     'screen-team-history': { title: 'История букетов', back: 'screen-team-orders' },
     'screen-team-deliveries': { title: 'Доставки', eyebrow: 'Команда', tab: 'team-deliveries' },
+    'screen-team-clients': { title: 'Клиенты', eyebrow: 'Команда', tab: 'team-clients' },
     'screen-team-staff': { title: 'Команда', eyebrow: 'Команда', tab: 'team-staff' }
   };
 
@@ -817,6 +884,11 @@
     const backEl = document.getElementById('topbar-back');
     if (eyebrowEl) eyebrowEl.textContent = meta.eyebrow || '';
     if (eyebrowEl) eyebrowEl.style.display = meta.eyebrow ? 'block' : 'none';
+    if (eyebrowEl) {
+      const clickable = meta.eyebrow === 'Bloomind';
+      eyebrowEl.style.cursor = clickable ? 'pointer' : '';
+      eyebrowEl.onclick = clickable ? function () { goWelcome(); } : null;
+    }
     if (titleEl) titleEl.textContent = meta.title;
     if (backEl) {
       const target = meta.back === true ? recipientBackTarget : meta.back;
@@ -836,7 +908,10 @@
     document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     setTopbar(id);
+    window.scrollTo(0, 0);
   }
+
+  function goWelcome() { showScreen('screen-welcome'); }
 
   // ===== ПЕРЕКЛЮЧАТЕЛЬ КЛИЕНТ / КОМАНДА =====
   // myStaffRole !== null означает, что этот Telegram ID есть в таблице staff —
@@ -855,6 +930,7 @@
           { tab: 'team-orders', label: 'Заказы', onclick: "goTeamScreen('screen-team-orders')" },
           { tab: 'team-florist', label: 'Флорист', onclick: "goTeamScreen('screen-team-florist')" },
           { tab: 'team-deliveries', label: 'Доставки', onclick: "goTeamScreen('screen-team-deliveries')" },
+          { tab: 'team-clients', label: 'Клиенты', onclick: "goTeamScreen('screen-team-clients')" },
           { tab: 'team-staff', label: 'Команда', onclick: "goTeamScreen('screen-team-staff')" }
         ];
       } else if (myStaffRole === 'florist') {
@@ -900,15 +976,22 @@
     if (id === 'screen-team-orders') loadTeamUnpaid();
     if (id === 'screen-team-florist') loadTeamFlorist();
     if (id === 'screen-team-deliveries') loadTeamDeliveries();
+    if (id === 'screen-team-clients') loadTeamClients();
     if (id === 'screen-team-staff') loadTeamRoster();
   }
+
+  // Какой список шагов сейчас проходим — обычная анкета или быстрая
+  // (разовый/срочный-новый заказ). Все навигационные функции читают именно
+  // этот список, а не жёстко закодированный steps, — quickMode переключает их разом.
+  function activeSteps() { return quickMode ? QUICK_STEPS : steps; }
 
   function updateFormDots(currentStepName) {
     const dotsEl = document.getElementById('form-dots');
     if (!dotsEl) return;
-    const idx = steps.indexOf(currentStepName);
+    const list = activeSteps();
+    const idx = list.indexOf(currentStepName);
     let html = '';
-    for (let i = 0; i < steps.length; i++) {
+    for (let i = 0; i < list.length; i++) {
       html += '<span class="dot' + (i <= idx ? ' active' : '') + '"></span>';
     }
     dotsEl.innerHTML = html;
@@ -939,9 +1022,12 @@
   function populateStepInputs(name) {
     if (name === 'name') document.getElementById('input-name').value = profile.name || '';
     if (name === 'address') {
-      document.getElementById('input-address').value = profile.address || '';
+      document.getElementById('input-city').value = profile.city || '';
+      document.getElementById('input-street').value = profile.street || '';
+      document.getElementById('input-house').value = profile.house || '';
       document.getElementById('input-apartment').value = profile.apartment || '';
       document.getElementById('input-entrance').value = profile.entrance || '';
+      document.getElementById('input-floor').value = profile.floor || '';
       document.getElementById('input-intercom').value = profile.intercom || '';
       document.getElementById('input-phone').value = profile.phone || '';
     }
@@ -981,9 +1067,10 @@
       showStep('summary');
       return;
     }
-    let idx = steps.indexOf(currentStep) + 1;
-    while (idx < steps.length && !shouldShowStep(steps[idx])) idx++;
-    showStep(steps[idx]);
+    const list = activeSteps();
+    let idx = list.indexOf(currentStep) + 1;
+    while (idx < list.length && !shouldShowStep(list[idx])) idx++;
+    showStep(list[idx]);
   }
 
   function editStep(name) {
@@ -1001,21 +1088,107 @@
       showStep('summary');
       return;
     }
-    let idx = steps.indexOf(currentStep) - 1;
-    while (idx >= 0 && !shouldShowStep(steps[idx])) idx--;
-    if (idx < 0) { loadHome(); return; }
-    showStep(steps[idx]);
+    const list = activeSteps();
+    let idx = list.indexOf(currentStep) - 1;
+    while (idx >= 0 && !shouldShowStep(list[idx])) idx--;
+    if (idx < 0) {
+      // Уходя с первого шага быстрой формы, сбрасываем режимы — иначе они
+      // "прилипнут" к следующему обычному "+ Добавить получателя".
+      const wasRush = reminderRush;
+      quickMode = false;
+      reminderRush = false;
+      if (wasRush) { showScreen('screen-rush-pick'); loadRushPickList(); return; }
+      loadHome();
+      return;
+    }
+    showStep(list[idx]);
+  }
+
+  // ===== БЫСТРАЯ ФОРМА: "Разовый заказ" и "Срочно, за 3 часа" (новый получатель) =====
+  // Переиспользует ту же анкету (startForm), но с урезанным набором шагов
+  // (QUICK_STEPS) — без "Кем приходится"/"Поводы"/"Расскажите о ней", так как
+  // это одноразовая покупка без долгосрочного профиля с напоминаниями.
+  function startQuickOrder() {
+    quickMode = true;
+    reminderRush = false;
+    startForm();
+  }
+
+  // Срочный заказ новому получателю — та же быстрая форма, но с флагом
+  // reminderRush, который потом уедет и в submitProfile (после сохранения
+  // сразу попадаем на экран напоминания), и в confirmReminder (доплата).
+  function rushPickNew() {
+    quickMode = true;
+    reminderRush = true;
+    startForm();
+  }
+
+  function startRushOrder() {
+    showScreen('screen-rush-pick');
+    loadRushPickList();
+  }
+
+  // Список уже сохранённых получателей для срочного заказа — переиспользуем
+  // apiList (тот же, что и на Главной), просто рендерим в отдельный контейнер
+  // с обработчиком, который ведёт не на карточку получателя, а сразу к выбору
+  // повода/создания occasion для срочной доставки.
+  function loadRushPickList() {
+    const list = document.getElementById('rush-pick-list');
+    list.innerHTML = '<p class="hint">Загрузка…</p>';
+    apiGet({ action: 'list', userId: userId }).then(function (res) {
+      const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
+      if (!recipients.length) {
+        list.innerHTML = '<p class="hint">Сохранённых получателей пока нет — оформите нового.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      recipients.forEach(function (r) {
+        const div = document.createElement('div');
+        div.className = 'card recipient-card';
+        div.innerHTML = '<div class="recipient-name">' + escapeHtml(r.name) + '</div>';
+        div.addEventListener('click', function () { rushPickExisting(r); });
+        list.appendChild(div);
+      });
+    }).catch(function () { list.innerHTML = '<p class="hint">Не получилось загрузить список.</p>'; });
+  }
+
+  // Выбрали существующего получателя для срочного заказа — заводим ему ещё
+  // один occasion "Разовый заказ" тем же способом, что и submitProfile для
+  // isOneOff (через addOccasion — apiAddOccasion не понимает isOneOff, но нам
+  // и не нужна отдельная запись в recipients, только новый occasion на
+  // сегодняшнюю дату), и сразу ведём на экран напоминания с флагом
+  // reminderRush, чтобы confirmReminder отправил доплату за срочность.
+  function rushPickExisting(r) {
+    reminderRush = true;
+    showScreen('screen-loading');
+    const todayIso = new Date().toISOString().slice(0, 10);
+    apiPost({
+      action: 'addOccasion', userId: userId, recipientId: r.recipientId,
+      occasion: { type: 'custom', label: 'Разовый заказ', date: toRuDate(todayIso), auto: false, recurring: false }
+    }).then(function (res) {
+      if (!res.ok) { showScreen('screen-error'); return; }
+      return apiGet({ action: 'recipient', id: r.recipientId, userId: userId }).then(function (recRes) {
+        if (!recRes.ok) { showScreen('screen-error'); return; }
+        const occasions = recRes.recipient.occasions || [];
+        const last = occasions[occasions.length - 1];
+        if (!last) { showScreen('screen-error'); return; }
+        loadReminder(last.rowIndex);
+      });
+    }).catch(function () { showScreen('screen-error'); });
   }
 
   function startForm() {
-    profile = {};
+    profile = { defaultSize: 'M' };
     schoolAgeSuggested = false;
     schoolAge = null;
     customRecurringOn = true;
     document.getElementById('input-name').value = '';
-    document.getElementById('input-address').value = '';
+    document.getElementById('input-city').value = '';
+    document.getElementById('input-street').value = '';
+    document.getElementById('input-house').value = '';
     document.getElementById('input-apartment').value = '';
     document.getElementById('input-entrance').value = '';
+    document.getElementById('input-floor').value = '';
     document.getElementById('input-intercom').value = '';
     document.getElementById('input-phone').value = '';
     document.getElementById('input-note').value = '';
@@ -1224,18 +1397,48 @@
   // ===== ШАГ "СТИЛЬ" =====
   function renderStyleStep() {
     const el = document.getElementById('style-rows');
+    // profile.style хранится строкой "Нежный, Яркий" — несколько направлений через запятую,
+    // либо один эксклюзивный пункт "Доверяю вам". Разбираем в список для отрисовки чекбоксов.
+    const selected = (profile.style || '').split(', ').filter(Boolean);
     el.innerHTML = STYLE_OPTIONS.map(function (s) {
-      const on = profile.style === s.value;
+      const on = selected.includes(s.value);
       const trustClass = s.value === 'Доверяю вам' ? ' style-row-trust' : '';
       return '<div class="style-row' + (on ? ' selected' : '') + trustClass + '" onclick="pickStyle(\'' + s.value + '\')">' +
         '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
         '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
     }).join('');
+    renderDefaultSizeRow();
   }
 
   function pickStyle(val) {
-    profile.style = val;
+    // "Доверяю вам" исключает остальные направления и наоборот — это разные
+    // модели подбора букета, совмещать их бессмысленно.
+    const cur = (profile.style || '').split(', ').filter(Boolean);
+    let next;
+    if (val === 'Доверяю вам') {
+      next = cur.includes(val) ? [] : [val];
+    } else {
+      next = cur.filter(function (v) { return v !== 'Доверяю вам'; });
+      next = next.includes(val) ? next.filter(function (v) { return v !== val; }) : next.concat([val]);
+    }
+    profile.style = next.join(', ');
     renderStyleStep();
+  }
+
+  // ===== БЮДЖЕТ ПО УМОЛЧАНИЮ (S/M/L) =====
+  function renderDefaultSizeRow() {
+    const el = document.getElementById('default-size-row');
+    if (!el) return;
+    if (!profile.defaultSize) profile.defaultSize = 'M';
+    el.innerHTML = ['S', 'M', 'L'].map(function (size) {
+      const on = profile.defaultSize === size;
+      return '<button type="button" class="interval-btn' + (on ? ' selected' : '') + '" onclick="pickDefaultSize(\'' + size + '\')">' + SIZE_LABELS[size] + '</button>';
+    }).join('');
+  }
+
+  function pickDefaultSize(size) {
+    profile.defaultSize = size;
+    renderDefaultSizeRow();
   }
 
   function submitStylePref() {
@@ -1245,17 +1448,75 @@
     goNext('stylepref');
   }
 
+  // ===== ФОРМАТИРОВАНИЕ ТЕЛЕФОНА (+7 (999) 000-00-00) =====
+  // Маска строится постепенно, по количеству введённых цифр, а не силой —
+  // иначе при неполном номере курсор скачет на пустые скобки/дефисы.
+  // Позицию каретки сохраняем "по количеству цифр слева от неё", а не по
+  // индексу символа — так как сама разметка (скобки, пробелы, дефисы)
+  // пересобирается заново на каждый ввод.
+  function formatPhoneDigits(digits) {
+    // digits — только цифры, начинающиеся с 7 (или пустая строка)
+    if (!digits) return '';
+    let out = '+7';
+    const rest = digits.slice(1); // всё после ведущей "7"
+    if (rest.length > 0) out += ' (' + rest.slice(0, 3);
+    if (rest.length >= 3) out += ')';
+    if (rest.length > 3) out += ' ' + rest.slice(3, 6);
+    if (rest.length > 6) out += '-' + rest.slice(6, 8);
+    if (rest.length > 8) out += '-' + rest.slice(8, 10);
+    return out;
+  }
+
+  function formatPhoneInput(input) {
+    const oldValue = input.value;
+    const caret = input.selectionStart == null ? oldValue.length : input.selectionStart;
+    // Сколько цифр стоит до каретки в старом значении — это и есть якорь,
+    // который должен сохраниться после переформатирования.
+    const digitsBeforeCaret = (oldValue.slice(0, caret).match(/\d/g) || []).length;
+
+    let digits = oldValue.replace(/\D/g, '');
+    if (digits.charAt(0) === '8') digits = '7' + digits.slice(1);
+    if (digits && digits.charAt(0) !== '7') digits = '7' + digits;
+    digits = digits.slice(0, 11);
+
+    const formatted = formatPhoneDigits(digits);
+    input.value = formatted;
+
+    // Ищем позицию в новой строке, перед которой стоит ровно digitsBeforeCaret цифр.
+    let seen = 0, pos = formatted.length;
+    for (let i = 0; i < formatted.length; i++) {
+      if (/\d/.test(formatted[i])) seen++;
+      if (seen === digitsBeforeCaret) { pos = i + 1; break; }
+    }
+    if (digitsBeforeCaret === 0) pos = formatted.length ? formatted.indexOf('7') + 1 : 0;
+    input.setSelectionRange(pos, pos);
+  }
+
   function submitAddress() {
-    const val = document.getElementById('input-address').value.trim();
+    const city = document.getElementById('input-city').value.trim();
+    const street = document.getElementById('input-street').value.trim();
+    const house = document.getElementById('input-house').value.trim();
     const err = document.getElementById('address-error');
-    if (!val) { err.textContent = 'Укажите адрес — без него не получится доставить букет.'; return; }
+    if (!city || !street || !house) { err.textContent = 'Укажите город, улицу и дом — без этого не получится доставить букет.'; return; }
     err.textContent = '';
-    profile.address = val;
+    profile.city = city;
+    profile.street = street;
+    profile.house = house;
     profile.apartment = document.getElementById('input-apartment').value.trim();
     profile.entrance = document.getElementById('input-entrance').value.trim();
+    profile.floor = document.getElementById('input-floor').value.trim();
     profile.intercom = document.getElementById('input-intercom').value.trim();
     profile.phone = document.getElementById('input-phone').value.trim();
     goNext('address');
+  }
+
+  // Собирает читаемую строку адреса из структурированных полей для summary —
+  // старое поле profile.address больше не заполняется напрямую в форме.
+  function composeAddressSummary() {
+    const parts = [profile.city, profile.street, profile.house].filter(Boolean);
+    let line = parts.join(', ');
+    if (profile.apartment) line += (line ? ', ' : '') + 'кв. ' + profile.apartment;
+    return line;
   }
 
   function buildOccasionsPayload() {
@@ -1316,7 +1577,19 @@
     document.getElementById('summary-name').textContent = profile.name;
     document.getElementById('summary-who').textContent = profile.who;
     document.getElementById('summary-style').textContent = profile.style;
-    document.getElementById('summary-address').textContent = profile.address;
+    document.getElementById('summary-address').textContent = composeAddressSummary();
+
+    // В быстрой форме (разово/срочно) нет ни "Кем приходится", ни "Поводов" —
+    // прячем эти строки и вместо них показываем поясняющую заметку, чтобы не
+    // выглядело так, будто эти поля забыли заполнить.
+    document.getElementById('summary-quick-note').style.display = quickMode ? 'block' : 'none';
+    document.getElementById('summary-who-row').style.display = quickMode ? 'none' : '';
+    document.getElementById('summary-occasions-card').style.display = quickMode ? 'none' : '';
+
+    const submitBtn = document.getElementById('submit-profile-btn');
+    submitBtn.textContent = quickMode ? 'Продолжить к заказу' : 'Всё верно, сохранить';
+
+    if (quickMode) { document.getElementById('summary-occasions').innerHTML = ''; return; }
     const occasions = buildOccasionsPayload();
     const el = document.getElementById('summary-occasions');
     el.innerHTML = occasions.map(function (o) {
@@ -1338,18 +1611,35 @@
     btn.style.opacity = '.6';
     const err = document.getElementById('submit-error');
     err.textContent = '';
-    const occasions = buildOccasionsPayload();
+    // В быстрой форме поводы не собираем (occasions пустой, isOneOff вставит
+    // ровно один occasion сам на бэкенде) — buildOccasionsPayload тут не нужен
+    // и небезопасен без profile.who.
+    const occasions = quickMode ? [] : buildOccasionsPayload();
+    const wasQuickMode = quickMode;
+    const wasRush = reminderRush;
     apiPost({
       action: 'submitProfile', userId: userId, name: profile.name, who: profile.who, style: profile.style,
+      defaultSize: profile.defaultSize,
       note: profile.note, socialMedia: profile.socialMedia,
-      address: profile.address, apartment: profile.apartment, entrance: profile.entrance, intercom: profile.intercom, phone: profile.phone,
-      occasions: occasions
+      city: profile.city, street: profile.street, house: profile.house,
+      apartment: profile.apartment, entrance: profile.entrance, floor: profile.floor, intercom: profile.intercom, phone: profile.phone,
+      occasions: occasions,
+      isOneOff: wasQuickMode
     })
       .then(function (res) {
         if (!res.ok) {
           err.textContent = 'Не получилось сохранить (' + errText(res) + '), попробуйте ещё раз.';
           btn.disabled = false;
           btn.style.opacity = '';
+          return;
+        }
+        if (wasQuickMode) {
+          // Разовый заказ не показывает обычный экран успеха ("Готово, всё
+          // запомнил") — вместо этого сразу ведём в напоминание/выбор размера,
+          // используя occasionId, который apiSubmitProfile вернул именно для isOneOff.
+          quickMode = false;
+          reminderRush = wasRush;
+          loadReminder(res.occasionId);
           return;
         }
         showSuccess('Готово. Всё запомнил про ' + profile.name + '.', 'Закрыть', closeApp);
@@ -1369,6 +1659,16 @@
     return 'поводов';
   }
 
+  // Универсальная функция русского склонения по числу — принимает три формы
+  // (1 → forms[0], 2-4 → forms[1], 5+/11-14 → forms[2]), используется везде,
+  // где раньше пришлось бы городить отдельный occasionsWord-подобный хелпер.
+  function plural(n, forms) {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return forms[0];
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
+    return forms[2];
+  }
+
   function occasionChipText(o) {
     const emoji = EMOJI_BY_LABEL[o.type] || '✨';
     if (o.type === 'Без повода') return emoji + ' раз в ' + (o.intervalMonths || 2) + ' мес.';
@@ -1380,7 +1680,9 @@
     apiGet({ action: 'list', userId: userId }).then(function (res) {
       const list = document.getElementById('home-list');
       list.innerHTML = '';
-      const recipients = (res.ok && res.recipients) ? res.recipients : [];
+      // Разовые заказы — не долгосрочные получатели с напоминаниями, поэтому
+      // не показываем их в обычном списке "Ваши получатели" на Главной.
+      const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
       const occasionCount = recipients.reduce(function (sum, r) { return sum + (r.occasions ? r.occasions.length : 0); }, 0);
       const countEl = document.getElementById('home-stat-count');
       const subEl = document.getElementById('home-stat-sub');
@@ -1642,28 +1944,42 @@
   }
 
   function editRecipientStyle() {
-    const el = document.getElementById('recipient-style-rows');
-    el.innerHTML = STYLE_OPTIONS.map(function (s) {
-      const on = currentRecipient.style === s.value;
-      return '<div class="style-row' + (on ? ' selected' : '') + '" data-style="' + s.value + '" onclick="pickRecipientStyle(\'' + s.value + '\')">' +
-        '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
-        '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
-    }).join('');
+    // _pendingStyle держим отдельно от currentRecipient.style, чтобы "Отмена"
+    // не портил уже сохранённое значение получателя.
+    currentRecipient._pendingStyle = currentRecipient.style || '';
+    renderRecipientStyleRows();
     document.getElementById('rec-input-note').value = currentRecipient.note || '';
     document.getElementById('rec-input-social').value = currentRecipient.socialMedia || '';
     document.getElementById('recipient-style-view').style.display = 'none';
     document.getElementById('recipient-style-edit').style.display = 'block';
   }
+  function renderRecipientStyleRows() {
+    const el = document.getElementById('recipient-style-rows');
+    const selected = (currentRecipient._pendingStyle || '').split(', ').filter(Boolean);
+    el.innerHTML = STYLE_OPTIONS.map(function (s) {
+      const on = selected.includes(s.value);
+      const trustClass = s.value === 'Доверяю вам' ? ' style-row-trust' : '';
+      return '<div class="style-row' + (on ? ' selected' : '') + trustClass + '" data-style="' + s.value + '" onclick="pickRecipientStyle(\'' + s.value + '\')">' +
+        '<div><div class="style-row-label">' + s.emoji + ' ' + s.value + '</div><div class="style-row-sub">' + s.sub + '</div></div>' +
+        '<div class="style-check' + (on ? ' checked' : '') + '"></div></div>';
+    }).join('');
+  }
   function pickRecipientStyle(val) {
-    currentRecipient._pendingStyle = val;
-    document.querySelectorAll('#recipient-style-rows .style-row').forEach(function (el) {
-      const on = el.dataset.style === val;
-      el.classList.toggle('selected', on);
-      el.querySelector('.style-check').classList.toggle('checked', on);
-    });
+    // Та же исключающая логика, что и в анкете: "Доверяю вам" не сочетается
+    // с конкретными направлениями.
+    const cur = (currentRecipient._pendingStyle || '').split(', ').filter(Boolean);
+    let next;
+    if (val === 'Доверяю вам') {
+      next = cur.includes(val) ? [] : [val];
+    } else {
+      next = cur.filter(function (v) { return v !== 'Доверяю вам'; });
+      next = next.includes(val) ? next.filter(function (v) { return v !== val; }) : next.concat([val]);
+    }
+    currentRecipient._pendingStyle = next.join(', ');
+    renderRecipientStyleRows();
   }
   function saveRecipientStyle() {
-    const style = currentRecipient._pendingStyle || currentRecipient.style;
+    const style = currentRecipient._pendingStyle != null ? currentRecipient._pendingStyle : currentRecipient.style;
     const note = document.getElementById('rec-input-note').value.trim();
     const socialMedia = document.getElementById('rec-input-social').value.trim();
     apiPost({ action: 'updateRecipient', userId: userId, recipientId: currentRecipient.recipientId, style: style, note: note, socialMedia: socialMedia })
@@ -1730,6 +2046,12 @@
       if (!res.ok) { showScreen('screen-error'); return; }
       const r = res.recipient;
       document.getElementById('reminder-title').textContent = r.occasion + ' у ' + r.name;
+      // Баннер срочности — approximate-показ статичной суммы 700 ₽ (совпадает
+      // с дефолтом rush_fee в app_settings на бэкенде). apiReminder (GET) не
+      // отдаёт rush_fee отдельно, а заводить ради баннера ещё один бэкенд-
+      // проброс избыточно — сумма и так подтверждается/пересчитывается на
+      // сервере в apiConfirmReminder, это только предварительная подсказка.
+      document.getElementById('reminder-rush-banner').style.display = reminderRush ? 'block' : 'none';
       reminderDefaultAddress = r.defaultAddress || '';
       document.getElementById('reminder-phone-input').value = r.defaultPhone || '';
       reminderAddressMode = reminderDefaultAddress ? 'default' : 'custom';
@@ -1828,13 +2150,19 @@
     const deliveryWindow = reminderSelectedSlot === -1
       ? document.getElementById('reminder-time-custom').value.trim()
       : (reminderSelectedSlot != null ? TIME_SLOTS[reminderSelectedSlot] : '');
+    const wasRush = reminderRush;
     apiPost({
       action: 'confirmReminder', rowIndex: reminderRow,
       size: reminderSelectedSize === 'custom' ? null : reminderSelectedSize,
       customBudget: customBudget,
-      deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow
+      deliveryAddress: deliveryAddress, deliveryPhone: deliveryPhone, deliveryWindow: deliveryWindow,
+      isRush: wasRush
     }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
+      // Флаг срочности живёт только на время одного захода в напоминание —
+      // сбрасываем сразу после подтверждения, чтобы следующий обычный заказ
+      // не унаследовал доплату случайно.
+      reminderRush = false;
       trackingRow = reminderRow;
       showSuccess(
         'Подтверждено. Флорист начнёт собирать и пришлёт фото черновика на согласование — оплата будет после того, как вам всё понравится.',
@@ -1851,6 +2179,7 @@
     if (!val) return;
     apiPost({ action: 'postponeReminder', rowIndex: reminderRow, newDate: toRuDate(val) }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
+      reminderRush = false; // не переносим доплату за срочность на новую дату
       showSuccess('Перенесено. Напомню заново, когда дата приблизится.', 'Закрыть', closeApp);
     });
   }
@@ -1882,6 +2211,10 @@
     showScreen('screen-loading');
     apiGet({ action: 'tracking', userId: userId, row: rowIndex }).then(function (res) {
       if (!res.ok) { showScreen('screen-error'); return; }
+      // Черновик одобрен, деньги ещё не спрошены — вместо обычного экрана
+      // статуса сразу показываем экран оплаты (плейсхолдер до ЮKassa),
+      // это и есть новая точка, где раньше просто слали реквизиты в чат.
+      if (res.showPayment) { renderPaymentScreen(res); showScreen('screen-payment'); return; }
       renderTrackingScreen(res);
       showScreen('screen-tracking');
     }).catch(function () { showScreen('screen-error'); });
@@ -1950,6 +2283,35 @@
     img.onerror = function () { wrap.innerHTML = '<span>фото пока недоступно</span>'; };
     img.onload = function () { wrap.innerHTML = ''; wrap.appendChild(img); };
     img.src = API_BASE + '?' + query;
+  }
+
+  // ===== ЭКРАН ОПЛАТЫ (плейсхолдер до подключения ЮKassa) =====
+  // Реального платёжного шлюза ещё нет (регистрация в ЮKassa не начата) —
+  // экран только показывает сумму и по нажатию "Оплатить" отмечает заказ
+  // как оплаченный клиентом (apiMarkPaidSelf, тот же метод, что и кнопка
+  // "Я оплатил(а)" в чате бота), а не проводит настоящий платёж.
+  function renderPaymentScreen(res) {
+    const lead = res.recipientName
+      ? (res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel + ' — ' : '') + 'для ' + res.recipientName
+      : 'Черновик одобрен — осталось оплатить.';
+    document.getElementById('payment-lead').textContent = lead;
+    document.getElementById('payment-price-bouquet').textContent = (res.bouquetPrice || 0) + ' ₽';
+    document.getElementById('payment-price-delivery').textContent = (res.deliverySurcharge || 0) + ' ₽';
+    document.getElementById('payment-price-total').textContent = (res.total || 0) + ' ₽';
+    document.getElementById('payment-pay-btn').textContent = 'Оплатить ' + (res.total || 0) + ' ₽';
+    document.getElementById('payment-error').textContent = '';
+  }
+
+  function payForOrder() {
+    document.getElementById('payment-error').textContent = '';
+    apiPost({ action: 'markPaidSelf', userId: userId, rowIndex: trackingRow }).then(function (res) {
+      if (!res.ok) { document.getElementById('payment-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
+      showSuccess(
+        'Оплата отмечена! Флорист оформит букет окончательно и пришлёт финальное фото перед отправкой.',
+        'Понятно',
+        function () { openTracking(trackingRow, trackingBackTarget); }
+      );
+    });
   }
 
   function trackingApprove() {
@@ -2078,6 +2440,12 @@
     const urgency = urgencyOf(o.eventDateIso);
     const borderStyle = urgency ? ('border:2px solid ' + (urgency.level === 'urgent' ? 'var(--red)' : '#E08A2E') + ';') : '';
     const lastNoteLine = (o.note || '').trim().split('\n').filter(Boolean).pop();
+    // "Срочно за 3 часа" — сигнал про обещанную скорость доставки, а не про
+    // близость event_date (urgencyOf). Оба могут сработать на одной карточке
+    // одновременно, поэтому не объединяем их в один бейдж/цвет.
+    const rushBadgeHtml = o.isRush
+      ? '<div style="background:#E8432E; color:#fff; font-weight:800; font-size:12px; padding:6px 10px; border-radius:8px; margin-bottom:8px; display:inline-block;">⚡ СРОЧНО (3 часа)</div>'
+      : '';
     const canSendPhoto = o.status === 'Новый' || /^Переделка/.test(o.status);
     let actionHtml = '';
     if (canSendPhoto) {
@@ -2089,6 +2457,7 @@
       actionHtml = '<div class="badge badge-paid-yes" style="display:inline-block;">Принято ✓ — передано в доставку</div>';
     }
     return '<div class="card" style="' + borderStyle + '">' +
+      rushBadgeHtml +
       '<div class="team-card-top"><div><div class="team-rec-name">' + escapeHtml(o.recipientName) + '</div>' +
       '<div class="team-sub-line">' + escapeHtml(o.occasion) + ' · ' + escapeHtml(o.date) + (o.window ? ' · ' + escapeHtml(o.window) : '') + '</div></div>' +
       '<span class="badge badge-status">' + escapeHtml(o.status) + '</span></div>' +
@@ -2096,8 +2465,47 @@
       (o.size ? '<div class="team-row"><span class="team-row-label">Размер</span><span>' + escapeHtml(o.size) + '</span></div>' : '') +
       (o.socialMedia ? '<div class="team-row"><span class="team-row-label">Соцсети</span><span>' + escapeHtml(o.socialMedia) + '</span></div>' : '') +
       (lastNoteLine ? '<div style="margin-top:8px; padding:9px 11px; background:#FBEEF0; border-radius:10px; font-size:12px; color:var(--accent-dark);"><div style="font-weight:700; font-size:11px; text-transform:uppercase; margin-bottom:3px;">Из личного дела</div>' + escapeHtml(lastNoteLine) + '</div>' : '') +
+      // Заглушка на "Дарим впервые" — реальная сводка (сколько раз дарили и
+      // как прошло в прошлый раз) подгружается отдельным запросом истории
+      // ПОСЛЕ рендера списка (см. loadTeamFlorist), чтобы не тормозить показ
+      // самой очереди сборки ожиданием N запросов истории.
+      '<div class="team-sub-line" id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '" style="margin-top:6px;">Дарим впервые</div>' +
       '<div class="team-link-right"><button type="button" class="btn-link" onclick="openTeamHistory(\'' + o.recipientId + '\', \'screen-team-florist\')">🗂 Вся история</button></div>' +
       actionHtml + '</div>';
+  }
+
+  // После рендера карточек очереди сборки — догружаем для каждого получателя
+  // сводку прошлых букетов (apiHistory уже существует для экрана "Вся
+  // история"), чтобы флорист сразу видел "повторный клиент или нет" и как
+  // прошло в прошлый раз, не переходя по ссылке. Один recipientId может
+  // повторяться на нескольких карточках (несколько поводов у одного
+  // получателя) — историю грузим один раз на recipientId, а не на карточку.
+  function loadFloristHistorySummaries(orders) {
+    const seen = {};
+    (orders || []).forEach(function (o) {
+      if (seen[o.recipientId]) return;
+      seen[o.recipientId] = true;
+      teamApiGet({ action: 'history', recipientId: o.recipientId }).then(function (res) {
+        if (!res.ok) return;
+        const bouquets = res.bouquets || [];
+        const count = bouquets.length;
+        let line;
+        if (!count) {
+          line = 'Дарим впервые · историй по этому получателю пока нет';
+        } else {
+          const last = bouquets[0]; // отсортированы по дате убывания (apiHistory)
+          const reaction = last.rating ? (RATING_TEXT[last.rating] || '') : '';
+          const detail = last.date + (reaction ? ' · ' + reaction : '');
+          line = 'Дарили уже ' + count + ' ' + plural(count, ['раз', 'раза', 'раз']) + '. Прошлый раз: ' + detail;
+        }
+        // Карточек с одинаковым recipientId может быть несколько — обновляем все разом.
+        // Фильтруем в JS (не через CSS-селектор с интерполяцией id), чтобы не
+        // зависеть от того, какие символы Supabase кладёт в recipientId.
+        document.querySelectorAll('[id^="florist-history-"]').forEach(function (el) {
+          if (el.dataset.recipientId === String(o.recipientId)) el.textContent = line;
+        });
+      });
+    });
   }
 
   // ===== "ДОСТАВКИ" — прежняя карточка с адресом/телефоном/картой, без изменений.
@@ -2209,6 +2617,7 @@
     teamApiGet({ action: 'florist' }).then(function (res) {
       if (!res.ok) { el.innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
       el.innerHTML = renderGroupedByDate(res.orders || [], floristOrderCardHtml) || '<p class="center">Пока нечего собирать.</p>';
+      loadFloristHistorySummaries(res.orders || []);
     });
   }
 
@@ -2260,6 +2669,37 @@
         });
       });
       el.innerHTML = html;
+    });
+  }
+
+  // "Клиенты" — CRM-сводка только для владельца: кто дарит чаще/больше всех
+  // (сортировка уже сделана на бэкенде, apiClients), карточка кликается в уже
+  // существующий экран "Вся история" по этому же получателю.
+  function loadTeamClients() {
+    const el = document.getElementById('team-clients-list');
+    el.innerHTML = '<p class="center">Загрузка…</p>';
+    teamApiGet({ action: 'clients' }).then(function (res) {
+      if (!res.ok) { el.innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
+      const totals = res.totals || { recipientCount: 0, totalOrders: 0, totalRevenue: 0 };
+      const countEl = document.getElementById('team-clients-stat-count');
+      const subEl = document.getElementById('team-clients-stat-sub');
+      if (countEl) countEl.textContent = String(totals.recipientCount);
+      if (subEl) {
+        subEl.textContent = totals.recipientCount
+          ? (totals.totalOrders + ' ' + plural(totals.totalOrders, ['заказ', 'заказа', 'заказов']) + ' · ' + totals.totalRevenue.toLocaleString('ru-RU') + ' ₽ всего')
+          : 'клиентов пока нет';
+      }
+      const clients = res.clients || [];
+      if (!clients.length) { el.innerHTML = '<p class="center">Клиентов пока нет.</p>'; return; }
+      el.innerHTML = clients.map(function (c) {
+        return '<div class="card" style="cursor:pointer;" onclick="openTeamHistory(\'' + c.recipientId + '\', \'screen-team-clients\')">' +
+          '<div class="team-card-top"><div><div class="team-rec-name">' + escapeHtml(c.name) + '</div>' +
+          '<div class="team-sub-line">' + escapeHtml(c.who || '') + '</div></div></div>' +
+          '<div class="team-row"><span class="team-row-label">Заказы</span><span>' + c.orderCount + ' ' + plural(c.orderCount, ['заказ', 'заказа', 'заказов']) + '</span></div>' +
+          '<div class="team-row"><span class="team-row-label">Выручка</span><span>' + c.totalRevenue.toLocaleString('ru-RU') + ' ₽</span></div>' +
+          '<div class="team-row"><span class="team-row-label">Последний</span><span>' + escapeHtml(c.lastOrderDate || '—') + '</span></div>' +
+          '</div>';
+      }).join('');
     });
   }
 
@@ -2401,7 +2841,7 @@
       text: 'Флорист соберёт букет и пришлёт фото-черновик на согласование. Не нравится — переделаем, до двух раз. Просим оплатить только после того, как вы одобрите.'
     },
     {
-      title: 'Довожу до финального вида',
+      title: 'Довожу до финального вида и показываю ещё раз',
       text: 'После оплаты флорист оформляет букет окончательно и присылает фото перед отправкой — уже для информации.'
     },
     {
