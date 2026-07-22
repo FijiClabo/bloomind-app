@@ -295,16 +295,30 @@
     <div style="width:68px;height:68px;border-radius:var(--radius-lg);background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent-dark);margin:0 auto 20px;">
       <svg width="32" height="32" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="none" stroke="currentColor" stroke-width="1.4"></circle><circle cx="14" cy="14" r="4.5" fill="currentColor"></circle></svg>
     </div>
-    <div style="font-family:var(--font-display);font-style:var(--font-display-style);font-size:36px;margin-bottom:14px;">Bloomind</div>
-    <p class="hint" style="margin:0 auto; max-width:270px;">Помогу не забывать о цветах для близких — сам напомню перед датой, договорюсь с флористом и покажу фото букета перед отправкой.</p>
+    <h1 style="font-family:var(--font-display); font-style:var(--font-display-style); font-weight:400; font-size:28px; line-height:1.25; margin:0 auto 14px; max-width:290px;">Цветы близким — всегда вовремя</h1>
+    <p class="hint" style="margin:0 auto; max-width:270px;">Для тех, кто хочет радовать близких цветами, но боится забыть дату или не угадать с букетом.</p>
   </div>
-  <div style="margin-top:30px;">
+  <div style="margin-top:22px; display:flex; flex-direction:column; gap:10px;">
+    <div style="display:flex; gap:12px; align-items:flex-start; background:var(--card-bg); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:12px 14px; box-shadow:var(--shadow-card);">
+      <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800;">1</div>
+      <div style="font-size:13.5px; line-height:1.5; padding-top:3px;">Вы один раз рассказываете о человеке — мы помним даты и вкусы.</div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:flex-start; background:var(--card-bg); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:12px 14px; box-shadow:var(--shadow-card);">
+      <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800;">2</div>
+      <div style="font-size:13.5px; line-height:1.5; padding-top:3px;">Напоминаем заранее, флорист собирает букет и показывает фото.</div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:flex-start; background:var(--card-bg); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:12px 14px; box-shadow:var(--shadow-card);">
+      <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800;">3</div>
+      <div style="font-size:13.5px; line-height:1.5; padding-top:3px;">Платите только после того, как одобрили букет. Доставим к дате.</div>
+    </div>
+  </div>
+  <div style="margin-top:22px;">
     <button class="btn-primary" onclick="startForm()">Заполнить анкету</button>
-  </div>
-  <div style="text-align:center; margin-top:14px; display:flex; flex-direction:column; align-items:center; gap:2px;">
-    <button class="btn-link" style="font-size:14px;" onclick="openProfile()">Профиль</button>
-    <button class="btn-link" style="font-size:14px;" onclick="showScreen('screen-about')">Как это работает</button>
-    <button class="btn-link" style="font-size:14px;" onclick="showScreen('screen-support')">Поддержка</button>
+    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:14px;">
+      <button type="button" onclick="openProfile()" style="padding:10px 16px; border-radius:999px; border:1.5px solid var(--border); background:var(--card-bg); color:var(--accent-dark); font-weight:700; font-size:13.5px; cursor:pointer; box-shadow:var(--shadow-card);">Профиль</button>
+      <button type="button" onclick="showScreen('screen-about')" style="padding:10px 16px; border-radius:999px; border:1.5px solid var(--border); background:var(--card-bg); color:var(--accent-dark); font-weight:700; font-size:13.5px; cursor:pointer; box-shadow:var(--shadow-card);">Как это работает</button>
+      <button type="button" onclick="showScreen('screen-support')" style="padding:10px 16px; border-radius:999px; border:1.5px solid var(--border); background:var(--card-bg); color:var(--accent-dark); font-weight:700; font-size:13.5px; cursor:pointer; box-shadow:var(--shadow-card);">Поддержка</button>
+    </div>
   </div>
 </div>
 
@@ -315,11 +329,12 @@
       <svg width="30" height="30" viewBox="0 0 28 28"><rect x="7" y="13" width="14" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect><path d="M10.5 13V9a3.5 3.5 0 0 1 7 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><circle cx="14" cy="18" r="1.5" fill="currentColor"></circle></svg>
     </div>
     <h1 style="font-size:21px; margin:0 0 14px;">Прежде чем начать</h1>
-    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
+    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому.</p>
   </div>
   <div style="margin-top:30px;">
-    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Принимаю и продолжаю</button>
-    <p class="hint" id="consent-error" style="text-align:center; margin-top:12px;">Показывается один раз</p>
+    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Согласен(на) на обработку данных и продолжаю</button>
+    <p class="hint" style="text-align:center; margin-top:12px;">Нажимая, вы соглашаетесь с <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">политикой обработки данных</a> и <a href="offer.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">публичной офертой</a></p>
+    <p class="hint" id="consent-error" style="text-align:center; margin-top:6px;">Показывается один раз</p>
   </div>
 </div>
 
@@ -377,10 +392,22 @@
 
 <!-- ===== СРОЧНЫЙ ЗАКАЗ: выбор получателя ===== -->
 <div id="screen-rush-pick" class="screen">
-  <h1>⚡ Срочно, за 3 часа</h1>
-  <p class="hint">Кому везём? Можно выбрать уже сохранённого получателя или оформить нового.</p>
+  <div class="card" style="background:var(--accent-soft); border:none;">
+    <div style="font-weight:700; font-size:14.5px; color:var(--accent-dark); margin-bottom:4px;">Экспресс за 3 часа</div>
+    <p class="hint" style="margin:0;">Доплата за срочность — кому доставляем?</p>
+  </div>
+  <button class="btn-primary" onclick="rushPickNew()" style="text-align:left; margin-bottom:16px;">Новому получателю</button>
   <div id="rush-pick-list"></div>
-  <button class="btn-primary" onclick="rushPickNew()" style="margin-top:10px;">+ Новый получатель</button>
+</div>
+
+<!-- ===== РАЗОВЫЙ ЗАКАЗ: выбор получателя ===== -->
+<div id="screen-quick-pick" class="screen">
+  <div class="card" style="background:var(--accent-soft); border:none;">
+    <div style="font-weight:700; font-size:14.5px; color:var(--accent-dark); margin-bottom:4px;">Разовый заказ</div>
+    <p class="hint" style="margin:0;">Без сохранения в «Ваши близкие» — кому дарим на этот раз?</p>
+  </div>
+  <button class="btn-primary" onclick="quickPickNew()" style="text-align:left; margin-bottom:16px;">Новому получателю</button>
+  <div id="quick-pick-list"></div>
 </div>
 
 <!-- ===== ОНБОРДИНГ-ТУР: показывается один раз поверх главного экрана ===== -->
@@ -476,7 +503,7 @@
   <div class="form-step" data-step="address">
     <button type="button" class="btn-link" onclick="goBack('address')">← Назад</button>
     <h1>Как с ней связаться на месте?</h1>
-    <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом, вдруг место изменится.</p>
+    <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом.</p>
     <div class="field-label">Город</div>
     <input type="text" id="input-city" placeholder="Москва">
     <div class="field-label">Улица</div>
@@ -523,6 +550,7 @@
     </div>
     <div class="card">
       <div class="row"><span>Стиль</span><span id="summary-style"></span> <button class="btn-link" onclick="editStep('stylepref')">изменить</button></div>
+      <div class="row"><span>Бюджет</span><span id="summary-budget"></span> <button class="btn-link" onclick="editStep('stylepref')">изменить</button></div>
       <div class="row"><span>Адрес</span><span id="summary-address"></span> <button class="btn-link" onclick="editStep('address')">изменить</button></div>
     </div>
     <button class="btn-primary" id="submit-profile-btn" onclick="submitProfile()">Всё верно, сохранить</button>
@@ -599,8 +627,8 @@
 <!-- ===== КАРТОЧКА НАПОМИНАНИЯ ===== -->
 <div id="screen-reminder" class="screen">
   <h1 id="reminder-title"></h1>
-  <div class="card" id="reminder-rush-banner" style="display:none; background:var(--accent-soft); border:none; font-weight:700;">⚡ Экспресс за 3 часа — доплата 700 ₽ за срочность.</div>
-  <p class="hint" id="reminder-lead">Подтвердите — пришлю реквизиты и договорюсь с флористом. Не готовы сейчас — можно перенести дату.</p>
+  <div class="card" id="reminder-rush-banner" style="display:none; background:var(--accent-soft); border:none; font-weight:700;">⚡ Экспресс за 3 часа — доплата за срочность указана ниже, в итоговой сумме.</div>
+  <p class="hint" id="reminder-lead">Подтвердите — флорист соберёт черновик и пришлёт фото на согласование. Оплата — после того, как вам всё понравится. Не готовы сейчас — можно перенести дату.</p>
   <button class="btn-option" onclick="showPostponeInput()">Перенести дату</button>
   <div id="postpone-block" style="display:none; margin-top:2px; margin-bottom:14px;">
     <input type="date" id="input-postpone-date">
@@ -628,6 +656,7 @@
   <div class="card" id="reminder-price-card">
     <div class="row"><span>Букет</span><span id="price-bouquet">—</span></div>
     <div class="row"><span>Доставка</span><span id="price-delivery">—</span></div>
+    <div class="row" id="price-rush-row" style="display:none;"><span>Срочность (3 часа)</span><span id="price-rush">—</span></div>
     <div class="row" style="font-weight:800;"><span>Итого</span><span id="price-total">—</span></div>
   </div>
   <p class="hint" id="reminder-size-error"></p>
@@ -654,6 +683,7 @@
   <div class="card" id="payment-price-card">
     <div class="row"><span>Букет</span><span id="payment-price-bouquet">—</span></div>
     <div class="row"><span>Доставка</span><span id="payment-price-delivery">—</span></div>
+    <div class="row" id="payment-price-rush-row" style="display:none;"><span>Срочность (3 часа)</span><span id="payment-price-rush">—</span></div>
     <div class="row" style="font-weight:800;"><span>Итого</span><span id="payment-price-total">—</span></div>
   </div>
 
@@ -706,6 +736,7 @@
   <div class="card">
     <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Аккаунт</span></div>
     <div class="row"><span>Telegram ID</span><span id="profile-userid"></span></div>
+    <div class="row" style="border-bottom:none; padding-top:8px;"><span class="btn-link" onclick="showScreen('screen-about')">Как это работает</span></div>
   </div>
 
   <div class="card">
@@ -736,6 +767,12 @@
     <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Оплата и заказы</span></div>
     <p class="hint" style="margin:0;">История появится после первого заказа.</p>
   </div>
+
+  <div class="card" id="profile-team-card" style="margin-top:16px; display:none;">
+    <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Режим команды</span></div>
+    <p class="hint" style="margin:0 0 12px;">Для флористов и курьеров — заказы, доставки, состав команды.</p>
+    <button class="btn-option" onclick="enterTeamMode()">Войти как Команда</button>
+  </div>
 </div>
 
 <!-- ===== КОМАНДА: ЗАКАЗЫ (только неоплаченные — очередь на оплату) ===== -->
@@ -762,11 +799,21 @@
 
 <!-- ===== КОМАНДА: КЛИЕНТЫ (CRM-сводка, только владелец) ===== -->
 <div id="screen-team-clients" class="screen">
-  <div class="stat-card">
-    <div class="stat-label">Клиентская база</div>
-    <div class="stat-number" id="team-clients-stat-count">0</div>
-    <div class="stat-sub" id="team-clients-stat-sub">получателей</div>
+  <div class="card" style="background:var(--accent-soft); border:none; display:flex; justify-content:space-between; gap:8px;">
+    <div>
+      <div style="font-size:20px; font-weight:800; line-height:1.1;" id="team-clients-stat-count">0</div>
+      <div style="font-size:11px; color:var(--accent-dark); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-top:3px;">Получателей</div>
+    </div>
+    <div>
+      <div style="font-size:20px; font-weight:800; line-height:1.1;" id="team-clients-stat-orders">0</div>
+      <div style="font-size:11px; color:var(--accent-dark); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-top:3px;">Заказов</div>
+    </div>
+    <div>
+      <div style="font-size:20px; font-weight:800; line-height:1.1;" id="team-clients-stat-revenue">0 ₽</div>
+      <div style="font-size:11px; color:var(--accent-dark); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-top:3px;">Выручка</div>
+    </div>
   </div>
+  <p class="hint" id="team-clients-empty-note" style="display:none;">клиентов пока нет</p>
   <div id="team-clients-list"></div>
 </div>
 
@@ -818,6 +865,12 @@
   // быструю форму (новый получатель) или через уже сохранённого — поэтому
   // это отдельный флаг, а не часть quickMode.
   let reminderRush = false;
+  // Метка повода для разового заказа существующему получателю ("Разовый
+  // подарок") — не влияет на цену, только на подпись экрана напоминания.
+  let reminderQuickLabel = null;
+  // Сумма доплаты за срочность — приходит с сервера (app_settings.rush_fee),
+  // 700 только как визуальный fallback до первой загрузки reminder.
+  let reminderRushFee = 700;
   const STYLE_OPTIONS = [
     { value: 'Нежный', emoji: '🌸', sub: 'пастель, пионы, эустома' },
     { value: 'Яркий', emoji: '🌺', sub: 'сочные тона, герберы' },
@@ -850,7 +903,7 @@
     'screen-team-history': { title: 'История букетов', back: 'screen-team-orders' },
     'screen-team-deliveries': { title: 'Доставки', eyebrow: 'Команда', tab: 'team-deliveries' },
     'screen-team-clients': { title: 'Клиенты', eyebrow: 'Команда', tab: 'team-clients' },
-    'screen-team-staff': { title: 'Команда', eyebrow: 'Команда', tab: 'team-staff' }
+    'screen-team-staff': { title: 'Состав команды', eyebrow: 'Команда', tab: 'team-staff' }
   };
 
   let recipientBackTarget = 'screen-home';
@@ -902,8 +955,14 @@
     const eyebrowEl = document.getElementById('topbar-eyebrow');
     const titleEl = document.getElementById('topbar-title');
     const backEl = document.getElementById('topbar-back');
-    if (eyebrowEl) eyebrowEl.textContent = meta.eyebrow || '';
-    if (eyebrowEl) eyebrowEl.style.display = meta.eyebrow ? 'block' : 'none';
+    // На team-экранах eyebrow должен показывать РЕАЛЬНУЮ роль пользователя
+    // (Владелец/Флорист/Курьер), а не статичную надпись "Команда" — роль уже
+    // известна из myStaffRole (сервер отдаёт её по Telegram ID при входе).
+    const eyebrowText = (meta.eyebrow === 'Команда' && myStaffRole && TEAM_ROLE_LABEL[myStaffRole])
+      ? TEAM_ROLE_LABEL[myStaffRole].toUpperCase()
+      : meta.eyebrow;
+    if (eyebrowEl) eyebrowEl.textContent = eyebrowText || '';
+    if (eyebrowEl) eyebrowEl.style.display = eyebrowText ? 'block' : 'none';
     if (eyebrowEl) {
       const clickable = meta.eyebrow === 'Bloomind';
       eyebrowEl.style.cursor = clickable ? 'pointer' : '';
@@ -1008,7 +1067,10 @@
   function updateFormDots(currentStepName) {
     const dotsEl = document.getElementById('form-dots');
     if (!dotsEl) return;
-    const list = activeSteps();
+    // Точки должны отражать реально показываемые шаги, а не полный список —
+    // schoolcheck считается только когда реально показан (роль "Дочь"),
+    // иначе счётчик "плывёт" на 8 вместо 7 даже для тех, кто его не увидит.
+    const list = activeSteps().filter(shouldShowStep);
     const idx = list.indexOf(currentStepName);
     let html = '';
     for (let i = 0; i < list.length; i++) {
@@ -1115,9 +1177,11 @@
       // Уходя с первого шага быстрой формы, сбрасываем режимы — иначе они
       // "прилипнут" к следующему обычному "+ Добавить получателя".
       const wasRush = reminderRush;
+      const wasQuick = quickMode && !wasRush;
       quickMode = false;
       reminderRush = false;
       if (wasRush) { showScreen('screen-rush-pick'); loadRushPickList(); return; }
+      if (wasQuick) { showScreen('screen-quick-pick'); loadQuickPickList(); return; }
       loadHome();
       return;
     }
@@ -1129,9 +1193,59 @@
   // (QUICK_STEPS) — без "Кем приходится"/"Поводы"/"Расскажите о ней", так как
   // это одноразовая покупка без долгосрочного профиля с напоминаниями.
   function startQuickOrder() {
+    showScreen('screen-quick-pick');
+    loadQuickPickList();
+  }
+
+  function quickPickNew() {
     quickMode = true;
     reminderRush = false;
     startForm();
+  }
+
+  // Список уже сохранённых получателей для разового заказа — тот же паттерн,
+  // что и loadRushPickList, но без флага reminderRush и с пометкой
+  // "Разовый подарок" на итоговом экране напоминания.
+  function loadQuickPickList() {
+    const list = document.getElementById('quick-pick-list');
+    list.innerHTML = '<p class="hint">Загрузка…</p>';
+    apiGet({ action: 'list', userId: userId }).then(function (res) {
+      const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
+      if (!recipients.length) {
+        list.innerHTML = '<p class="hint">Сохранённых получателей пока нет — оформите нового.</p>';
+        return;
+      }
+      list.innerHTML = '';
+      recipients.forEach(function (r) {
+        const div = document.createElement('div');
+        div.className = 'card recipient-card';
+        div.innerHTML = '<div class="recipient-name">' + escapeHtml(r.name) + '</div>';
+        div.addEventListener('click', function () { quickPickExisting(r); });
+        list.appendChild(div);
+      });
+    }).catch(function () { list.innerHTML = '<p class="hint">Не получилось загрузить список.</p>'; });
+  }
+
+  // Выбрали существующего получателя для разового заказа — заводим ему ещё
+  // один occasion "Разовый подарок" (без сохранения как обычного повода) и
+  // сразу ведём на экран напоминания с пометкой "Разовый подарок".
+  function quickPickExisting(r) {
+    reminderQuickLabel = 'Разовый подарок';
+    showScreen('screen-loading');
+    const todayIso = new Date().toISOString().slice(0, 10);
+    apiPost({
+      action: 'addOccasion', userId: userId, recipientId: r.recipientId,
+      occasion: { type: 'custom', label: 'Разовый подарок', date: toRuDate(todayIso), auto: false, recurring: false }
+    }).then(function (res) {
+      if (!res.ok) { showScreen('screen-error'); return; }
+      return apiGet({ action: 'recipient', id: r.recipientId, userId: userId }).then(function (recRes) {
+        if (!recRes.ok) { showScreen('screen-error'); return; }
+        const occasions = recRes.recipient.occasions || [];
+        const last = occasions[occasions.length - 1];
+        if (!last) { showScreen('screen-error'); return; }
+        loadReminder(last.rowIndex);
+      });
+    }).catch(function () { showScreen('screen-error'); });
   }
 
   // Срочный заказ новому получателю — та же быстрая форма, но с флагом
@@ -1598,6 +1712,10 @@
     document.getElementById('summary-name').textContent = profile.name;
     document.getElementById('summary-who').textContent = profile.who;
     document.getElementById('summary-style').textContent = profile.style;
+    // Точную сумму бюджета покажем позже на экране напоминания (там уже
+    // известны актуальные цены по стилю) — здесь только выбранный размер,
+    // чтобы пользователь видел, что он вообще указал бюджет по умолчанию.
+    document.getElementById('summary-budget').textContent = SIZE_LABELS[profile.defaultSize] || SIZE_LABELS.M;
     document.getElementById('summary-address').textContent = composeAddressSummary();
 
     // В быстрой форме (разово/срочно) нет ни "Кем приходится", ни "Поводов" —
@@ -1663,7 +1781,7 @@
           loadReminder(res.occasionId);
           return;
         }
-        showSuccess('Готово. Всё запомнил про ' + profile.name + '.', 'Закрыть', closeApp);
+        showSuccess('Получатель добавлен. Будем напоминать вовремя.', 'Закрыть', closeApp);
       })
       .catch(function (e) {
         err.textContent = 'Нет связи с сервером: ' + e + '.';
@@ -1740,6 +1858,10 @@
       const listRes = results[0], settingsRes = results[1];
       document.getElementById('profile-userid').textContent = userId;
       renderReminderDays(settingsRes.ok ? settingsRes.reminderDays : 5);
+      // Блок "Режим команды" — только для тех, кто реально есть в таблице
+      // staff (см. checkStaffRole/myStaffRole), иначе обычный клиент увидел
+      // бы кнопку, которая всё равно ничего не сделает.
+      document.getElementById('profile-team-card').style.display = myStaffRole ? 'block' : 'none';
 
       document.getElementById('input-contact-phone').value = (settingsRes.ok && settingsRes.contactPhone) ? settingsRes.contactPhone : '';
       pendingContactPref = (settingsRes.ok && settingsRes.contactPref) ? settingsRes.contactPref : null;
@@ -2062,6 +2184,7 @@
 
   // ===== КАРТОЧКА НАПОМИНАНИЯ =====
   let reminderRow = null;
+  let reminderRecipientName = ''; // для success-текста после confirmReminder — см. showSuccess ниже
   let reminderDefaultAddress = '';
   const TIME_SLOTS = ['09:00–13:00', '13:00–17:00', '17:00–21:00'];
   let reminderSelectedSlot = null;
@@ -2080,7 +2203,10 @@
     apiGet({ action: 'reminder', row: row }).then(function (res) {
       if (!res.ok) { showScreen('screen-error'); return; }
       const r = res.recipient;
-      document.getElementById('reminder-title').textContent = r.occasion + ' у ' + r.name;
+      reminderRecipientName = r.name || '';
+      const occasionLabel = reminderQuickLabel || r.occasion;
+      document.getElementById('reminder-title').textContent = r.name + ' · ' + occasionLabel;
+      reminderQuickLabel = null;
       // Баннер срочности — approximate-показ статичной суммы 700 ₽ (совпадает
       // с дефолтом rush_fee в app_settings на бэкенде). apiReminder (GET) не
       // отдаёт rush_fee отдельно, а заводить ради баннера ещё один бэкенд-
@@ -2097,6 +2223,7 @@
       reminderFarSurcharge = r.farDeliverySurcharge || 0;
       reminderNearFee = r.nearDeliveryFee != null ? r.nearDeliveryFee : 500;
       reminderIsFarMkad = !!r.isFarMkad;
+      reminderRushFee = r.rushFee || 700;
       reminderSelectedSize = 'M';
       renderReminderSizeRow();
       renderReminderPriceBreakdown();
@@ -2130,9 +2257,12 @@
     // Доставка теперь не бывает бесплатной — либо базовая плата по городу,
     // либо доплата за МКАД вместо неё (не в дополнение).
     const deliveryFee = reminderIsFarMkad ? reminderFarSurcharge : reminderNearFee;
+    const rushFee = reminderRush ? reminderRushFee : 0;
     document.getElementById('price-bouquet').textContent = bouquetPrice ? bouquetPrice + ' ₽' : '—';
     document.getElementById('price-delivery').textContent = deliveryFee + ' ₽' + (reminderIsFarMkad ? ' (за МКАД)' : '');
-    document.getElementById('price-total').textContent = bouquetPrice ? (bouquetPrice + deliveryFee) + ' ₽' : '—';
+    document.getElementById('price-rush-row').style.display = reminderRush ? 'flex' : 'none';
+    document.getElementById('price-rush').textContent = rushFee + ' ₽';
+    document.getElementById('price-total').textContent = bouquetPrice ? (bouquetPrice + deliveryFee + rushFee) + ' ₽' : '—';
   }
   document.getElementById('reminder-custom-budget-input').addEventListener('input', renderReminderPriceBreakdown);
 
@@ -2200,7 +2330,7 @@
       reminderRush = false;
       trackingRow = reminderRow;
       showSuccess(
-        'Подтверждено. Флорист начнёт собирать и пришлёт фото черновика на согласование — оплата будет после того, как вам всё понравится.',
+        'Подтверждено! Флорист соберёт черновик букета для получателя «' + (reminderRecipientName || '—') + '» и пришлёт фото на согласование. Оплата — после того, как вам всё понравится.',
         'Посмотреть статус заказа',
         function () { openTracking(trackingRow, 'screen-success'); }
       );
@@ -2215,7 +2345,7 @@
     apiPost({ action: 'postponeReminder', rowIndex: reminderRow, newDate: toRuDate(val) }).then(function (res) {
       if (!res.ok) { document.getElementById('reminder-error').textContent = 'Не получилось, попробуйте ещё раз.'; return; }
       reminderRush = false; // не переносим доплату за срочность на новую дату
-      showSuccess('Перенесено. Напомню заново, когда дата приблизится.', 'Закрыть', closeApp);
+      showSuccess('Дата перенесена на ' + toRuDate(val) + '. Напомним заново.', 'Закрыть', closeApp);
     });
   }
 
@@ -2351,12 +2481,20 @@
   // как оплаченный клиентом (apiMarkPaidSelf, тот же метод, что и кнопка
   // "Я оплатил(а)" в чате бота), а не проводит настоящий платёж.
   function renderPaymentScreen(res) {
+    const sizeLabel = res.size && SIZE_LABELS[res.size] ? SIZE_LABELS[res.size] : null;
     const lead = res.recipientName
-      ? (res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel + ' — ' : '') + 'для ' + res.recipientName
+      ? [res.recipientName, res.occasionLabel, sizeLabel ? 'размер ' + sizeLabel : null].filter(Boolean).join(' · ')
       : 'Черновик одобрен — осталось оплатить.';
     document.getElementById('payment-lead').textContent = lead;
     document.getElementById('payment-price-bouquet').textContent = (res.bouquetPrice || 0) + ' ₽';
     document.getElementById('payment-price-delivery').textContent = (res.deliverySurcharge || 0) + ' ₽';
+    const rushRow = document.getElementById('payment-price-rush-row');
+    if (res.rushFee) {
+      rushRow.style.display = 'flex';
+      document.getElementById('payment-price-rush').textContent = res.rushFee + ' ₽';
+    } else {
+      rushRow.style.display = 'none';
+    }
     document.getElementById('payment-price-total').textContent = (res.total || 0) + ' ₽';
     document.getElementById('payment-pay-btn').textContent = 'Я перевёл(а) ' + (res.total || 0) + ' ₽ — отметить оплаченным';
     document.getElementById('payment-error').textContent = '';
@@ -2539,7 +2677,19 @@
       '</div>' +
       '<div class="team-badges"><span class="badge badge-paid-no">' + escapeHtml(o.paid === 'заявлено клиентом' ? 'Клиент заявил' : 'Не оплачено') + '</span></div>' +
       clientContactHtml(o) +
+      '<button class="btn-link" style="margin-top:6px;" onclick="confirmTeamPayment(' + o.occasionId + ')">Отметить оплату (нал./на месте)</button>' +
       '</div>';
+  }
+
+  // Владелец сверил поступление (перевод/наличные на месте) и вручную
+  // подтверждает оплату — так же, как это делает apiConfirmPayment при сверке
+  // по банку. После подтверждения заказ пропадает из "Заказы" и появляется у
+  // флориста уже для финальной сборки.
+  function confirmTeamPayment(occasionId) {
+    if (!confirm('Подтвердить, что оплата по этому заказу получена?')) return;
+    teamApiPost({ action: 'confirmPayment', occasionId: occasionId }).then(function (res) {
+      if (res.ok) loadTeamUnpaid();
+    });
   }
 
   // ===== "ФЛОРИСТ" (оплаченные) — только то, что нужно для сборки: стиль,
@@ -2793,14 +2943,10 @@
     teamApiGet({ action: 'clients' }).then(function (res) {
       if (!res.ok) { el.innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
       const totals = res.totals || { recipientCount: 0, totalOrders: 0, totalRevenue: 0 };
-      const countEl = document.getElementById('team-clients-stat-count');
-      const subEl = document.getElementById('team-clients-stat-sub');
-      if (countEl) countEl.textContent = String(totals.recipientCount);
-      if (subEl) {
-        subEl.textContent = totals.recipientCount
-          ? (totals.totalOrders + ' ' + plural(totals.totalOrders, ['заказ', 'заказа', 'заказов']) + ' · ' + totals.totalRevenue.toLocaleString('ru-RU') + ' ₽ всего')
-          : 'клиентов пока нет';
-      }
+      document.getElementById('team-clients-stat-count').textContent = String(totals.recipientCount);
+      document.getElementById('team-clients-stat-orders').textContent = String(totals.totalOrders);
+      document.getElementById('team-clients-stat-revenue').textContent = totals.totalRevenue.toLocaleString('ru-RU') + ' ₽';
+      document.getElementById('team-clients-empty-note').style.display = totals.recipientCount ? 'none' : 'block';
       const clients = res.clients || [];
       if (!clients.length) { el.innerHTML = '<p class="center">Клиентов пока нет.</p>'; return; }
       el.innerHTML = clients.map(function (c) {
@@ -2821,10 +2967,16 @@
     teamApiGet({ action: 'staff' }).then(function (res) {
       if (!res.ok) { el.innerHTML = '<p class="center">Не удалось загрузить.</p>'; return; }
       el.innerHTML = (res.staff || []).map(function (s) {
+        // Себя показываем без кнопки "убрать" — удалить самого себя из
+        // команды через этот экран не должно быть возможно (обезопасит от
+        // случайного клика, оставляющего аккаунт вообще без владельца).
+        const isMe = String(s.telegram_id) === String(userId);
+        const nameLabel = isMe ? escapeHtml(s.name) + ' (вы)' : escapeHtml(s.name);
+        const actionHtml = isMe ? '' : '<button type="button" class="btn-link" style="color:var(--red);" onclick="removeTeamStaff(\'' + s.telegram_id + '\')">убрать</button>';
         return '<div class="card" style="display:flex; justify-content:space-between; align-items:center;">' +
-          '<div><div class="team-rec-name">' + escapeHtml(s.name) + '</div><div class="team-sub-line">ID ' + escapeHtml(s.telegram_id) + '</div></div>' +
+          '<div><div class="team-rec-name">' + nameLabel + '</div></div>' +
           '<div style="display:flex; align-items:center; gap:10px;"><span class="badge badge-status">' + (TEAM_ROLE_LABEL[s.role] || s.role) + '</span>' +
-          '<button type="button" class="btn-link" style="color:var(--red);" onclick="removeTeamStaff(\'' + s.telegram_id + '\')">убрать</button></div></div>';
+          actionHtml + '</div></div>';
       }).join('') || '<p class="center">Пока только ты.</p>';
     });
   }
