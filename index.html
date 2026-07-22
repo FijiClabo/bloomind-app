@@ -453,8 +453,8 @@
     <button type="button" class="btn-link" onclick="goBack('about')">← Назад</button>
     <h1>Расскажите о ней</h1>
     <p class="hint">Один раз, максимально подробно — дальше мы будем ориентироваться на это и на историю заказов, вам не придётся объяснять снова.</p>
-    <div class="field-label">Какая она, что любит</div>
-    <textarea id="input-note" rows="3" placeholder="Например: любит пионы и пастельные тона, не любит резкие запахи и лилии"></textarea>
+    <div class="field-label">Какая она, что любит (необязательно)</div>
+    <textarea id="input-note" rows="3" placeholder="Например: любит пионы и пастельные тона, не любит резкие запахи и лилии. Не знаете, что писать — просто нажмите «Далее», флорист подберёт классику."></textarea>
     <p class="hint" id="about-error" style="margin:-6px 0 14px;">&nbsp;</p>
     <div class="field-label">Соцсети получателя (необязательно)</div>
     <input type="text" id="input-social" placeholder="instagram.com/имя — поможет лучше понять вкус">
@@ -568,11 +568,17 @@
   <div class="section-label">Контакты для доставки</div>
   <div class="card" id="recipient-address-view"></div>
   <div class="card" id="recipient-address-edit" style="display:none;">
-    <div class="field-label">Город, улица, дом</div>
-    <input type="text" id="rec-input-address">
+    <div class="field-label">Город</div>
+    <input type="text" id="rec-input-city" placeholder="Москва">
+    <div class="field-label">Улица</div>
+    <input type="text" id="rec-input-street" placeholder="ул. Ленина">
     <div class="two-up">
+      <div><div class="field-label">Дом, корпус</div><input type="text" id="rec-input-house" placeholder="10, корп. 2"></div>
       <div><div class="field-label">Квартира</div><input type="text" id="rec-input-apartment"></div>
+    </div>
+    <div class="two-up">
       <div><div class="field-label">Подъезд</div><input type="text" id="rec-input-entrance"></div>
+      <div><div class="field-label">Этаж</div><input type="text" id="rec-input-floor"></div>
     </div>
     <div class="field-label">Код домофона</div>
     <input type="text" id="rec-input-intercom">
@@ -628,6 +634,7 @@
 
   <button class="btn-primary" onclick="confirmReminder()">Подтвердить</button>
   <p class="hint" id="reminder-error"></p>
+  <button class="btn-option" onclick="cancelCurrentOrder(reminderRow)" style="color:var(--red); margin-top:4px;">Не в этот раз, отменить</button>
 </div>
 
 <!-- ===== УСПЕХ ===== -->
@@ -650,8 +657,13 @@
     <div class="row" style="font-weight:800;"><span>Итого</span><span id="payment-price-total">—</span></div>
   </div>
 
-  <button class="btn-primary" id="payment-pay-btn" onclick="payForOrder()">Оплатить</button>
-  <p class="hint" id="payment-footnote">Откроется безопасная страница оплаты — реализуем на следующем этапе. Пока отметим как оплаченное, а флорист сверит поступление вручную.</p>
+  <div class="card" id="payment-details-card" style="display:none; background:var(--accent-soft-alt);">
+    <div style="font-weight:700; margin-bottom:4px;">Куда перевести</div>
+    <div id="payment-details-text" style="font-size:15px; line-height:1.5;"></div>
+  </div>
+
+  <button class="btn-primary" id="payment-pay-btn" onclick="payForOrder()">Я перевёл(а) — отметить оплаченным</button>
+  <p class="hint" id="payment-footnote">Онлайн-оплата картой скоро появится прямо здесь. Пока переведите сумму по реквизитам выше и нажмите кнопку — флорист сверит поступление вручную и продолжит сборку.</p>
   <p class="hint" id="payment-error"></p>
 </div>
 
@@ -678,7 +690,15 @@
   </div>
 
   <p class="hint" id="tracking-note" style="display:none;"></p>
+
+  <div class="card" id="tracking-save-recipient-card" style="display:none;">
+    <div style="font-weight:700; margin-bottom:4px;">Сохранить получателя?</div>
+    <p class="hint" style="margin-top:0;">Этот заказ был разовым — карточка не сохранена. Если планируете дарить ещё, сохраним всё (адрес, стиль, телефон) и будем сами напоминать о датах.</p>
+    <button class="btn-primary" onclick="convertTrackingRecipient()">Сохранить как постоянного получателя</button>
+  </div>
+
   <p class="hint" id="tracking-error"></p>
+  <button class="btn-option" id="tracking-cancel-btn" onclick="cancelCurrentOrder(trackingRow)" style="display:none; color:var(--red); margin-top:8px;">Отменить заказ</button>
 </div>
 
 <!-- ===== ПРОФИЛЬ ===== -->
@@ -1385,10 +1405,11 @@
   }
 
   function submitAbout() {
-    const err = document.getElementById('about-error');
+    // Поле необязательное — многие мужчины теряются перед пустым текстовым
+    // полем "расскажите о ней" и бросают анкету на середине. Если пусто,
+    // просто идём дальше без блокировки; флорист в этом случае ориентируется
+    // на выбранный стиль и историю заказов.
     const note = document.getElementById('input-note').value.trim();
-    if (!note) { err.textContent = 'Расскажите о ней хотя бы в двух словах — это важно для подбора букета.'; return; }
-    err.textContent = '';
     profile.note = note;
     profile.socialMedia = document.getElementById('input-social').value.trim();
     goNext('about');
@@ -1841,7 +1862,11 @@
   function renderRecipientScreen() {
     const r = currentRecipient;
 
-    const TRACKABLE_STATUSES = ['Подтверждено', 'На согласовании', 'Ожидает оплаты', 'Оплачено', 'Готов к доставке'];
+    // 'Доставлено' тоже включаем сюда (в отличие от блока "Ближайшее событие"
+    // выше) — иначе ссылка на фото букета пропадает из карточки повода сразу
+    // после отметки курьером "Доставлено", и клиент теряет единственный
+    // способ вернуться и посмотреть, каким получился финальный букет.
+    const TRACKABLE_STATUSES = ['Подтверждено', 'На согласовании', 'Ожидает оплаты', 'Оплачено', 'Готов к доставке', 'Доставлено'];
     renderRecipientUpcoming(r);
 
     const occEl = document.getElementById('recipient-occasions');
@@ -1988,19 +2013,29 @@
   function cancelRecipientStyleEdit() { renderRecipientScreen(); }
 
   function editRecipientAddress() {
-    document.getElementById('rec-input-address').value = currentRecipient.addressParts.line;
-    document.getElementById('rec-input-apartment').value = currentRecipient.addressParts.apartment;
-    document.getElementById('rec-input-entrance').value = currentRecipient.addressParts.entrance;
-    document.getElementById('rec-input-intercom').value = currentRecipient.addressParts.intercom;
+    const parts = currentRecipient.addressParts;
+    // Старые получатели могли быть созданы до разбивки адреса на поля — тогда
+    // city/street/house пустые, а вся строка лежит в line. Не терять её:
+    // подставляем line в "Улица", чтобы было видно и можно было доразбить руками.
+    document.getElementById('rec-input-city').value = parts.city || '';
+    document.getElementById('rec-input-street').value = parts.street || (!parts.city && !parts.house ? parts.line : '') || '';
+    document.getElementById('rec-input-house').value = parts.house || '';
+    document.getElementById('rec-input-apartment').value = parts.apartment;
+    document.getElementById('rec-input-entrance').value = parts.entrance;
+    document.getElementById('rec-input-floor').value = parts.floor || '';
+    document.getElementById('rec-input-intercom').value = parts.intercom;
     document.getElementById('recipient-address-view').style.display = 'none';
     document.getElementById('recipient-address-edit').style.display = 'block';
   }
   function saveRecipientAddress() {
     apiPost({
       action: 'updateRecipient', userId: userId, recipientId: currentRecipient.recipientId,
-      address: document.getElementById('rec-input-address').value.trim(),
+      city: document.getElementById('rec-input-city').value.trim(),
+      street: document.getElementById('rec-input-street').value.trim(),
+      house: document.getElementById('rec-input-house').value.trim(),
       apartment: document.getElementById('rec-input-apartment').value.trim(),
       entrance: document.getElementById('rec-input-entrance').value.trim(),
+      floor: document.getElementById('rec-input-floor').value.trim(),
       intercom: document.getElementById('rec-input-intercom').value.trim()
     }).then(function () { openRecipient(currentRecipient.recipientId, recipientBackTarget); });
   }
@@ -2220,9 +2255,31 @@
     }).catch(function () { showScreen('screen-error'); });
   }
 
+  let trackingRecipientId = null;
+  // Держим этот список согласованным с CANCELLABLE_STATUSES на бэкенде
+  // (api/index.ts) — там источник истины (проверка при самой отмене), тут
+  // только чтобы не показывать кнопку, если сервер всё равно откажет.
+  const CANCELLABLE_TRACKING_STATUSES = ['Новый', 'Напоминание отправлено', 'Подтверждено', 'На согласовании', 'Ожидает оплаты'];
+
   function renderTrackingScreen(res) {
     document.getElementById('tracking-title').textContent = res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel : 'Заказ';
     document.getElementById('tracking-subtitle').textContent = res.recipientName ? 'Для: ' + res.recipientName : '';
+
+    // Разовый заказ ("Заказать разово") — предлагаем сохранить получателя
+    // насовсем прямо тут, раз уж клиент всё равно смотрит на этот заказ.
+    // Больше эта карточка нигде не всплывает — другого пути открыть разового
+    // получателя в интерфейсе просто нет (он скрыт из списка "Получатели").
+    trackingRecipientId = res.recipientId || null;
+    document.getElementById('tracking-save-recipient-card').style.display = res.isOneOff ? 'block' : 'none';
+    // Отмена доступна, пока владелец не подтвердил реальную оплату (см.
+    // CANCELLABLE_STATUSES на бэкенде) — после "Оплачено" флорист уже мог
+    // начать финальную сборку, дальше это решает поддержка/владелец лично.
+    document.getElementById('tracking-cancel-btn').style.display = CANCELLABLE_TRACKING_STATUSES.indexOf(res.status) !== -1 ? 'block' : 'none';
+    // Запоминаем, какую именно версию черновика клиент сейчас видит — если
+    // флорист успеет прислать новую до того, как клиент нажмёт "Принять"/
+    // "Переделать", сервер сверит это значение и откажет вместо того, чтобы
+    // тихо засчитать решение по устаревшей картинке (см. trackingApprove/Redo).
+    trackingDraftPhotoId = res.draftPhotoId || null;
 
     const stagesEl = document.getElementById('tracking-stages');
     stagesEl.innerHTML = TRACKING_STAGE_LABELS.map(function (label, i) {
@@ -2260,7 +2317,10 @@
 
     if (res.redoExhausted) {
       noteEl.style.display = 'block';
-      noteEl.textContent = 'Мы попробовали дважды подобрать вариант — свяжитесь с нами напрямую, обсудим детали лично.';
+      // Экран трекинга не показывает нижний таббар (только topbar-back) — без
+      // прямой кнопки тут пользователю пришлось бы самому догадаться, что
+      // "Поддержка" вообще существует и как до неё добраться.
+      noteEl.innerHTML = 'Мы попробовали дважды подобрать вариант — свяжитесь с нами напрямую, обсудим детали лично. <span class="btn-link" onclick="showScreen(\'screen-support\')">Написать в поддержку →</span>';
     } else if (res.status === 'Ожидает оплаты') {
       noteEl.style.display = 'block';
       noteEl.textContent = 'Черновик одобрен — реквизиты для оплаты пришли в чат.';
@@ -2298,25 +2358,45 @@
     document.getElementById('payment-price-bouquet').textContent = (res.bouquetPrice || 0) + ' ₽';
     document.getElementById('payment-price-delivery').textContent = (res.deliverySurcharge || 0) + ' ₽';
     document.getElementById('payment-price-total').textContent = (res.total || 0) + ' ₽';
-    document.getElementById('payment-pay-btn').textContent = 'Оплатить ' + (res.total || 0) + ' ₽';
+    document.getElementById('payment-pay-btn').textContent = 'Я перевёл(а) ' + (res.total || 0) + ' ₽ — отметить оплаченным';
     document.getElementById('payment-error').textContent = '';
+    // Реквизиты настраиваются владельцем в app_settings без деплоя (см.
+    // миграцию v11) — пока поле пустое (ЮKassa/реквизиты ещё не заведены),
+    // прячем блок целиком, а не показываем пустую карточку "куда переводить".
+    paymentDetailsText = res.paymentDetails || '';
+    document.getElementById('payment-details-card').style.display = paymentDetailsText ? 'block' : 'none';
+    document.getElementById('payment-details-text').textContent = paymentDetailsText;
   }
+
+  let paymentDetailsText = '';
 
   function payForOrder() {
     document.getElementById('payment-error').textContent = '';
     apiPost({ action: 'markPaidSelf', userId: userId, rowIndex: trackingRow }).then(function (res) {
       if (!res.ok) { document.getElementById('payment-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
-      showSuccess(
-        'Оплата отмечена! Флорист оформит букет окончательно и пришлёт финальное фото перед отправкой.',
-        'Понятно',
-        function () { openTracking(trackingRow, trackingBackTarget); }
-      );
+      // Явно повторяем в success-сообщении, что это отметка "клиент сообщил
+      // об оплате", а не подтверждённое зачисление денег — иначе легко
+      // прочитать "Оплата отмечена!" как гарантию того, что деньги дошли.
+      const confirmText = paymentDetailsText
+        ? 'Отметили: вы сообщили, что перевели ' + document.getElementById('payment-price-total').textContent + '. Флорист сверит поступление и продолжит сборку букета — если перевод не найдётся, с вами свяжутся.'
+        : 'Отметили как оплаченное. Флорист сверит поступление и продолжит сборку букета — если перевод не найдётся, с вами свяжутся.';
+      showSuccess(confirmText, 'Понятно', function () { openTracking(trackingRow, trackingBackTarget); });
     });
   }
 
+  let trackingDraftPhotoId = null;
+
   function trackingApprove() {
     document.getElementById('tracking-error').textContent = '';
-    apiPost({ action: 'approveDraft', userId: userId, rowIndex: trackingRow }).then(function (res) {
+    apiPost({ action: 'approveDraft', userId: userId, rowIndex: trackingRow, draftPhotoId: trackingDraftPhotoId }).then(function (res) {
+      if (!res.ok && res.error === 'photo_outdated') {
+        // Флорист прислал новое фото, пока клиент смотрел на старое — не
+        // показываем это как обычную ошибку, а сразу подгружаем актуальную
+        // версию, чтобы клиент увидел, на что реально сейчас реагирует.
+        document.getElementById('tracking-error').textContent = 'Флорист прислал обновлённый вариант — посмотрите его перед решением.';
+        openTracking(trackingRow, trackingBackTarget);
+        return;
+      }
       if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
       openTracking(trackingRow, trackingBackTarget);
     });
@@ -2324,9 +2404,38 @@
 
   function trackingRedo() {
     document.getElementById('tracking-error').textContent = '';
-    apiPost({ action: 'redoDraft', userId: userId, rowIndex: trackingRow }).then(function (res) {
+    apiPost({ action: 'redoDraft', userId: userId, rowIndex: trackingRow, draftPhotoId: trackingDraftPhotoId }).then(function (res) {
+      if (!res.ok && res.error === 'photo_outdated') {
+        document.getElementById('tracking-error').textContent = 'Флорист прислал обновлённый вариант — посмотрите его перед решением.';
+        openTracking(trackingRow, trackingBackTarget);
+        return;
+      }
       if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
       openTracking(trackingRow, trackingBackTarget);
+    });
+  }
+
+  function convertTrackingRecipient() {
+    if (!trackingRecipientId) return;
+    const card = document.getElementById('tracking-save-recipient-card');
+    apiPost({ action: 'convertToRecipient', userId: userId, recipientId: trackingRecipientId }).then(function (res) {
+      if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
+      card.innerHTML = '<div style="font-weight:700;">Сохранено 🌸</div><p class="hint" style="margin-top:4px;">Теперь этот получатель — в вашем списке, и мы сами напомним про следующий повод.</p>';
+    });
+  }
+
+  // Общая функция отмены — используется и с экрана напоминания (reminderRow,
+  // заказ ещё даже не подтверждён), и с экрана трекинга (trackingRow, заказ
+  // уже в процессе сборки/согласования/оплаты). rowIndex передаётся явно, а
+  // не берётся из общей переменной, чтобы функция работала одинаково с обоих
+  // экранов, у которых разное "текущее" состояние.
+  function cancelCurrentOrder(rowIndex) {
+    if (!rowIndex) return;
+    if (!confirm('Точно отменить этот заказ? Если флорист уже начал собирать черновик, работа остановится.')) return;
+    const errEl = document.getElementById('tracking-error') || document.getElementById('reminder-error');
+    apiPost({ action: 'cancelOrder', userId: userId, rowIndex: rowIndex }).then(function (res) {
+      if (!res.ok) { if (errEl) errEl.textContent = 'Не получилось отменить (' + errText(res) + ').'; return; }
+      showSuccess('Заказ отменён. Если это был повторяющийся повод — дату уже сдвинули на следующий раз, напомним заранее.', 'Закрыть', function () { loadHome(); });
     });
   }
 
@@ -2465,11 +2574,14 @@
       (o.size ? '<div class="team-row"><span class="team-row-label">Размер</span><span>' + escapeHtml(o.size) + '</span></div>' : '') +
       (o.socialMedia ? '<div class="team-row"><span class="team-row-label">Соцсети</span><span>' + escapeHtml(o.socialMedia) + '</span></div>' : '') +
       (lastNoteLine ? '<div style="margin-top:8px; padding:9px 11px; background:#FBEEF0; border-radius:10px; font-size:12px; color:var(--accent-dark);"><div style="font-weight:700; font-size:11px; text-transform:uppercase; margin-bottom:3px;">Из личного дела</div>' + escapeHtml(lastNoteLine) + '</div>' : '') +
-      // Заглушка на "Дарим впервые" — реальная сводка (сколько раз дарили и
-      // как прошло в прошлый раз) подгружается отдельным запросом истории
-      // ПОСЛЕ рендера списка (см. loadTeamFlorist), чтобы не тормозить показ
-      // самой очереди сборки ожиданием N запросов истории.
-      '<div class="team-sub-line" id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '" style="margin-top:6px;">Дарим впервые</div>' +
+      // Нейтральная заглушка на время загрузки — реальная сводка (сколько раз
+      // дарили и как прошло в прошлый раз) подгружается отдельным запросом
+      // истории ПОСЛЕ рендера списка (см. loadTeamFlorist), чтобы не тормозить
+      // показ самой очереди сборки ожиданием N запросов истории. Специально
+      // НЕ пишем тут "Дарим впервые" сразу — при медленной сети флорист мог
+      // бы принять решение по букету, думая что клиент новый, хотя это
+      // просто ещё не подгрузившиеся данные.
+      '<div class="team-sub-line" id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '" style="margin-top:6px;">Загружаю историю…</div>' +
       '<div class="team-link-right"><button type="button" class="btn-link" onclick="openTeamHistory(\'' + o.recipientId + '\', \'screen-team-florist\')">🗂 Вся история</button></div>' +
       actionHtml + '</div>';
   }
@@ -2787,6 +2899,15 @@
 
     if (urlScreen === 'reminder' && urlRow) {
       loadReminder(urlRow);
+      return;
+    }
+    // Deep-link из уведомления бота: "черновик готов на согласование" / "букет
+    // одобрен, оплата" / просто "посмотреть статус" — раньше эти действия
+    // делались прямо кнопками в чате (approve/redo/paid), теперь бот только
+    // зовёт сюда, а сам openTracking уже сам решает, показать screen-tracking
+    // или screen-payment, в зависимости от актуального статуса заказа.
+    if (urlScreen === 'tracking' && urlRow) {
+      openTracking(urlRow, 'screen-home');
       return;
     }
 
