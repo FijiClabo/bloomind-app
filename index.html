@@ -128,7 +128,7 @@
   .btn-primary {
     display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: 700;
     border-radius: var(--radius-md); border: none; margin-bottom: 10px; cursor: pointer;
-    background: var(--text); color: #fff;
+    background: var(--text); color: #fff; line-height: 1.35;
     box-shadow: 0 4px 14px rgba(58,46,46,0.18);
   }
   .btn-primary:active { opacity: .85; }
@@ -364,6 +364,15 @@
     <b>5. Уточняю доставку каждый раз</b>
     <p class="hint" style="margin:4px 0 0;">Адрес и время подтверждаете перед каждым конкретным заказом — мало ли, обстоятельства меняются.</p>
   </div>
+  <div class="card">
+    <b>Прозрачные цены</b>
+    <p class="hint" style="margin:4px 0 12px;">Без скрытых доплат — точную сумму по конкретному заказу всегда показываем ещё раз перед оплатой.</p>
+    <div class="row"><span>Компакт (S)</span><span>3 400 ₽</span></div>
+    <div class="row"><span>Средний (M)</span><span>4 900 ₽</span></div>
+    <div class="row"><span>Большой (L)</span><span>6 900 ₽</span></div>
+    <div class="row"><span>Доставка</span><span>500 ₽</span></div>
+    <div class="row" style="border-bottom:none;"><span>Срочно, за 3 часа</span><span>+700 ₽</span></div>
+  </div>
   <button class="btn-primary" onclick="startForm()">Понятно, поехали</button>
 </div>
 
@@ -373,7 +382,7 @@
     <p style="margin:0;">Если что-то пошло не так или остались вопросы — напишите напрямую, отвечу лично.</p>
   </div>
   <button class="btn-primary" onclick="openSupportChat()">Написать в поддержку</button>
-  <p class="hint" style="text-align:center; margin-top:2px;">откроется чат с основателем в Telegram</p>
+  <p class="hint" style="text-align:center; margin-top:2px;">откроется чат в Telegram</p>
 </div>
 
 <!-- ===== ГЛАВНЫЙ ЭКРАН: СПИСОК ПОЛУЧАТЕЛЕЙ ===== -->
@@ -386,7 +395,7 @@
   <div id="home-list"></div>
   <button class="btn-option btn-option-dashed" onclick="startForm()" style="margin-top:14px;">+ Добавить получателя</button>
   <div style="display:flex;gap:8px;margin-top:10px">
-    <button onclick="startQuickOrder()" class="btn-option btn-option-dashed" style="flex:1; margin-bottom:0;">Заказать разово</button>
+    <button onclick="startQuickOrder()" class="btn-option" style="flex:1; margin-bottom:0; text-align:center;">Заказать разово</button>
     <button onclick="startRushOrder()" class="btn-option btn-option-dashed" style="flex:1; margin-bottom:0; border-color:var(--accent);">Срочно, за 3 часа</button>
   </div>
 </div>
@@ -442,7 +451,7 @@
     <button type="button" class="btn-link" onclick="goBack('who')">← Назад</button>
     <h1>Кем она вам приходится?</h1>
     <p class="hint">&nbsp;</p>
-    <button class="btn-option" data-value="Жена/партнёрша" onclick="chooseWho('Жена/партнёрша')">Жена / партнёрша</button>
+    <button class="btn-option" data-value="Жена/партнёрша" onclick="chooseWho('Жена/партнёрша')">Жена/партнёрша</button>
     <button class="btn-option" data-value="Мама" onclick="chooseWho('Мама')">Мама</button>
     <button class="btn-option" data-value="Дочь" onclick="chooseWho('Дочь')">Дочь</button>
     <div class="field-label" style="margin-top:16px;">Или напишите сами</div>
@@ -515,7 +524,7 @@
     <div class="two-up">
       <div>
         <div class="field-label">Дом, корпус</div>
-        <input type="text" id="input-house" placeholder="10, корп. 2">
+        <input type="text" id="input-house" placeholder="10к2">
       </div>
       <div>
         <div class="field-label">Квартира</div>
@@ -543,7 +552,7 @@
   <div class="form-step" data-step="summary">
     <h1>Проверим, всё ли верно</h1>
     <p class="hint">Можно поправить любой пункт отдельно.</p>
-    <p class="hint" id="summary-quick-note" style="display:none;">Разовый заказ — эту карточку не сохраняем и не будем напоминать про неё в будущем.</p>
+    <div id="summary-quick-note" style="display:none; background:var(--accent-soft); border-radius:var(--radius-lg); padding:12px 14px; margin-bottom:12px; font-size:13px; line-height:1.5;">Разовый заказ — эту карточку не сохраняем и не будем напоминать про неё в будущем.</div>
     <div class="card" id="summary-who-card">
       <div class="row"><span>Кому</span><span id="summary-name"></span> <button class="btn-link" onclick="editStep('name')">изменить</button></div>
       <div class="row" id="summary-who-row"><span>Кто</span><span id="summary-who"></span> <button class="btn-link" onclick="editStep('who')">изменить</button></div>
@@ -605,7 +614,7 @@
     <div class="field-label">Улица</div>
     <input type="text" id="rec-input-street" placeholder="ул. Ленина">
     <div class="two-up">
-      <div><div class="field-label">Дом, корпус</div><input type="text" id="rec-input-house" placeholder="10, корп. 2"></div>
+      <div><div class="field-label">Дом, корпус</div><input type="text" id="rec-input-house" placeholder="10к2"></div>
       <div><div class="field-label">Квартира</div><input type="text" id="rec-input-apartment"></div>
     </div>
     <div class="two-up">
@@ -744,7 +753,8 @@
   </div>
 
   <div class="card">
-    <div class="row" style="border-bottom:none; margin-bottom:8px;"><span class="occasions-summary-title">Напоминать за</span></div>
+    <div class="row" style="border-bottom:none; margin-bottom:8px;"><span class="occasions-summary-title">За сколько дней напоминать</span></div>
+    <p class="hint" style="margin:0 0 10px;">Пришлём сообщение с подтверждением заранее — успеете согласовать букет.</p>
     <div class="interval-row" id="reminder-days-row"></div>
     <p class="hint" id="reminder-days-error" style="margin:8px 0 0;"></p>
   </div>
@@ -897,7 +907,7 @@
     'screen-rush-pick': { title: 'Срочный заказ', back: 'screen-home' },
     'screen-form': { title: 'Новый получатель' },
     'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
-    'screen-reminder': { title: 'Напоминание' },
+    'screen-reminder': { title: 'Напоминание', back: 'screen-home' },
     'screen-success': { title: 'Готово' },
     'screen-payment': { title: 'Оплата', back: true },
     'screen-tracking': { title: 'Статус заказа', back: true },
@@ -922,9 +932,7 @@
     'Мама': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
       { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' },
-      { type: 'mothersday', emoji: '🍂', label: 'День матери', required: false, auto: true, defaultChecked: false, sub: 'последнее воскресенье ноября, каждый год' },
-      { type: 'anniversary', emoji: '💍', label: 'Годовщина', required: false, auto: false, needsDate: true, defaultChecked: false, sub: 'например, дата знакомства или свадьбы — дату укажете сами' },
-      { type: 'justbecause', emoji: '💌', label: 'Без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'напомним раз в выбранный период' }
+      { type: 'mothersday', emoji: '🍂', label: 'День матери', required: false, auto: true, defaultChecked: false, sub: 'последнее воскресенье ноября, каждый год' }
     ],
     'Жена/партнёрша': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
@@ -934,15 +942,11 @@
     ],
     'Дочь': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' },
-      { type: 'anniversary', emoji: '💍', label: 'Годовщина', required: false, auto: false, needsDate: true, defaultChecked: false, sub: 'например, дата знакомства или свадьбы — дату укажете сами' },
-      { type: 'justbecause', emoji: '💌', label: 'Без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'напомним раз в выбранный период' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' }
     ],
     'Другое': [
       { type: 'birthday', emoji: '🎂', label: 'День рождения', required: false, auto: false, needsDate: true, defaultChecked: true },
-      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' },
-      { type: 'anniversary', emoji: '💍', label: 'Годовщина', required: false, auto: false, needsDate: true, defaultChecked: false, sub: 'например, дата знакомства или свадьбы — дату укажете сами' },
-      { type: 'justbecause', emoji: '💌', label: 'Без повода, для настроения', required: false, auto: false, interval: true, defaultChecked: false, sub: 'напомним раз в выбранный период' }
+      { type: 'march8', emoji: '🌷', label: '8 марта', required: false, auto: true, defaultChecked: false, sub: 'каждый год, 8 марта' }
     ]
   };
 
@@ -958,6 +962,18 @@
   function shortDate(ruDate) {
     // "24.07.2026" -> "24.07"
     return ruDate ? ruDate.slice(0, 5) : '';
+  }
+
+  const MONTHS_SHORT = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  function shortDateRu(dateIso) {
+    // "2026-08-12" -> "12 авг"
+    if (!dateIso) return '';
+    const parts = dateIso.split('-');
+    if (parts.length !== 3) return '';
+    const day = parseInt(parts[2], 10);
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    if (!day || monthIdx < 0 || monthIdx > 11) return '';
+    return day + ' ' + MONTHS_SHORT[monthIdx];
   }
 
   function setTopbar(id) {
@@ -1859,7 +1875,8 @@
     if (o.type === 'Без повода') {
       parts.push('раз в ' + (o.intervalMonths || 2) + ' мес.');
     } else {
-      if (o.date) parts.push(o.date);
+      const shortRu = shortDateRu(o.dateIso);
+      if (shortRu) parts.push(shortRu);
       const label = daysUntilLabel(pick.days);
       if (label) parts.push(label);
     }
@@ -1874,14 +1891,11 @@
       // Разовые заказы — не долгосрочные получатели с напоминаниями, поэтому
       // не показываем их в обычном списке "Ваши получатели" на Главной.
       const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
-      const occasionCount = recipients.reduce(function (sum, r) { return sum + (r.occasions ? r.occasions.length : 0); }, 0);
       const countEl = document.getElementById('home-stat-count');
       const subEl = document.getElementById('home-stat-sub');
       if (countEl) countEl.textContent = String(recipients.length);
       if (subEl) {
-        subEl.textContent = recipients.length
-          ? (recipients.length + ' ' + (recipients.length === 1 ? 'получатель' : 'получателя') + ' · ' + occasionCount + ' ' + occasionsWord(occasionCount) + ' в году')
-          : 'получателей настроено';
+        subEl.textContent = recipients.length === 1 ? 'получатель настроен' : 'получателей настроено';
       }
       if (!res.ok || !recipients.length) {
         list.innerHTML = '<div class="empty-state"><div class="hero-emoji">🌿</div><h2>Пока никого нет</h2><p>Добавьте первого получателя, и я сам буду напоминать о датах.</p></div>';
@@ -2263,10 +2277,20 @@
     apiGet({ action: 'reminder', row: row }).then(function (res) {
       if (!res.ok) { showScreen('screen-error'); return; }
       const r = res.recipient;
-      // Временный диагностический лог — если бюджет снова покажет 0 ₽,
-      // открой консоль браузера (или Eruda/devtools в Telegram) и посмотри,
-      // что реально пришло в r.pricing и r.style.
-      console.log('[Bloomind debug] reminder response:', JSON.stringify(r));
+      // Диагностика бага "0 ₽": показываем видимый блок на экране ТОЛЬКО если
+      // пришедший pricing реально нулевой/пустой — не мешает при нормальной
+      // работе, но сразу видно на телефоне, если сервер снова отдал 0 ₽.
+      const gotPricing = r.pricing && (r.pricing.S || r.pricing.M || r.pricing.L);
+      if (!gotPricing) {
+        let debugEl = document.getElementById('bloomind-debug-box');
+        if (!debugEl) {
+          debugEl = document.createElement('div');
+          debugEl.id = 'bloomind-debug-box';
+          debugEl.style.cssText = 'position:fixed; bottom:0; left:0; right:0; background:#a00; color:#fff; font-size:12px; padding:10px; z-index:9999; max-height:200px; overflow:auto; white-space:pre-wrap; font-family:monospace;';
+          document.body.appendChild(debugEl);
+        }
+        debugEl.textContent = 'ДИАГНОСТИКА 0₽: style=' + JSON.stringify(r.style) + ' pricing=' + JSON.stringify(r.pricing) + ' name=' + JSON.stringify(r.name) + ' row=' + JSON.stringify(row);
+      }
       reminderRecipientName = r.name || '';
       const occasionLabel = reminderQuickLabel || r.occasion;
       document.getElementById('reminder-title').textContent = r.name + ' · ' + occasionLabel;
