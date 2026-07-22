@@ -330,11 +330,10 @@
       <svg width="30" height="30" viewBox="0 0 28 28"><rect x="7" y="13" width="14" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect><path d="M10.5 13V9a3.5 3.5 0 0 1 7 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><circle cx="14" cy="18" r="1.5" fill="currentColor"></circle></svg>
     </div>
     <h1 style="font-size:21px; margin:0 0 14px;">Прежде чем начать</h1>
-    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому.</p>
+    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
   </div>
   <div style="margin-top:30px;">
-    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Согласен(на) на обработку данных и продолжаю</button>
-    <p class="hint" style="text-align:center; margin-top:12px;">Нажимая, вы соглашаетесь с <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">политикой обработки данных</a> и <a href="offer.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">публичной офертой</a></p>
+    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Принимаю и продолжаю</button>
     <p class="hint" id="consent-error" style="text-align:center; margin-top:6px;">Показывается один раз</p>
   </div>
 </div>
@@ -640,7 +639,6 @@
 <!-- ===== КАРТОЧКА НАПОМИНАНИЯ ===== -->
 <div id="screen-reminder" class="screen">
   <h1 id="reminder-title"></h1>
-  <div class="card" id="reminder-rush-banner" style="display:none; background:var(--accent-soft); border:none; font-weight:700;">⚡ Экспресс за 3 часа — доплата за срочность указана ниже, в итоговой сумме.</div>
   <p class="hint" id="reminder-lead">Подтвердите — флорист соберёт черновик и пришлёт фото на согласование. Оплата — после того, как вам всё понравится. Не готовы сейчас — можно перенести дату.</p>
   <button class="btn-option" onclick="showPostponeInput()">Перенести дату</button>
   <div id="postpone-block" style="display:none; margin-top:2px; margin-bottom:14px;">
@@ -659,8 +657,14 @@
   <input type="tel" id="reminder-phone-input" placeholder="+7 (999) 000-00-00" oninput="formatPhoneInput(this)">
 
   <div class="field-label">Когда привезти</div>
-  <div class="interval-row" id="reminder-time-slots"></div>
-  <input type="text" id="reminder-time-custom" placeholder="Уточните удобное время" style="display:none;">
+  <div class="card" id="reminder-rush-banner" style="display:none; background:var(--accent-soft); margin-bottom:6px;">
+    <div style="font-weight:700; font-size:13.5px; color:var(--accent-dark);">Экспресс — привезём в течение 3 часов</div>
+    <div class="hint" style="font-size:12px; margin-top:2px;">Доплата за срочность: <span id="reminder-rush-fee-text"></span></div>
+  </div>
+  <div id="reminder-time-slots-wrap">
+    <div class="interval-row" id="reminder-time-slots"></div>
+    <input type="text" id="reminder-time-custom" placeholder="Уточните удобное время" style="display:none;">
+  </div>
 
   <div style="border-top:1.5px dashed var(--border); margin:16px 0;"></div>
   <div class="field-label" style="margin-top:0;">Размер букета</div>
@@ -695,7 +699,7 @@
 
 <!-- ===== ОПЛАТА ===== -->
 <div id="screen-payment" class="screen">
-  <p class="hint" id="payment-lead" style="font-size:14.5px; font-weight:700; color:var(--text);">Черновик одобрен · размер M</p>
+  <p class="hint" id="payment-lead" style="margin:0 0 16px;">Черновик одобрен</p>
 
   <div class="card" id="payment-price-card">
     <div class="row"><span>Букет</span><span id="payment-price-bouquet">—</span></div>
@@ -716,8 +720,6 @@
 
 <!-- ===== СТАТУС ЗАКАЗА ===== -->
 <div id="screen-tracking" class="screen">
-  <h1 id="tracking-title" style="margin-bottom:4px;"></h1>
-  <p class="hint" id="tracking-subtitle" style="margin-top:0;"></p>
   <div id="tracking-stages" style="display:flex; margin:22px 0 26px;"></div>
 
   <div class="card" id="tracking-photo-card" style="display:none; padding:16px;">
@@ -728,6 +730,13 @@
       <button class="btn-primary" onclick="trackingApprove()">Всё отлично</button>
       <button class="btn-option" onclick="trackingRedo()" style="margin-top:8px;">Хочу другой вариант</button>
     </div>
+  </div>
+
+  <div class="card" id="tracking-pay-card" style="display:none; padding:16px;">
+    <div style="font-weight:800; font-size:15px; margin-bottom:4px;">Черновик одобрен</div>
+    <p class="hint" style="margin:0 0 12px;">Осталось оплатить — после оплаты флорист оформит букет окончательно.</p>
+    <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span class="hint" style="font-size:13px;">К оплате</span><span style="font-weight:800; font-size:16px;" id="tracking-pay-total">—</span></div>
+    <button class="btn-primary" id="tracking-pay-btn" onclick="goToPaymentFromTracking()">Оплатить</button>
   </div>
 
   <div class="card" id="tracking-final-photo-card" style="display:none; padding:16px;">
@@ -914,7 +923,7 @@
     'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
     'screen-reminder': { title: 'Напоминание', back: 'screen-home' },
     'screen-success': { title: 'Готово' },
-    'screen-payment': { title: 'Оплата', back: true },
+    'screen-payment': { title: 'Оплата', back: 'screen-tracking' },
     'screen-tracking': { title: 'Статус заказа', back: true },
     'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' },
     'screen-team-role': { title: 'Выбор роли', back: 'screen-profile' },
@@ -1328,18 +1337,22 @@
   // повода/создания occasion для срочной доставки.
   function loadRushPickList() {
     const list = document.getElementById('rush-pick-list');
+    const label = document.getElementById('rush-pick-list-label');
     list.innerHTML = '<p class="hint">Загрузка…</p>';
+    label.style.display = 'none';
     apiGet({ action: 'list', userId: userId }).then(function (res) {
       const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
       if (!recipients.length) {
         list.innerHTML = '<p class="hint">Сохранённых получателей пока нет — оформите нового.</p>';
         return;
       }
+      label.style.display = 'block';
       list.innerHTML = '';
       recipients.forEach(function (r) {
         const div = document.createElement('div');
         div.className = 'card recipient-card';
-        div.innerHTML = '<div class="recipient-name">' + escapeHtml(r.name) + '</div>';
+        div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; cursor:pointer;';
+        div.innerHTML = '<span class="recipient-name">' + escapeHtml(r.name) + '</span><span style="color:var(--hint); font-size:14px;">›</span>';
         div.addEventListener('click', function () { rushPickExisting(r); });
         list.appendChild(div);
       });
@@ -2342,12 +2355,11 @@
       const occasionLabel = reminderQuickLabel || r.occasion;
       document.getElementById('reminder-title').textContent = r.name + ' · ' + occasionLabel;
       reminderQuickLabel = null;
-      // Баннер срочности — approximate-показ статичной суммы 700 ₽ (совпадает
-      // с дефолтом rush_fee в app_settings на бэкенде). apiReminder (GET) не
-      // отдаёт rush_fee отдельно, а заводить ради баннера ещё один бэкенд-
-      // проброс избыточно — сумма и так подтверждается/пересчитывается на
-      // сервере в apiConfirmReminder, это только предварительная подсказка.
+      // Баннер срочности — как в макете, заменяет собой выбор слотов времени
+      // целиком (доставка "в течение 3 часов" не оставляет выбора окна).
       document.getElementById('reminder-rush-banner').style.display = reminderRush ? 'block' : 'none';
+      document.getElementById('reminder-time-slots-wrap').style.display = reminderRush ? 'none' : 'block';
+      if (reminderRush) document.getElementById('reminder-rush-fee-text').textContent = (r.rushFee || reminderRushFee || 700) + ' ₽';
       reminderDefaultAddress = r.defaultAddress || '';
       document.getElementById('reminder-phone-input').value = r.defaultPhone || '';
       reminderAddressMode = reminderDefaultAddress ? 'default' : 'custom';
@@ -2466,7 +2478,7 @@
       trackingRow = reminderRow;
       showSuccess(
         'Подтверждено! Флорист соберёт черновик букета для получателя «' + (reminderRecipientName || '—') + '» и пришлёт фото на согласование. Оплата — после того, как вам всё понравится.',
-        'Посмотреть статус заказа',
+        'Смотреть статус',
         function () { openTracking(trackingRow, 'screen-success'); }
       );
       if (reminderIsOneOff) showSuccessSaveOffer(reminderRecipientId);
@@ -2539,12 +2551,21 @@
     showScreen('screen-loading');
     apiGet({ action: 'tracking', userId: userId, row: rowIndex }).then(function (res) {
       if (!res.ok) { showScreen('screen-error'); return; }
-      // Черновик одобрен, деньги ещё не спрошены — вместо обычного экрана
-      // статуса сразу показываем экран оплаты (плейсхолдер до ЮKassa),
-      // это и есть новая точка, где раньше просто слали реквизиты в чат.
-      if (res.showPayment) { renderPaymentScreen(res); showScreen('screen-payment'); return; }
       renderTrackingScreen(res);
       showScreen('screen-tracking');
+    }).catch(function () { showScreen('screen-error'); });
+  }
+
+  // Кнопка "Оплатить" на встроенной карточке "Черновик одобрен" (как в
+  // макете — карточка прямо на экране Трекинг, а не автоматический редирект
+  // на отдельный экран) — по клику уже осознанно открываем полноценный экран
+  // оплаты с реквизитами.
+  function goToPaymentFromTracking() {
+    showScreen('screen-loading');
+    apiGet({ action: 'tracking', userId: userId, row: trackingRow }).then(function (res) {
+      if (!res.ok) { showScreen('screen-error'); return; }
+      renderPaymentScreen(res);
+      showScreen('screen-payment');
     }).catch(function () { showScreen('screen-error'); });
   }
 
@@ -2554,8 +2575,6 @@
   const CANCELLABLE_TRACKING_STATUSES = ['Новый', 'Напоминание отправлено', 'Подтверждено', 'На согласовании', 'Ожидает оплаты'];
 
   function renderTrackingScreen(res) {
-    document.getElementById('tracking-title').textContent = res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel : 'Заказ';
-    document.getElementById('tracking-subtitle').textContent = res.recipientName ? 'Для: ' + res.recipientName : '';
     // Отмена доступна, пока владелец не подтвердил реальную оплату (см.
     // CANCELLABLE_STATUSES на бэкенде) — после "Оплачено" флорист уже мог
     // начать финальную сборку, дальше это решает поддержка/владелец лично.
@@ -2600,6 +2619,16 @@
       finalCard.style.display = 'none';
     }
 
+    // "Черновик одобрен" — встроенная карточка прямо на экране статуса, как
+    // в макете, а не автоматический переход на отдельный экран оплаты.
+    const payCard = document.getElementById('tracking-pay-card');
+    if (res.showPayment) {
+      payCard.style.display = 'block';
+      document.getElementById('tracking-pay-total').textContent = (res.total || 0) + ' ₽';
+    } else {
+      payCard.style.display = 'none';
+    }
+
     if (res.redoExhausted) {
       noteEl.style.display = 'block';
       // Экран трекинга не показывает нижний таббар (только topbar-back) — без
@@ -2637,7 +2666,7 @@
   // "Я оплатил(а)" в чате бота), а не проводит настоящий платёж.
   function renderPaymentScreen(res) {
     const sizeLabel = res.size && SIZE_LABELS[res.size] ? SIZE_LABELS[res.size] : null;
-    const lead = [res.occasionLabel, sizeLabel ? 'размер ' + sizeLabel : null].filter(Boolean).join(' · ') || 'Черновик одобрен';
+    const lead = [res.recipientName, res.occasionLabel, sizeLabel ? 'размер ' + sizeLabel : null].filter(Boolean).join(' · ') || 'Черновик одобрен';
     document.getElementById('payment-lead').textContent = lead;
     document.getElementById('payment-price-bouquet').textContent = (res.bouquetPrice || 0) + ' ₽';
     document.getElementById('payment-price-delivery').textContent = (res.deliverySurcharge || 0) + ' ₽';
@@ -3097,12 +3126,14 @@
       const clients = res.clients || [];
       if (!clients.length) { el.innerHTML = '<p class="center">Клиентов пока нет.</p>'; return; }
       el.innerHTML = clients.map(function (c) {
+        const ordersLabel = c.orderCount + ' ' + plural(c.orderCount, ['заказ', 'заказа', 'заказов']);
         return '<div class="card" style="cursor:pointer;" onclick="openTeamHistory(\'' + c.recipientId + '\', \'screen-team-clients\')">' +
-          '<div class="team-card-top"><div><div class="team-rec-name">' + escapeHtml(c.name) + '</div>' +
-          '<div class="team-sub-line">' + escapeHtml(c.who || '') + '</div></div></div>' +
-          '<div class="team-row"><span class="team-row-label">Заказы</span><span>' + c.orderCount + ' ' + plural(c.orderCount, ['заказ', 'заказа', 'заказов']) + '</span></div>' +
-          '<div class="team-row"><span class="team-row-label">Выручка</span><span>' + c.totalRevenue.toLocaleString('ru-RU') + ' ₽</span></div>' +
-          '<div class="team-row"><span class="team-row-label">Последний</span><span>' + escapeHtml(c.lastOrderDate || '—') + '</span></div>' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
+            '<span class="team-rec-name">' + escapeHtml(c.name) + '</span>' +
+            '<span class="team-rec-name">' + c.totalRevenue.toLocaleString('ru-RU') + ' ₽</span>' +
+          '</div>' +
+          '<div class="team-sub-line">' + escapeHtml(c.who || '') + ' · ' + ordersLabel + '</div>' +
+          '<div class="team-sub-line" style="margin-top:2px;">Последний заказ: ' + escapeHtml(c.lastOrderDate || '—') + '</div>' +
           '</div>';
       }).join('');
     });
