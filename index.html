@@ -404,7 +404,7 @@
 <div id="screen-rush-pick" class="screen">
   <div class="card" style="background:var(--accent-soft); border:none;">
     <div style="font-weight:700; font-size:14.5px; color:var(--accent-dark); margin-bottom:4px;">Экспресс за 3 часа</div>
-    <p class="hint" style="margin:0;">Доплата 700 ₽ за срочность. Кому доставляем?</p>
+    <p class="hint" id="rush-pick-fee-text" style="margin:0;">Доплата 700 ₽ за срочность. Кому доставляем?</p>
   </div>
   <button class="btn-primary" onclick="rushPickNew()" style="text-align:left; margin-bottom:16px;">Новому получателю</button>
   <div class="section-label" id="rush-pick-list-label" style="display:none;">Уже есть в списке</div>
@@ -607,7 +607,7 @@
   </div>
 
   <div class="section-label">Контакты для доставки</div>
-  <div class="card" id="recipient-address-view"></div>
+  <div class="card" id="recipient-address-view" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;"></div>
   <div class="card" id="recipient-address-edit" style="display:none;">
     <div class="field-label">Город</div>
     <input type="text" id="rec-input-city" placeholder="Москва">
@@ -626,7 +626,7 @@
     <button class="btn-primary" onclick="saveRecipientAddress()">Сохранить</button>
     <button class="btn-link" onclick="cancelRecipientAddressEdit()">Отмена</button>
   </div>
-  <div class="card" id="recipient-phone-view"></div>
+  <div class="card" id="recipient-phone-view" style="margin-top:-1px; border-top-left-radius:0; border-top-right-radius:0;"></div>
   <div class="card" id="recipient-phone-edit" style="display:none;">
     <div class="field-label">Телефон получателя</div>
     <input type="tel" id="rec-input-phone">
@@ -676,7 +676,6 @@
 
   <button class="btn-primary" onclick="confirmReminder()">Подтвердить</button>
   <p class="hint" id="reminder-error"></p>
-  <button class="btn-option" onclick="cancelCurrentOrder(reminderRow)" style="color:var(--red); margin-top:4px;">Не в этот раз, отменить</button>
 </div>
 
 <!-- ===== УСПЕХ ===== -->
@@ -686,18 +685,23 @@
     <p class="center" id="success-text" style="padding:0;">Готово.</p>
   </div>
   <button class="btn-primary" id="success-cta-btn" onclick="closeApp()">Закрыть</button>
+
+  <div class="card" id="success-save-recipient-card" style="display:none; margin-top:16px;">
+    <div style="font-weight:700; margin-bottom:4px;">Хотите, будем запоминать?</div>
+    <p class="hint" style="margin-top:0;">Сохраним получателя, поводы и вкусы — в следующий раз напомним сами.</p>
+    <button class="btn-primary" onclick="convertSuccessRecipient()">Сохранить как постоянного получателя</button>
+  </div>
 </div>
 
-<!-- ===== ОПЛАТА (плейсхолдер до подключения ЮKassa) ===== -->
+<!-- ===== ОПЛАТА ===== -->
 <div id="screen-payment" class="screen">
-  <h1>Оплата</h1>
-  <p class="hint" id="payment-lead">Черновик одобрен — осталось оплатить, и флорист доведёт букет до финального вида.</p>
+  <p class="hint" id="payment-lead" style="font-size:14.5px; font-weight:700; color:var(--text);">Черновик одобрен · размер M</p>
 
   <div class="card" id="payment-price-card">
     <div class="row"><span>Букет</span><span id="payment-price-bouquet">—</span></div>
     <div class="row"><span>Доставка</span><span id="payment-price-delivery">—</span></div>
     <div class="row" id="payment-price-rush-row" style="display:none;"><span>Срочность (3 часа)</span><span id="payment-price-rush">—</span></div>
-    <div class="row" style="font-weight:800;"><span>Итого</span><span id="payment-price-total">—</span></div>
+    <div class="row" style="font-weight:800;"><span>К оплате</span><span id="payment-price-total">—</span></div>
   </div>
 
   <div class="card" id="payment-details-card" style="display:none; background:var(--accent-soft-alt);">
@@ -705,8 +709,8 @@
     <div id="payment-details-text" style="font-size:15px; line-height:1.5;"></div>
   </div>
 
-  <button class="btn-primary" id="payment-pay-btn" onclick="payForOrder()">Я перевёл(а) — отметить оплаченным</button>
-  <p class="hint" id="payment-footnote">Онлайн-оплата картой скоро появится прямо здесь. Пока переведите сумму по реквизитам выше и нажмите кнопку — флорист сверит поступление вручную и продолжит сборку.</p>
+  <button class="btn-primary" id="payment-pay-btn" onclick="payForOrder()">Оплатить</button>
+  <p class="hint" id="payment-footnote">Онлайн-оплата картой и СБП скоро появится прямо здесь — пока переведите сумму по реквизитам выше и нажмите кнопку, флорист сверит поступление вручную.</p>
   <p class="hint" id="payment-error"></p>
 </div>
 
@@ -733,12 +737,6 @@
   </div>
 
   <p class="hint" id="tracking-note" style="display:none;"></p>
-
-  <div class="card" id="tracking-save-recipient-card" style="display:none;">
-    <div style="font-weight:700; margin-bottom:4px;">Сохранить получателя?</div>
-    <p class="hint" style="margin-top:0;">Этот заказ был разовым — карточка не сохранена. Если планируете дарить ещё, сохраним всё (адрес, стиль, телефон) и будем сами напоминать о датах.</p>
-    <button class="btn-primary" onclick="convertTrackingRecipient()">Сохранить как постоянного получателя</button>
-  </div>
 
   <p class="hint" id="tracking-error"></p>
   <button class="btn-option" id="tracking-cancel-btn" onclick="cancelCurrentOrder(trackingRow)" style="display:none; color:var(--red); margin-top:8px;">Отменить заказ</button>
@@ -789,6 +787,12 @@
   </div>
 </div>
 
+<!-- ===== КОМАНДА: ВЫБОР РОЛИ ===== -->
+<div id="screen-team-role" class="screen">
+  <p class="hint" style="margin:0 0 18px;">Выберите роль — экраны и заказы подстроятся под задачи.</p>
+  <div id="team-role-list"></div>
+</div>
+
 <!-- ===== КОМАНДА: ЗАКАЗЫ (только неоплаченные — очередь на оплату) ===== -->
 <div id="screen-team-orders" class="screen">
   <p class="hint" style="margin:0 0 14px;">Ждут оплаты. Как только клиент оплатит — заказ пропадёт отсюда и появится у флориста.</p>
@@ -827,6 +831,7 @@
       <div style="font-size:11px; color:var(--accent-dark); font-weight:700; text-transform:uppercase; letter-spacing:.03em; margin-top:3px;">Выручка</div>
     </div>
   </div>
+  <p class="hint" style="margin:0 0 12px;">По убыванию суммы заказов. Клик — история букетов этого получателя.</p>
   <p class="hint" id="team-clients-empty-note" style="display:none;">клиентов пока нет</p>
   <div id="team-clients-list"></div>
 </div>
@@ -912,6 +917,7 @@
     'screen-payment': { title: 'Оплата', back: true },
     'screen-tracking': { title: 'Статус заказа', back: true },
     'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' },
+    'screen-team-role': { title: 'Выбор роли', back: 'screen-profile' },
     'screen-team-orders': { title: 'Заказы', eyebrow: 'Команда', tab: 'team-orders' },
     'screen-team-florist': { title: 'Флорист', eyebrow: 'Команда', tab: 'team-florist' },
     'screen-team-history': { title: 'История букетов', back: 'screen-team-orders' },
@@ -1061,7 +1067,27 @@
     // (через setTopbar) — здесь только пересобирается набор кнопок под режим/роль.
   }
 
+  // Экран "Выбор роли" — по дизайну. Роль всё равно определяется сервером
+  // (myStaffRole), клиент не может её подделать: список всегда содержит
+  // только ту роль, что реально назначена этому Telegram ID в таблице staff.
+  // Это подтверждающий шаг перед входом в режим команды, а не настоящий
+  // мульти-выбор — но выглядит и ведёт себя как в макете (экран 36).
   function enterTeamMode() {
+    if (!myStaffRole) return;
+    showScreen('screen-team-role');
+    renderTeamRolePicker();
+  }
+
+  function renderTeamRolePicker() {
+    const list = document.getElementById('team-role-list');
+    if (!list || !myStaffRole) return;
+    const label = TEAM_ROLE_LABEL[myStaffRole] || myStaffRole;
+    list.innerHTML = '<button type="button" class="btn-option" onclick="chooseTeamRole()" style="text-align:left;">' +
+      '<div style="font-weight:700; font-size:15px;">' + escapeHtml(label) + '</div>' +
+      '</button>';
+  }
+
+  function chooseTeamRole() {
     if (!myStaffRole) return;
     appMode = 'team';
     renderTabbar();
@@ -1286,6 +1312,14 @@
   function startRushOrder() {
     showScreen('screen-rush-pick');
     loadRushPickList();
+    // Доплата за срочность настраивается владельцем в app_settings
+    // (rush_fee) — подтягиваем актуальное значение вместо жёстко зашитого
+    // "700 ₽", чтобы баннер не расходился с реальной ценой при подтверждении.
+    apiGet({ action: 'settings', userId: userId }).then(function (res) {
+      if (res.ok && res.rushFee) {
+        document.getElementById('rush-pick-fee-text').textContent = 'Доплата ' + res.rushFee + ' ₽ за срочность. Кому доставляем?';
+      }
+    }).catch(function () {});
   }
 
   // Список уже сохранённых получателей для срочного заказа — переиспользуем
@@ -2087,8 +2121,17 @@
       (r.socialMedia ? '<div class="hint" style="font-size:12px; margin-top:2px;">' + escapeHtml(r.socialMedia) + '</div>' : '') +
       '</div><span class="btn-link" onclick="editRecipientStyle()">изменить</span></div>';
 
+    // "Как найти" — подъезд/этаж/домофон, показываем только если хоть что-то
+    // из этого указано (мокап показывает эту строку как условную, вторую).
+    const ap = r.addressParts || {};
+    const findParts = [
+      ap.entrance ? 'подъезд ' + ap.entrance : null,
+      ap.floor ? 'этаж ' + ap.floor : null,
+      ap.intercom ? 'домофон ' + ap.intercom : null
+    ].filter(Boolean);
+    const findLine = findParts.length ? '<div class="hint" style="font-size:12px; margin-top:4px;">Как найти: ' + escapeHtml(findParts.join(', ')) + '</div>' : '';
     document.getElementById('recipient-address-view').innerHTML =
-      '<div class="row" style="border-bottom:none;"><span>' + escapeHtml(r.address || 'адрес не указан') + '</span>' +
+      '<div class="row" style="border-bottom:none;"><span>' + escapeHtml(r.address || 'адрес не указан') + findLine + '</span>' +
       '<span class="btn-link" onclick="editRecipientAddress()">изменить</span></div>';
 
     document.getElementById('recipient-phone-view').innerHTML =
@@ -2259,6 +2302,8 @@
   // ===== КАРТОЧКА НАПОМИНАНИЯ =====
   let reminderRow = null;
   let reminderRecipientName = ''; // для success-текста после confirmReminder — см. showSuccess ниже
+  let reminderRecipientId = null; // для предложения "сохранить получателя" на Success
+  let reminderIsOneOff = false;
   let reminderDefaultAddress = '';
   const TIME_SLOTS = ['09:00–13:00', '13:00–17:00', '17:00–21:00'];
   let reminderSelectedSlot = null;
@@ -2292,6 +2337,8 @@
         debugEl.textContent = 'ДИАГНОСТИКА 0₽: style=' + JSON.stringify(r.style) + ' pricing=' + JSON.stringify(r.pricing) + ' name=' + JSON.stringify(r.name) + ' row=' + JSON.stringify(row);
       }
       reminderRecipientName = r.name || '';
+      reminderRecipientId = r.recipientId || null;
+      reminderIsOneOff = !!r.isOneOff;
       const occasionLabel = reminderQuickLabel || r.occasion;
       document.getElementById('reminder-title').textContent = r.name + ' · ' + occasionLabel;
       reminderQuickLabel = null;
@@ -2422,6 +2469,7 @@
         'Посмотреть статус заказа',
         function () { openTracking(trackingRow, 'screen-success'); }
       );
+      if (reminderIsOneOff) showSuccessSaveOffer(reminderRecipientId);
     });
   }
 
@@ -2449,7 +2497,34 @@
     const btn = document.getElementById('success-cta-btn');
     btn.textContent = ctaLabel;
     btn.onclick = ctaAction;
+    // Предложение "сохранить получателя" — по умолчанию скрыто, показывается
+    // явно вызовом showSuccessSaveOffer() сразу после showSuccess() там, где
+    // это уместно (после подтверждения разового заказа).
+    const saveCard = document.getElementById('success-save-recipient-card');
+    saveCard.style.display = 'none';
+    saveCard.innerHTML = '<div style="font-weight:700; margin-bottom:4px;">Хотите, будем запоминать?</div>' +
+      '<p class="hint" style="margin-top:0;">Сохраним получателя, поводы и вкусы — в следующий раз напомним сами.</p>' +
+      '<button class="btn-primary" onclick="convertSuccessRecipient()">Сохранить как постоянного получателя</button>';
     showScreen('screen-success');
+  }
+
+  let successRecipientId = null;
+
+  // Показывает предложение сохранить разового получателя насовсем — вызывать
+  // сразу после showSuccess() там, где заказ мог быть одноразовым.
+  function showSuccessSaveOffer(recipientId) {
+    successRecipientId = recipientId || null;
+    if (!successRecipientId) return;
+    document.getElementById('success-save-recipient-card').style.display = 'block';
+  }
+
+  function convertSuccessRecipient() {
+    if (!successRecipientId) return;
+    const card = document.getElementById('success-save-recipient-card');
+    apiPost({ action: 'convertToRecipient', userId: userId, recipientId: successRecipientId }).then(function (res) {
+      if (!res.ok) return;
+      card.innerHTML = '<div style="font-weight:700;">Сохранено 🌸</div><p class="hint" style="margin-top:4px;">Теперь этот получатель — в вашем списке, и мы сами напомним про следующий повод.</p>';
+    });
   }
 
   // ===== СТАТУС ЗАКАЗА (черновик-фото, одобрение/переделка, финальное фото) =====
@@ -2473,7 +2548,6 @@
     }).catch(function () { showScreen('screen-error'); });
   }
 
-  let trackingRecipientId = null;
   // Держим этот список согласованным с CANCELLABLE_STATUSES на бэкенде
   // (api/index.ts) — там источник истины (проверка при самой отмене), тут
   // только чтобы не показывать кнопку, если сервер всё равно откажет.
@@ -2482,13 +2556,6 @@
   function renderTrackingScreen(res) {
     document.getElementById('tracking-title').textContent = res.occasionLabel ? (EMOJI_BY_LABEL[res.occasionLabel] || '✨') + ' ' + res.occasionLabel : 'Заказ';
     document.getElementById('tracking-subtitle').textContent = res.recipientName ? 'Для: ' + res.recipientName : '';
-
-    // Разовый заказ ("Заказать разово") — предлагаем сохранить получателя
-    // насовсем прямо тут, раз уж клиент всё равно смотрит на этот заказ.
-    // Больше эта карточка нигде не всплывает — другого пути открыть разового
-    // получателя в интерфейсе просто нет (он скрыт из списка "Получатели").
-    trackingRecipientId = res.recipientId || null;
-    document.getElementById('tracking-save-recipient-card').style.display = res.isOneOff ? 'block' : 'none';
     // Отмена доступна, пока владелец не подтвердил реальную оплату (см.
     // CANCELLABLE_STATUSES на бэкенде) — после "Оплачено" флорист уже мог
     // начать финальную сборку, дальше это решает поддержка/владелец лично.
@@ -2570,9 +2637,7 @@
   // "Я оплатил(а)" в чате бота), а не проводит настоящий платёж.
   function renderPaymentScreen(res) {
     const sizeLabel = res.size && SIZE_LABELS[res.size] ? SIZE_LABELS[res.size] : null;
-    const lead = res.recipientName
-      ? [res.recipientName, res.occasionLabel, sizeLabel ? 'размер ' + sizeLabel : null].filter(Boolean).join(' · ')
-      : 'Черновик одобрен — осталось оплатить.';
+    const lead = [res.occasionLabel, sizeLabel ? 'размер ' + sizeLabel : null].filter(Boolean).join(' · ') || 'Черновик одобрен';
     document.getElementById('payment-lead').textContent = lead;
     document.getElementById('payment-price-bouquet').textContent = (res.bouquetPrice || 0) + ' ₽';
     document.getElementById('payment-price-delivery').textContent = (res.deliverySurcharge || 0) + ' ₽';
@@ -2584,7 +2649,7 @@
       rushRow.style.display = 'none';
     }
     document.getElementById('payment-price-total').textContent = (res.total || 0) + ' ₽';
-    document.getElementById('payment-pay-btn').textContent = 'Я перевёл(а) ' + (res.total || 0) + ' ₽ — отметить оплаченным';
+    document.getElementById('payment-pay-btn').textContent = 'Оплатить ' + (res.total || 0) + ' ₽';
     document.getElementById('payment-error').textContent = '';
     // Реквизиты настраиваются владельцем в app_settings без деплоя (см.
     // миграцию v11) — пока поле пустое (ЮKassa/реквизиты ещё не заведены),
@@ -2638,15 +2703,6 @@
       }
       if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
       openTracking(trackingRow, trackingBackTarget);
-    });
-  }
-
-  function convertTrackingRecipient() {
-    if (!trackingRecipientId) return;
-    const card = document.getElementById('tracking-save-recipient-card');
-    apiPost({ action: 'convertToRecipient', userId: userId, recipientId: trackingRecipientId }).then(function (res) {
-      if (!res.ok) { document.getElementById('tracking-error').textContent = 'Не получилось (' + errText(res) + ').'; return; }
-      card.innerHTML = '<div style="font-weight:700;">Сохранено 🌸</div><p class="hint" style="margin-top:4px;">Теперь этот получатель — в вашем списке, и мы сами напомним про следующий повод.</p>';
     });
   }
 
@@ -2811,15 +2867,18 @@
       (o.style ? '<div class="team-row"><span class="team-row-label">Стиль</span><span>' + escapeHtml(o.style) + '</span></div>' : '') +
       (o.size ? '<div class="team-row"><span class="team-row-label">Размер</span><span>' + escapeHtml(o.size) + '</span></div>' : '') +
       (o.socialMedia ? '<div class="team-row"><span class="team-row-label">Соцсети</span><span>' + escapeHtml(o.socialMedia) + '</span></div>' : '') +
-      (lastNoteLine ? '<div style="margin-top:8px; padding:9px 11px; background:#FBEEF0; border-radius:10px; font-size:12px; color:var(--accent-dark);"><div style="font-weight:700; font-size:11px; text-transform:uppercase; margin-bottom:3px;">Из личного дела</div>' + escapeHtml(lastNoteLine) + '</div>' : '') +
-      // Нейтральная заглушка на время загрузки — реальная сводка (сколько раз
-      // дарили и как прошло в прошлый раз) подгружается отдельным запросом
-      // истории ПОСЛЕ рендера списка (см. loadTeamFlorist), чтобы не тормозить
-      // показ самой очереди сборки ожиданием N запросов истории. Специально
-      // НЕ пишем тут "Дарим впервые" сразу — при медленной сети флорист мог
-      // бы принять решение по букету, думая что клиент новый, хотя это
-      // просто ещё не подгрузившиеся данные.
-      '<div class="team-sub-line" id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '" style="margin-top:6px;">Загружаю историю…</div>' +
+      (lastNoteLine ? '<div class="team-row"><span class="team-row-label">Заметка</span><span>' + escapeHtml(lastNoteLine) + '</span></div>' : '') +
+      // "Из личного дела" по макету — это сводка истории прошлых букетов
+      // (сколько раз дарили и как прошло в прошлый раз), а не заметка клиента.
+      // Подгружается отдельным запросом ПОСЛЕ рендера списка (см.
+      // loadTeamFlorist), чтобы не тормозить показ очереди ожиданием N
+      // запросов истории. Специально НЕ пишем тут "Дарим впервые" сразу — при
+      // медленной сети флорист мог бы принять решение по букету, думая что
+      // клиент новый, хотя это просто ещё не подгрузившиеся данные.
+      '<div style="margin-top:8px; padding:9px 11px; background:#FBEEF0; border-radius:10px; font-size:12px; color:var(--accent-dark);">' +
+        '<div style="font-weight:700; font-size:11px; text-transform:uppercase; margin-bottom:3px;">Из личного дела</div>' +
+        '<div id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '">Загружаю историю…</div>' +
+      '</div>' +
       '<div class="team-link-right"><button type="button" class="btn-link" onclick="openTeamHistory(\'' + o.recipientId + '\', \'screen-team-florist\')">🗂 Вся история</button></div>' +
       actionHtml + '</div>';
   }
