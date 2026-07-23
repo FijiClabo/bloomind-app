@@ -836,7 +836,27 @@
 <!-- ===== КОМАНДА: СОСТАВ ===== -->
 <div id="screen-team-staff" class="screen">
   <div id="team-staff-list"></div>
-  <button class="btn-primary" onclick="showAddStaffForm()">+ Добавить сотрудника</button>
+  <button class="btn-primary" onclick="showInviteForm()">+ Пригласить сотрудника</button>
+  <div class="card" id="invite-form" style="display:none; margin-top:10px;">
+    <div class="field-label">Роль нового сотрудника</div>
+    <div class="team-role-select">
+      <div class="btn-option selected" data-invrole="florist" onclick="pickInviteRole('florist', this)">Флорист</div>
+      <div class="btn-option" data-invrole="courier" onclick="pickInviteRole('courier', this)">Курьер</div>
+      <div class="btn-option" data-invrole="owner" onclick="pickInviteRole('owner', this)">Владелец</div>
+    </div>
+    <button class="btn-primary" style="margin-top:12px;" onclick="createInviteLink()">Создать ссылку-приглашение</button>
+    <div id="invite-result" style="display:none; margin-top:12px; background:var(--accent-soft); border-radius:var(--radius-md); padding:12px;">
+      <p class="hint" style="margin:0 0 8px;">Отправьте ссылку сотруднику. Он перейдёт по ней — бот сам добавит его как <b id="invite-role-word"></b>, вводить ID не нужно.</p>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="invite-link-input" readonly style="flex:1; font-size:12px; padding:8px;">
+        <button type="button" class="btn-link" style="white-space:nowrap;" onclick="copyInviteLink()">Копировать</button>
+      </div>
+      <p class="hint" id="invite-copied" style="margin:6px 0 0; display:none; color:var(--green);">Скопировано ✓</p>
+    </div>
+    <p class="hint" id="invite-error" style="margin:8px 0 0;"></p>
+    <button type="button" class="btn-link" style="display:block; margin:12px auto 0;" onclick="showAddStaffForm()">или добавить вручную по ID</button>
+    <button type="button" class="btn-link" style="display:block; margin:6px auto 0;" onclick="hideInviteForm()">Закрыть</button>
+  </div>
   <div class="card" id="add-staff-form" style="display:none; margin-top:10px;">
     <div class="field-label">Имя (для отображения)</div>
     <input type="text" id="staff-name" placeholder="Например: Флорист Аня">
@@ -2552,7 +2572,7 @@
   }
 
   // ===== СТАТУС ЗАКАЗА (черновик-фото, одобрение/переделка, финальное фото) =====
-  const TRACKING_STAGE_LABELS = ['Собираем', 'Фото на проверку', 'В пути', 'Доставлено'];
+  const TRACKING_STAGE_LABELS = ['Собираем', 'Фото на проверку', 'Оплата', 'В пути', 'Доставлено'];
   let trackingRow = null;
   let trackingBackTarget = 'screen-home';
 
@@ -3203,8 +3223,57 @@
     });
   }
 
+  // ===== Приглашение сотрудника по ссылке (основной способ) =====
+  let pendingInviteRole = 'florist';
+  const INVITE_ROLE_WORD = { florist: 'флориста', courier: 'курьера', owner: 'владельца' };
+  function showInviteForm() {
+    document.getElementById('invite-form').style.display = 'block';
+    document.getElementById('add-staff-form').style.display = 'none';
+  }
+  function hideInviteForm() {
+    document.getElementById('invite-form').style.display = 'none';
+    document.getElementById('invite-result').style.display = 'none';
+    document.getElementById('invite-error').textContent = '';
+  }
+  function pickInviteRole(role, el) {
+    pendingInviteRole = role;
+    document.querySelectorAll('#invite-form [data-invrole]').forEach(function (b) { b.classList.remove('selected'); });
+    el.classList.add('selected');
+  }
+  function createInviteLink() {
+    const err = document.getElementById('invite-error');
+    err.textContent = 'Создаём ссылку…';
+    teamApiPost({ action: 'createInvite', role: pendingInviteRole }).then(function (res) {
+      if (!res.ok || !res.link) {
+        err.textContent = res.error === 'no_bot_username'
+          ? 'Не удалось определить бота — попробуйте ещё раз чуть позже.'
+          : 'Не получилось: ' + errText(res);
+        return;
+      }
+      err.textContent = '';
+      document.getElementById('invite-role-word').textContent = INVITE_ROLE_WORD[res.role] || res.role;
+      document.getElementById('invite-link-input').value = res.link;
+      document.getElementById('invite-result').style.display = 'block';
+      document.getElementById('invite-copied').style.display = 'none';
+    }).catch(function () { err.textContent = 'Нет связи с сервером, попробуйте ещё раз.'; });
+  }
+  function copyInviteLink() {
+    const input = document.getElementById('invite-link-input');
+    input.select();
+    input.setSelectionRange(0, 99999);
+    const done = function () { document.getElementById('invite-copied').style.display = 'block'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(input.value).then(done).catch(function () { try { document.execCommand('copy'); done(); } catch (e) {} });
+    } else {
+      try { document.execCommand('copy'); done(); } catch (e) {}
+    }
+  }
+
   let pendingStaffRole = 'florist';
-  function showAddStaffForm() { document.getElementById('add-staff-form').style.display = 'block'; }
+  function showAddStaffForm() {
+    document.getElementById('add-staff-form').style.display = 'block';
+    const inv = document.getElementById('invite-form'); if (inv) inv.style.display = 'none';
+  }
   function hideAddStaffForm() {
     document.getElementById('add-staff-form').style.display = 'none';
     document.getElementById('staff-name').value = '';
