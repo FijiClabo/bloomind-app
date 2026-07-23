@@ -333,8 +333,14 @@
     <p style="font-size:14.5px; line-height:1.6; color:var(--hint); max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому.</p>
   </div>
   <div style="margin-top:30px;">
-    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Согласен(на) на обработку данных</button>
-    <p class="hint" style="text-align:center; font-size:12.5px; margin:0 0 6px; line-height:1.5;">Нажимая, вы соглашаетесь с <a href="privacy.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">политикой обработки данных</a> и <a href="offer.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">публичной офертой</a></p>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; cursor:pointer; padding:14px 16px; border:1.5px solid var(--border); border-radius:var(--radius-md); background:var(--card-bg);" onclick="toggleConsent()">
+      <div id="consent-toggle" style="width:46px; height:28px; border-radius:999px; background:var(--border); position:relative; transition:background .2s; flex-shrink:0;">
+        <div id="consent-toggle-knob" style="width:22px; height:22px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);"></div>
+      </div>
+      <span style="font-size:14px; text-align:left; line-height:1.35;">Согласен(на) на обработку персональных данных</span>
+    </div>
+    <button class="btn-primary" id="consent-btn" onclick="giveConsent()" disabled style="opacity:.5;">Продолжить</button>
+    <p class="hint" style="text-align:center; font-size:12.5px; margin:8px 0 6px; line-height:1.5;">Продолжая, вы соглашаетесь с <a href="privacy.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">политикой обработки данных</a> и <a href="offer.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">публичной офертой</a></p>
     <p class="hint" id="consent-error" style="text-align:center; font-size:12.5px; margin:0;">Показывается один раз</p>
   </div>
 </div>
@@ -3354,11 +3360,22 @@
   let onboardingSeen = true; // по умолчанию не мешаем, пока не узнаем реальное значение
 
   function checkConsentThenRoute() {
-    apiGet({ action: 'settings', userId: userId }).then(function (res) {
-      onboardingSeen = !(res.ok && !res.onboardingSeenAt);
-      if (res.ok && !res.consentedAt) { showScreen('screen-consent'); return; }
+    // Согласие/тур считаем пройденными, если ЛИБО сервер, ЛИБО CloudStorage
+    // Telegram помнят это. CloudStorage надёжно переживает переоткрытие
+    // приложения — поэтому даже при сбое серверного флага экраны не всплывут
+    // повторно.
+    Promise.all([
+      apiGet({ action: 'settings', userId: userId }).catch(function () { return { ok: false }; }),
+      cloudGet('bloomind_consent'),
+      cloudGet('bloomind_tour')
+    ]).then(function (r) {
+      const res = r[0];
+      const consented = (res.ok && res.consentedAt) || r[1] === '1';
+      const tourSeen = (res.ok && res.onboardingSeenAt) || r[2] === '1';
+      onboardingSeen = tourSeen;
+      if (!consented) { showScreen('screen-consent'); return; }
       pendingRoute();
-    }).catch(function () { pendingRoute(); });
+    });
   }
 
   // ===== ОНБОРДИНГ-ТУР =====
@@ -3423,26 +3440,57 @@
   function finishTour() {
     document.getElementById('tour-overlay').classList.remove('active');
     onboardingSeen = true;
+    cloudSet('bloomind_tour', '1');
     apiPost({ action: 'markOnboardingSeen', userId: userId }).catch(function () {});
   }
 
-  function giveConsent() {
+  // Telegram CloudStorage — надёжное хранилище флагов «согласие дано» и «тур
+  // показан» на стороне серверов Telegram (переживает закрытие/переоткрытие
+  // приложения, синхронизируется между устройствами). Дублирует серверные
+  // флаги: даже если серверный по какой-то причине не сохранился, CloudStorage
+  // не даст показать согласие/тур повторно.
+  function cloudGet(key) {
+    return new Promise(function (resolve) {
+      try {
+        if (tg && tg.CloudStorage && tg.CloudStorage.getItem) {
+          tg.CloudStorage.getItem(key, function (err, val) { resolve(err ? null : (val || null)); });
+        } else { resolve(null); }
+      } catch (_e) { resolve(null); }
+    });
+  }
+  function cloudSet(key, val) {
+    try { if (tg && tg.CloudStorage && tg.CloudStorage.setItem) tg.CloudStorage.setItem(key, val, function () {}); } catch (_e) {}
+  }
+
+  // Тумблер согласия: кнопка «Продолжить» доступна только когда переключено.
+  let consentToggled = false;
+  function toggleConsent() {
+    consentToggled = !consentToggled;
+    const t = document.getElementById('consent-toggle');
+    const k = document.getElementById('consent-toggle-knob');
     const btn = document.getElementById('consent-btn');
-    const err = document.getElementById('consent-error');
+    if (consentToggled) {
+      t.style.background = 'var(--accent)';
+      k.style.left = '21px';
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    } else {
+      t.style.background = 'var(--border)';
+      k.style.left = '3px';
+      if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
+    }
+  }
+
+  function giveConsent() {
+    if (!consentToggled) return;
+    const btn = document.getElementById('consent-btn');
     if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+    // Пишем флаг в CloudStorage сразу — это надёжное подтверждение, не зависящее
+    // от ответа сервера. Серверный флаг ставим параллельно (для записи согласия
+    // на бэкенде); даже если сервер не подтвердит — экран больше не появится.
+    cloudSet('bloomind_consent', '1');
     apiPost({ action: 'giveConsent', userId: userId })
-      .then(function (res) {
-        if (!res.ok) {
-          if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-          if (err) err.textContent = 'Не получилось сохранить (' + errText(res) + '). Попробуйте ещё раз.';
-          return;
-        }
-        pendingRoute();
-      })
-      .catch(function (e) {
-        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-        if (err) err.textContent = 'Нет связи с сервером, попробуйте ещё раз.';
-      });
+      .then(function () { pendingRoute(); })
+      .catch(function () { pendingRoute(); });
   }
 
   init();
