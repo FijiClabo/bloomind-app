@@ -329,12 +329,13 @@
     <div style="width:68px; height:68px; border-radius:var(--radius-lg); background:var(--accent-soft); display:flex; align-items:center; justify-content:center; color:var(--accent-dark); margin-bottom:20px;">
       <svg width="30" height="30" viewBox="0 0 28 28"><rect x="7" y="13" width="14" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect><path d="M10.5 13V9a3.5 3.5 0 0 1 7 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path><circle cx="14" cy="18" r="1.5" fill="currentColor"></circle></svg>
     </div>
-    <h1 style="font-size:21px; margin:0 0 14px;">Прежде чем начать</h1>
-    <p class="hint" style="max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому. <a href="privacy.html" target="_blank" style="color:var(--accent-dark); font-weight:700;">Политика обработки данных</a></p>
+    <h1 style="margin:0 0 14px;">Прежде чем начать</h1>
+    <p style="font-size:14.5px; line-height:1.6; color:var(--hint); max-width:290px; margin:0;">Bloomind хранит имена, даты и адреса ваших близких, чтобы напоминать о поводах и организовать доставку. Передаём это только флористу-партнёру под конкретный заказ, больше никому.</p>
   </div>
   <div style="margin-top:30px;">
-    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Принимаю и продолжаю</button>
-    <p class="hint" id="consent-error" style="text-align:center; margin-top:6px;">Показывается один раз</p>
+    <button class="btn-primary" id="consent-btn" onclick="giveConsent()">Согласен(на) на обработку данных</button>
+    <p class="hint" style="text-align:center; font-size:12.5px; margin:0 0 6px; line-height:1.5;">Нажимая, вы соглашаетесь с <a href="privacy.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">политикой обработки данных</a> и <a href="offer.html" target="_blank" style="font-weight:700; color:var(--accent-dark); text-decoration:underline;">публичной офертой</a></p>
+    <p class="hint" id="consent-error" style="text-align:center; font-size:12.5px; margin:0;">Показывается один раз</p>
   </div>
 </div>
 
@@ -405,7 +406,7 @@
     <div style="font-weight:700; font-size:14.5px; color:var(--accent-dark); margin-bottom:4px;">Экспресс за 3 часа</div>
     <p class="hint" id="rush-pick-fee-text" style="margin:0;">Доплата 700 ₽ за срочность. Кому доставляем?</p>
   </div>
-  <button class="btn-primary" onclick="rushPickNew()" style="text-align:left; margin-bottom:16px;">Новому получателю</button>
+  <button class="btn-option" onclick="rushPickNew()" style="font-weight:700; margin-bottom:16px;">Новому получателю</button>
   <div class="section-label" id="rush-pick-list-label" style="display:none;">Уже есть в списке</div>
   <div id="rush-pick-list"></div>
 </div>
@@ -414,9 +415,10 @@
 <div id="screen-quick-pick" class="screen">
   <div class="card" style="background:var(--accent-soft); border:none;">
     <div style="font-weight:700; font-size:14.5px; color:var(--accent-dark); margin-bottom:4px;">Разовый заказ</div>
-    <p class="hint" style="margin:0;">Без сохранения в «Ваши близкие» — кому дарим на этот раз?</p>
+    <p class="hint" style="margin:0;">Кому дарим на этот раз?</p>
   </div>
-  <button class="btn-primary" onclick="quickPickNew()" style="text-align:left; margin-bottom:16px;">Новому получателю</button>
+  <button class="btn-option" onclick="quickPickNew()" style="font-weight:700; margin-bottom:16px;">Новому получателю</button>
+  <div class="section-label" id="quick-pick-list-label" style="display:none;">Уже есть в списке</div>
   <div id="quick-pick-list"></div>
 </div>
 
@@ -434,9 +436,7 @@
 <div id="screen-form" class="screen">
   <div class="dots" id="form-dots"></div>
 
-  <div class="form-step" data-step="name">
-    <button type="button" class="btn-link" onclick="goBack('name')">← Назад</button>
-    <div class="hero">
+  <div class="form-step" data-step="name">    <div class="hero">
       <div style="width:68px;height:68px;border-radius:var(--radius-lg);background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent-dark);margin:0 auto 20px;">
         <svg width="30" height="30" viewBox="0 0 28 28"><circle cx="14" cy="7" r="4" fill="currentColor" opacity=".85"></circle><circle cx="14" cy="21" r="4" fill="currentColor" opacity=".85"></circle><circle cx="7" cy="14" r="4" fill="currentColor" opacity=".85"></circle><circle cx="21" cy="14" r="4" fill="currentColor" opacity=".85"></circle><circle cx="14" cy="14" r="3" fill="currentColor"></circle></svg>
       </div>
@@ -446,9 +446,7 @@
     <button class="btn-primary" onclick="submitName()">Далее</button>
   </div>
 
-  <div class="form-step" data-step="who">
-    <button type="button" class="btn-link" onclick="goBack('who')">← Назад</button>
-    <h1>Кем она вам приходится?</h1>
+  <div class="form-step" data-step="who">    <h1>Кем она вам приходится?</h1>
     <p class="hint">&nbsp;</p>
     <button class="btn-option" data-value="Жена/партнёрша" onclick="chooseWho('Жена/партнёрша')">Жена/партнёрша</button>
     <button class="btn-option" data-value="Мама" onclick="chooseWho('Мама')">Мама</button>
@@ -459,9 +457,7 @@
     <button class="btn-primary" onclick="submitWhoOther()">Далее</button>
   </div>
 
-  <div class="form-step" data-step="occasions">
-    <button type="button" class="btn-link" onclick="goBack('occasions')">← Назад</button>
-    <h1>Какие поводы отмечаем?</h1>
+  <div class="form-step" data-step="occasions">    <h1>Какие поводы отмечаем?</h1>
     <p class="hint">Часть предложили сами — можно убрать лишнее или добавить своё.</p>
     <div id="occasions-list"></div>
     <button class="btn-link" type="button" onclick="showAddOccasionForm()">+ Свой повод</button>
@@ -480,17 +476,13 @@
     <button class="btn-primary" onclick="submitOccasions()" style="margin-top:6px;">Далее</button>
   </div>
 
-  <div class="form-step" data-step="schoolcheck">
-    <button type="button" class="btn-link" onclick="goBack('schoolcheck')">← Назад</button>
-    <h1>Добавить 1 сентября?</h1>
+  <div class="form-step" data-step="schoolcheck">    <h1>Добавить 1 сентября?</h1>
     <p class="hint">Судя по дате рождения, сейчас ей около <span id="schoolcheck-age"></span> лет — похоже, ещё учится. Напомнить и про этот день?</p>
     <button class="btn-primary" onclick="chooseSchoolCheck(true)">Да, добавить</button>
     <button class="btn-option" onclick="chooseSchoolCheck(false)">Не нужно</button>
   </div>
 
-  <div class="form-step" data-step="about">
-    <button type="button" class="btn-link" onclick="goBack('about')">← Назад</button>
-    <h1>Расскажите о ней</h1>
+  <div class="form-step" data-step="about">    <h1>Расскажите о ней</h1>
     <p class="hint">Один раз, максимально подробно — дальше будем ориентироваться на это, вам не придётся объяснять снова.</p>
     <div class="field-label">Какая она, что любит</div>
     <textarea id="input-note" rows="3" placeholder="Например: любит пионы и пастельные тона, не любит резкие запахи и лилии"></textarea>
@@ -500,9 +492,7 @@
     <button class="btn-primary" onclick="submitAbout()">Далее</button>
   </div>
 
-  <div class="form-step" data-step="stylepref">
-    <button type="button" class="btn-link" onclick="goBack('stylepref')">← Назад</button>
-    <h1>Стиль и бюджет</h1>
+  <div class="form-step" data-step="stylepref">    <h1>Стиль и бюджет</h1>
     <p class="hint">Можно выбрать несколько направлений, а можно доверить решение нам. Через несколько заказов мы изучим вкусы и начнём предлагать варианты сами.</p>
     <div id="style-rows"></div>
     <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
@@ -512,9 +502,7 @@
     <button class="btn-primary" onclick="submitStylePref()">Далее</button>
   </div>
 
-  <div class="form-step" data-step="address">
-    <button type="button" class="btn-link" onclick="goBack('address')">← Назад</button>
-    <h1>Как с ней связаться на месте?</h1>
+  <div class="form-step" data-step="address">    <h1>Как с ней связаться на месте?</h1>
     <p class="hint">Понадобится курьеру в день доставки — уточним у вас ещё раз перед каждым заказом.</p>
     <div class="field-label">Город</div>
     <input type="text" id="input-city" placeholder="Москва">
@@ -915,18 +903,19 @@
     'screen-error': { title: 'Bloomind' },
     'screen-welcome': { title: 'Bloomind' },
     'screen-consent': { title: 'Bloomind' },
-    'screen-about': { title: 'Как это работает', back: 'screen-welcome' },
-    'screen-support': { title: 'Поддержка', eyebrow: 'Bloomind', tab: 'support' },
+    'screen-about': { title: 'Как это работает', back: '__prev' },
+    'screen-support': { title: 'Поддержка', eyebrow: 'Bloomind', tab: 'support', back: '__prev' },
     'screen-home': { title: 'Ваши получатели', eyebrow: 'Bloomind', tab: 'home' },
     'screen-rush-pick': { title: 'Срочный заказ', back: 'screen-home' },
-    'screen-form': { title: 'Новый получатель' },
+    'screen-quick-pick': { title: 'Разовый заказ', back: 'screen-home' },
+    'screen-form': { title: 'Новый получатель', back: '__form' },
     'screen-recipient': { title: 'Получатель', eyebrow: 'Получатель', back: true },
     'screen-reminder': { title: 'Напоминание', back: 'screen-home' },
     'screen-success': { title: 'Готово' },
     'screen-payment': { title: 'Оплата', back: 'screen-tracking' },
     'screen-tracking': { title: 'Статус заказа', back: true },
-    'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile' },
-    'screen-team-role': { title: 'Выбор роли', back: 'screen-profile' },
+    'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile', back: '__prev' },
+    'screen-team-role': { title: 'Режим команды', back: 'screen-profile' },
     'screen-team-orders': { title: 'Заказы', eyebrow: 'Команда', tab: 'team-orders' },
     'screen-team-florist': { title: 'Флорист', eyebrow: 'Команда', tab: 'team-florist' },
     'screen-team-history': { title: 'История букетов', back: 'screen-team-orders' },
@@ -936,6 +925,11 @@
   };
 
   let recipientBackTarget = 'screen-home';
+  // Экран, с которого пришли — для стрелки «назад» на Профиле/Поддержке
+  // (в макете back:'__prev'). Обновляется в showScreen при каждом переходе.
+  let prevScreen = null;
+  // Текущий шаг анкеты — чтобы стрелка «назад» в шапке формы шла на шаг назад.
+  let currentFormStep = 'name';
 
   function openSupportChat() {
     const url = 'https://t.me/' + SUPPORT_USERNAME;
@@ -1011,9 +1005,16 @@
     }
     if (titleEl) titleEl.textContent = meta.title;
     if (backEl) {
-      const target = meta.back === true ? recipientBackTarget : meta.back;
-      backEl.style.display = target ? 'inline-block' : 'none';
-      backEl.onclick = target ? function () { showScreen(target); } : null;
+      if (meta.back === '__form') {
+        // Анкета: стрелка в шапке делает шаг назад (или выходит с 1-го шага),
+        // как в макете — отдельных inline-кнопок «← Назад» больше нет.
+        backEl.style.display = 'inline-block';
+        backEl.onclick = function () { goBack(currentFormStep); };
+      } else {
+        const target = meta.back === true ? recipientBackTarget : (meta.back === '__prev' ? prevScreen : meta.back);
+        backEl.style.display = target ? 'inline-block' : 'none';
+        backEl.onclick = target ? function () { showScreen(target); } : null;
+      }
     }
     const tabbarEl = document.getElementById('tabbar');
     if (tabbarEl) {
@@ -1025,6 +1026,10 @@
   }
 
   function showScreen(id) {
+    const cur = document.querySelector('.screen.active');
+    // screen-loading/-error — служебные промежуточные экраны; не запоминаем их
+    // как «предыдущий», иначе стрелка «назад» (back:'__prev') вела бы на них.
+    if (cur && cur.id !== id && cur.id !== 'screen-loading' && cur.id !== 'screen-error') prevScreen = cur.id;
     document.querySelectorAll('.screen').forEach(function (el) { el.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     setTopbar(id);
@@ -1141,6 +1146,7 @@
   }
 
   function showStep(name) {
+    currentFormStep = name;
     showScreen('screen-form');
     if (name === 'occasions') renderOccasionsStep();
     if (name === 'schoolcheck') renderSchoolCheck();
@@ -1269,18 +1275,22 @@
   // "Разовый подарок" на итоговом экране напоминания.
   function loadQuickPickList() {
     const list = document.getElementById('quick-pick-list');
+    const label = document.getElementById('quick-pick-list-label');
     list.innerHTML = '<p class="hint">Загрузка…</p>';
+    label.style.display = 'none';
     apiGet({ action: 'list', userId: userId }).then(function (res) {
       const recipients = (res.ok && res.recipients) ? res.recipients.filter(function (r) { return !r.isOneOff; }) : [];
       if (!recipients.length) {
         list.innerHTML = '<p class="hint">Сохранённых получателей пока нет — оформите нового.</p>';
         return;
       }
+      label.style.display = 'block';
       list.innerHTML = '';
       recipients.forEach(function (r) {
         const div = document.createElement('div');
         div.className = 'card recipient-card';
-        div.innerHTML = '<div class="recipient-name">' + escapeHtml(r.name) + '</div>';
+        div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; cursor:pointer;';
+        div.innerHTML = '<span class="recipient-name">' + escapeHtml(r.name) + '</span><span style="color:var(--hint); font-size:14px;">›</span>';
         div.addEventListener('click', function () { quickPickExisting(r); });
         list.appendChild(div);
       });
@@ -2904,8 +2914,8 @@
       // запросов истории. Специально НЕ пишем тут "Дарим впервые" сразу — при
       // медленной сети флорист мог бы принять решение по букету, думая что
       // клиент новый, хотя это просто ещё не подгрузившиеся данные.
-      '<div style="margin-top:8px; padding:9px 11px; background:#FBEEF0; border-radius:10px; font-size:12px; color:var(--accent-dark);">' +
-        '<div style="font-weight:700; font-size:11px; text-transform:uppercase; margin-bottom:3px;">Из личного дела</div>' +
+      '<div style="margin-top:8px; padding:10px 12px; background:var(--accent-soft); border-radius:var(--radius-md); font-size:12px; color:var(--accent-dark);">' +
+        '<div style="font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:3px;">Из личного дела</div>' +
         '<div id="florist-history-' + o.occasionId + '" data-recipient-id="' + escapeHtml(o.recipientId) + '">Загружаю историю…</div>' +
       '</div>' +
       '<div class="team-link-right"><button type="button" class="btn-link" onclick="openTeamHistory(\'' + o.recipientId + '\', \'screen-team-florist\')">🗂 Вся история</button></div>' +
