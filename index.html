@@ -1116,6 +1116,10 @@
   // мульти-выбор — но выглядит и ведёт себя как в макете (экран 36).
   function enterTeamMode() {
     if (!myStaffRole) return;
+    // Флорист/курьер — одна роль, сразу в рабочий экран, без экрана выбора.
+    // Владельцу показываем экран роли (как в макете) — он «главный», разделов
+    // у него несколько.
+    if (myStaffRole === 'florist' || myStaffRole === 'courier') { chooseTeamRole(); return; }
     showScreen('screen-team-role');
     renderTeamRolePicker();
   }
@@ -3349,6 +3353,10 @@
       if (urlScreen === 'team' && myStaffRole) { enterTeamMode(); return; }
       if (urlScreen === 'welcome') { showScreen('screen-welcome'); return; }
       if (urlScreen === 'profile') { openProfile(); return; }
+      // Флорист/курьер по умолчанию открывают рабочий режим — клиентская часть
+      // им не нужна (переключиться могут кнопкой «← Клиент»). Владелец остаётся
+      // в клиентской части: у него всё доступно и там, и в «Команде».
+      if (myStaffRole === 'florist' || myStaffRole === 'courier') { enterTeamMode(); return; }
       loadHome();
     };
     // Сначала узнаём роль (нужна и для таббара, и для авто-входа в режим
