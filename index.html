@@ -93,7 +93,7 @@
     overflow: hidden; /* подстраховка от переполнения нативным date-picker'ом на iOS */
   }
   .card-lead { font-size: 14px; line-height: 1.55; }
-  input[type="text"], input[type="tel"], input[type="date"], textarea {
+  input[type="text"], input[type="tel"], input[type="date"], input[type="number"], textarea {
     display: block;
     width: 100%;
     max-width: 100%;
@@ -1330,14 +1330,8 @@
       action: 'addOccasion', userId: userId, recipientId: r.recipientId,
       occasion: { type: 'custom', label: 'Разовый подарок', date: toRuDate(todayIso), auto: false, recurring: false }
     }).then(function (res) {
-      if (!res.ok) { showScreen('screen-error'); return; }
-      return apiGet({ action: 'recipient', id: r.recipientId, userId: userId }).then(function (recRes) {
-        if (!recRes.ok) { showScreen('screen-error'); return; }
-        const occasions = recRes.recipient.occasions || [];
-        const last = occasions[occasions.length - 1];
-        if (!last) { showScreen('screen-error'); return; }
-        loadReminder(last.rowIndex);
-      });
+      if (!res.ok || !res.occasionId) { showScreen('screen-error'); return; }
+      loadReminder(res.occasionId);
     }).catch(function () { showScreen('screen-error'); });
   }
 
@@ -1399,20 +1393,15 @@
   // reminderRush, чтобы confirmReminder отправил доплату за срочность.
   function rushPickExisting(r) {
     reminderRush = true;
+    reminderQuickLabel = null; // заголовок возьмётся из типа повода — «Разовый заказ»
     showScreen('screen-loading');
     const todayIso = new Date().toISOString().slice(0, 10);
     apiPost({
       action: 'addOccasion', userId: userId, recipientId: r.recipientId,
       occasion: { type: 'custom', label: 'Разовый заказ', date: toRuDate(todayIso), auto: false, recurring: false }
     }).then(function (res) {
-      if (!res.ok) { showScreen('screen-error'); return; }
-      return apiGet({ action: 'recipient', id: r.recipientId, userId: userId }).then(function (recRes) {
-        if (!recRes.ok) { showScreen('screen-error'); return; }
-        const occasions = recRes.recipient.occasions || [];
-        const last = occasions[occasions.length - 1];
-        if (!last) { showScreen('screen-error'); return; }
-        loadReminder(last.rowIndex);
-      });
+      if (!res.ok || !res.occasionId) { showScreen('screen-error'); return; }
+      loadReminder(res.occasionId);
     }).catch(function () { showScreen('screen-error'); });
   }
 
