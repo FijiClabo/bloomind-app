@@ -783,17 +783,6 @@
     <p class="hint" style="margin:0;">История появится после первого заказа.</p>
   </div>
 
-  <div class="card" id="profile-team-card" style="margin-top:16px; display:none;">
-    <div class="row" style="border-bottom:none;"><span class="occasions-summary-title">Режим команды</span></div>
-    <p class="hint" style="margin:0 0 12px;">Для флористов и курьеров — заказы, доставки, состав команды.</p>
-    <button class="btn-option" onclick="enterTeamMode()">Войти как Команда</button>
-  </div>
-</div>
-
-<!-- ===== КОМАНДА: ВЫБОР РОЛИ ===== -->
-<div id="screen-team-role" class="screen">
-  <p class="hint" style="margin:0 0 18px;">Выберите роль — экраны и заказы подстроятся под задачи.</p>
-  <div id="team-role-list"></div>
 </div>
 
 <!-- ===== КОМАНДА: ЗАКАЗЫ (только неоплаченные — очередь на оплату) ===== -->
@@ -939,9 +928,8 @@
     'screen-reminder': { title: 'Напоминание', back: 'screen-home' },
     'screen-success': { title: 'Готово' },
     'screen-payment': { title: 'Оплата', back: 'screen-tracking' },
-    'screen-tracking': { title: 'Статус заказа', back: true },
+    'screen-tracking': { title: 'Статус заказа', back: '__tracking', tab: 'tracking' },
     'screen-profile': { title: 'Профиль', eyebrow: 'Bloomind', tab: 'profile', back: '__prev' },
-    'screen-team-role': { title: 'Режим команды', back: 'screen-profile' },
     'screen-team-orders': { title: 'Заказы', eyebrow: 'Команда', tab: 'team-orders' },
     'screen-team-florist': { title: 'Флорист', eyebrow: 'Команда', tab: 'team-florist' },
     'screen-team-history': { title: 'История букетов', back: 'screen-team-orders' },
@@ -1037,7 +1025,10 @@
         backEl.style.display = 'inline-block';
         backEl.onclick = function () { goBack(currentFormStep); };
       } else {
-        const target = meta.back === true ? recipientBackTarget : (meta.back === '__prev' ? prevScreen : meta.back);
+        const target = meta.back === true ? recipientBackTarget
+          : meta.back === '__tracking' ? trackingBackTarget
+          : meta.back === '__prev' ? prevScreen
+          : meta.back;
         backEl.style.display = target ? 'inline-block' : 'none';
         // «Назад» на Главную всегда перезагружает список (свежие заказы/статусы)
         // и гарантирует, что после deep-link из бота экран не окажется пустым.
@@ -1109,31 +1100,11 @@
     // (через setTopbar) — здесь только пересобирается набор кнопок под режим/роль.
   }
 
-  // Экран "Выбор роли" — по дизайну. Роль всё равно определяется сервером
-  // (myStaffRole), клиент не может её подделать: список всегда содержит
-  // только ту роль, что реально назначена этому Telegram ID в таблице staff.
-  // Это подтверждающий шаг перед входом в режим команды, а не настоящий
-  // мульти-выбор — но выглядит и ведёт себя как в макете (экран 36).
+  // Вход в режим команды. Роль определяется сервером (myStaffRole) — клиент не
+  // может её подделать. Владелец попадает в «Заказы» со всеми вкладками
+  // (Флорист/Доставки/Клиенты/Команда), флорист/курьер — сразу в свой
+  // единственный рабочий раздел. Промежуточный экран выбора роли убран.
   function enterTeamMode() {
-    if (!myStaffRole) return;
-    // Флорист/курьер — одна роль, сразу в рабочий экран, без экрана выбора.
-    // Владельцу показываем экран роли (как в макете) — он «главный», разделов
-    // у него несколько.
-    if (myStaffRole === 'florist' || myStaffRole === 'courier') { chooseTeamRole(); return; }
-    showScreen('screen-team-role');
-    renderTeamRolePicker();
-  }
-
-  function renderTeamRolePicker() {
-    const list = document.getElementById('team-role-list');
-    if (!list || !myStaffRole) return;
-    const label = TEAM_ROLE_LABEL[myStaffRole] || myStaffRole;
-    list.innerHTML = '<button type="button" class="btn-option" onclick="chooseTeamRole()" style="text-align:left;">' +
-      '<div style="font-weight:700; font-size:15px;">' + escapeHtml(label) + '</div>' +
-      '</button>';
-  }
-
-  function chooseTeamRole() {
     if (!myStaffRole) return;
     appMode = 'team';
     renderTabbar();
@@ -2010,10 +1981,6 @@
       const listRes = results[0], settingsRes = results[1];
       document.getElementById('profile-userid').textContent = userId;
       renderReminderDays(settingsRes.ok ? settingsRes.reminderDays : 5);
-      // Блок "Режим команды" — только для тех, кто реально есть в таблице
-      // staff (см. checkStaffRole/myStaffRole), иначе обычный клиент увидел
-      // бы кнопку, которая всё равно ничего не сделает.
-      document.getElementById('profile-team-card').style.display = myStaffRole ? 'block' : 'none';
 
       document.getElementById('input-contact-phone').value = (settingsRes.ok && settingsRes.contactPhone) ? settingsRes.contactPhone : '';
       pendingContactPref = (settingsRes.ok && settingsRes.contactPref) ? settingsRes.contactPref : null;
@@ -2582,8 +2549,10 @@
 
   function openTracking(rowIndex, backTo) {
     trackingRow = rowIndex;
+    // У «Статуса» СВОЯ цель возврата (trackingBackTarget) — раньше здесь
+    // затирался общий recipientBackTarget, из-за чего после «Статус → назад →
+    // Получатель» стрелка на Получателе вела сама на себя, и человек застревал.
     trackingBackTarget = backTo || recipientBackTarget || 'screen-home';
-    recipientBackTarget = trackingBackTarget;
     showScreen('screen-loading');
     apiGet({ action: 'tracking', userId: userId, row: rowIndex }).then(function (res) {
       if (!res.ok) { showScreen('screen-error'); return; }
@@ -2914,11 +2883,17 @@
     const rushBadgeHtml = o.isRush
       ? '<div style="background:#E8432E; color:#fff; font-weight:800; font-size:12px; padding:6px 10px; border-radius:8px; margin-bottom:8px; display:inline-block;">⚡ СРОЧНО (3 часа)</div>'
       : '';
-    const canSendPhoto = o.status === 'Новый' || /^Переделка/.test(o.status);
+    // Очередь флориста — статусы «Подтверждено» (нужен черновик) и «Оплачено»
+    // (нужно финальное фото). Раньше кнопка включалась только для «Новый», из-за
+    // чего у ВСЕХ заказов очереди кнопки фото не было вовсе.
+    const isFinalStage = o.status === 'Оплачено';
+    const isDraftStage = o.status === 'Подтверждено' || o.status === 'Новый' || /^Переделка/.test(o.status);
+    const canSendPhoto = isDraftStage || isFinalStage;
     let actionHtml = '';
     if (canSendPhoto) {
-      actionHtml = '<button class="btn-primary" onclick="startSendTeamPhoto(' + o.occasionId + ')">📷 ' +
-        (o.status === 'Новый' ? 'Отправить на согласование' : 'Отправить новое фото') + '</button>';
+      const photoLabel = isFinalStage ? 'Отправить финальное фото'
+        : (/^Переделка/.test(o.status) ? 'Отправить новое фото' : 'Отправить черновик на согласование');
+      actionHtml = '<button class="btn-primary" onclick="startSendTeamPhoto(' + o.occasionId + ')">📷 ' + photoLabel + '</button>';
     } else if (o.status === 'На согласовании') {
       actionHtml = '<div class="team-sub-line">Ждём ответ клиента.</div>';
     } else if (o.status === 'Одобрено') {
@@ -3321,20 +3296,6 @@
 
     userId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) || urlUserId;
 
-    if (urlScreen === 'reminder' && urlRow) {
-      loadReminder(urlRow);
-      return;
-    }
-    // Deep-link из уведомления бота: "черновик готов на согласование" / "букет
-    // одобрен, оплата" / просто "посмотреть статус" — раньше эти действия
-    // делались прямо кнопками в чате (approve/redo/paid), теперь бот только
-    // зовёт сюда, а сам openTracking уже сам решает, показать screen-tracking
-    // или screen-payment, в зависимости от актуального статуса заказа.
-    if (urlScreen === 'tracking' && urlRow) {
-      openTracking(urlRow, 'screen-home');
-      return;
-    }
-
     if (!userId) {
       const debugEl = document.getElementById('debug-info');
       if (debugEl) {
@@ -3350,6 +3311,11 @@
 
     renderTabbar();
     pendingRoute = function () {
+      // Открытие из уведомления бота на конкретный экран — уже ПОСЛЕ инициализации
+      // оболочки (роль + таббар), поэтому у экрана есть нижнее меню и рабочая
+      // кнопка «назад» (openTracking сам решает: статус или оплата).
+      if (urlScreen === 'reminder' && urlRow) { loadReminder(urlRow); return; }
+      if (urlScreen === 'tracking' && urlRow) { openTracking(urlRow, 'screen-home'); return; }
       if (urlScreen === 'team' && myStaffRole) { enterTeamMode(); return; }
       if (urlScreen === 'welcome') { showScreen('screen-welcome'); return; }
       if (urlScreen === 'profile') { openProfile(); return; }
