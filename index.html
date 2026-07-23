@@ -498,7 +498,7 @@
     <p class="hint" id="style-error" style="margin:-6px 0 14px;">&nbsp;</p>
     <div class="field-label" style="margin-top:18px;">Обычный бюджет букета</div>
     <p class="hint" style="margin-top:-6px;">Подставим по умолчанию, когда подойдёт дата — там же можно будет изменить.</p>
-    <div class="two-up" id="default-size-row"></div>
+    <div class="interval-row" id="default-size-row" style="margin-bottom:16px;"></div>
     <button class="btn-primary" onclick="submitStylePref()">Далее</button>
   </div>
 
@@ -1672,7 +1672,7 @@
     if (!profile.defaultSize) profile.defaultSize = 'M';
     el.innerHTML = ['S', 'M', 'L'].map(function (size) {
       const on = profile.defaultSize === size;
-      return '<button type="button" class="interval-btn' + (on ? ' selected' : '') + '" onclick="pickDefaultSize(\'' + size + '\')">' + SIZE_LABELS[size] + '</button>';
+      return '<button type="button" class="interval-btn' + (on ? ' selected' : '') + '" onclick="pickDefaultSize(\'' + size + '\')">' + SIZE_LABELS[size] + ' · ' + SIZE_PRICES[size] + ' ₽</button>';
     }).join('');
   }
 
@@ -2360,6 +2360,11 @@
   let reminderSelectedSize = null;
   // S/M/L остаются как есть в базе — на экране показываем понятные названия.
   const SIZE_LABELS = { S: 'Компакт', M: 'Средний', L: 'Большой' };
+  // Цены для витрины на шаге «Обычный бюджет» в анкете (там ещё нет загруженного
+  // с сервера прайса по получателю). Держим в согласии с bouquet_pricing в базе
+  // (миграция v13): S 3400 / M 4900 / L 6900. Реальную сумму заказа всё равно
+  // считает сервер при подтверждении — тут только ориентир.
+  const SIZE_PRICES = { S: 3400, M: 4900, L: 6900 };
 
   function loadReminder(row) {
     reminderRow = row;
