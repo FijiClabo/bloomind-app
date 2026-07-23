@@ -1013,7 +1013,9 @@
       } else {
         const target = meta.back === true ? recipientBackTarget : (meta.back === '__prev' ? prevScreen : meta.back);
         backEl.style.display = target ? 'inline-block' : 'none';
-        backEl.onclick = target ? function () { showScreen(target); } : null;
+        // «Назад» на Главную всегда перезагружает список (свежие заказы/статусы)
+        // и гарантирует, что после deep-link из бота экран не окажется пустым.
+        backEl.onclick = target ? function () { if (target === 'screen-home') loadHome(); else showScreen(target); } : null;
       }
     }
     const tabbarEl = document.getElementById('tabbar');
@@ -3087,13 +3089,24 @@
       const orders = res.orders || [];
       if (!orders.length) { el.innerHTML = '<p class="center">Доставок нет.</p>'; return; }
 
-      // Группировка: сначала по дате (Сегодня/Завтра/Позже, как в Заказах/
-      // Флористе — для логистики важно то же самое ощущение срочности),
-      // внутри даты — по времени суток (Утро/День/Вечер/Уточняется), чтобы
-      // сразу было видно маршрут на конкретный отрезок дня.
+      let html = '';
+
+      // Срочные (rush), ещё не доставленные — в самый верх: 3-часовой дедлайн
+      // важнее любой обычной доставки на сегодня. У срочных нет окна времени
+      // (доставка «в течение 3 часов»), поэтому в обычной группировке они бы
+      // попали в «Уточняется» — в самый низ, что для курьера наоборот.
+      const rushPending = orders.filter(function (o) { return o.isRush && o.status !== 'Доставлено'; });
+      const rest = orders.filter(function (o) { return !(o.isRush && o.status !== 'Доставлено'); });
+      if (rushPending.length) {
+        html += '<div class="section-label" style="color:var(--accent-dark);">⚡ Срочно — доставить в течение 3 часов</div>' +
+          rushPending.map(function (o) { return teamOrderCardHtml(o, { deliverAction: true }); }).join('');
+      }
+
+      // Остальные: по дате (Сегодня→Завтра→Позже), внутри дня — по времени
+      // суток (Утро→День→Вечер), ранние сверху — план-маршрут на день.
       const dateGroups = {};
       const dateOrder = [];
-      orders.forEach(function (o) {
+      rest.forEach(function (o) {
         const dateLabel = o.eventDateIso ? groupLabelFor(o.eventDateIso) : 'Без даты';
         if (!dateGroups[dateLabel]) { dateGroups[dateLabel] = {}; dateOrder.push(dateLabel); }
         const timeLabel = timeOfDayGroup(o.window);
@@ -3103,10 +3116,8 @@
 
       const dateRank = { 'Сегодня': 0, 'Завтра': 1, 'Позже': 2, 'Без даты': 3 };
       dateOrder.sort(function (a, b) { return dateRank[a] - dateRank[b]; });
-      const timeRank = { 'Утро': 0, 'День': 1, 'Вечер': 2, 'Уточняется': 3 };
       const timeOrderList = ['Утро', 'День', 'Вечер', 'Уточняется'];
 
-      let html = '';
       dateOrder.forEach(function (dateLabel) {
         html += '<div class="section-label">' + dateLabel + '</div>';
         timeOrderList.forEach(function (timeLabel) {
@@ -3214,7 +3225,7 @@
     teamApiPost({ action: 'addStaff', name: name, idOrUsername: idOrUsername, role: pendingStaffRole }).then(function (res) {
       if (!res.ok) {
         err.textContent = res.error === 'not_found'
-          ? 'Не нашли этот username. Попросите сначала написать /start нашему боту и попробуйте снова.'
+          ? 'Не нашли этого человека. Пусть он сначала напишет /start нашему боту, затем добавьте по числовому ID (узнать ID можно у @userinfobot) — по username Telegram находит не всегда.'
           : 'Не получилось: ' + errText(res);
         return;
       }
