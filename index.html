@@ -2821,6 +2821,9 @@
   }
 
   function groupLabelFor(eventDateIso) {
+    // Защита: если у заказа по какой-то причине нет даты, не роняем весь список
+    // (раньше пустая дата = TypeError на split → белый экран всей очереди).
+    if (!eventDateIso) return 'Позже';
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const parts = eventDateIso.split('-').map(Number);
     const evt = new Date(parts[0], parts[1] - 1, parts[2]);
