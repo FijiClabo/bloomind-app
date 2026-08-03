@@ -53,8 +53,15 @@
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-html,body{margin:0;padding:0;height:100%}
+html{height:100%}
 body{
+  margin:0;padding:0;
+  /* Высота окна, а не документа. Telegram отдаёт свою переменную —
+     с ней приложение не уезжает под низ экрана, когда шапка чата
+     сжимается. Без неё берём обычную высоту вьюпорта. */
+  height:var(--tg-viewport-stable-height,100dvh);
+  display:flex;flex-direction:column;
+  overflow:hidden;
   background:var(--bg);
   color:var(--text);
   font-family:var(--sans);
@@ -67,7 +74,10 @@ body{
 
 /* ---------- каркас экрана ----------
    Композиция одна и та же везде: шапка, содержимое, главная кнопка внизу. */
-.screen{display:none;min-height:100dvh;flex-direction:column}
+/* Экран занимает всё, что осталось от вкладок, и прокручивается внутри
+   себя. Раньше он был высотой в целый экран, и панель вкладок оказывалась
+   ниже края — до неё приходилось доскроллить. */
+.screen{display:none;flex:1;min-height:0;flex-direction:column}
 .screen.active{display:flex}
 .screen.green{background:var(--green);color:var(--bg)}
 
@@ -142,6 +152,8 @@ body{
 /* ---------- варианты выбора ---------- */
 .opt{
   width:100%;text-align:left;border:0;cursor:pointer;
+  /* без этого второй тап по строке выделяет слово вместо нажатия */
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
   background:var(--unselected);color:#6D766D;
   border-radius:18px;padding:15px 16px;
   font:600 14px/1.25 var(--sans);
@@ -177,6 +189,8 @@ body{
 .field:focus{border-color:var(--green)}
 .field.err{border-color:var(--alarm)}
 textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;resize:none}
+/* короткая заметка — два ряда, не на пол-экрана */
+textarea.field.ta{min-height:60px}
 .err-text{font:600 11.5px/1.4 var(--sans);color:var(--alarm)}
 
 /* ---------- прогресс анкеты ---------- */
@@ -196,11 +210,22 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
 .cd.today{font-weight:700;background:var(--green);color:var(--bg)}
 .cd.mark{font-weight:600;background:var(--calm);color:var(--green)}
 .cd[disabled]{color:#CCD1C8;cursor:default}
+/* выбранный день в календаре главного экрана */
+.cd.picked{box-shadow:inset 0 0 0 2px var(--green);font-weight:700}
+/* стрелки листания месяцев — тап-цель 44 px при небольшом значке */
+.mnav{
+  border:0;background:none;cursor:pointer;color:var(--muted-2);
+  font:600 20px/1 var(--sans);padding:6px 4px;position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.mnav::after{content:'';position:absolute;inset:-11px -12px}
+.mnav:active{color:var(--green)}
 
 /* ---------- нижние вкладки ---------- */
 .tabs{
   display:none;background:var(--card);border-top:1px solid var(--line);
   padding:11px 0 calc(15px + var(--safe-bottom));flex:none;
+  z-index:5;
 }
 .tabs.on{display:flex}
 .tabs button{
@@ -651,9 +676,17 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
       <input class="field" id="b5-street" placeholder="Москва, Тверская 12" autocomplete="off">
     </div>
     <div style="display:flex;gap:8px">
-      <div class="grow"><div class="lbl" style="margin-bottom:7px">Кв.</div><input class="field" id="b5-apt" placeholder="45" autocomplete="off"></div>
-      <div class="grow"><div class="lbl" style="margin-bottom:7px">Подъезд</div><input class="field" id="b5-entrance" placeholder="2" autocomplete="off"></div>
+      <div class="grow"><div class="lbl" style="margin-bottom:7px">Кв.</div><input class="field" id="b5-apt" inputmode="numeric" placeholder="45" autocomplete="off"></div>
+      <div class="grow"><div class="lbl" style="margin-bottom:7px">Подъезд</div><input class="field" id="b5-entrance" inputmode="numeric" placeholder="2" autocomplete="off"></div>
+      <div class="grow"><div class="lbl" style="margin-bottom:7px">Этаж</div><input class="field" id="b5-floor" inputmode="numeric" placeholder="7" autocomplete="off"></div>
       <div class="grow"><div class="lbl" style="margin-bottom:7px">Домофон</div><input class="field" id="b5-intercom" placeholder="45К" autocomplete="off"></div>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Что курьеру знать про этот адрес</div>
+      <textarea class="field ta" id="b5-addr-note" rows="2"
+        placeholder="Код на калитке 1234. Вход со двора, шлагбаум"></textarea>
+      <div class="hint" style="text-align:left;margin-top:6px">Не обязательно. Это увидит только курьер в день доставки</div>
     </div>
 
     <div class="note green">Адрес видит только курьер и только в день доставки</div>
@@ -713,7 +746,11 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
 <div class="screen" id="s-C1">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;flex:none">
     <div>
-      <div class="h2" id="c1-month">—</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="mnav" id="c1-prev" type="button" aria-label="предыдущий месяц">‹</button>
+        <div class="h2" id="c1-month">—</div>
+        <button class="mnav" id="c1-next" type="button" aria-label="следующий месяц">›</button>
+      </div>
       <div class="sub" id="c1-sub" style="margin-top:7px"></div>
     </div>
     <button class="ava sm" id="c1-profile" style="border:0;cursor:pointer;border-radius:18px;background:var(--card)"></button>
@@ -732,6 +769,15 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
     <div class="card lg" style="padding:10px 12px">
       <div class="cal" id="c1-dow"></div>
       <div class="cal" id="c1-days" style="margin-top:6px"></div>
+    </div>
+
+    <!-- что происходит в выбранный день: появляется, только когда день выбран -->
+    <div class="hidden" id="c1-day">
+      <div class="between" style="margin-bottom:8px">
+        <div class="lbl" id="c1-day-title"></div>
+        <button class="link" id="c1-day-clear">показать всё</button>
+      </div>
+      <div class="list" id="c1-day-list"></div>
     </div>
 
     <div class="list" id="c1-cards"></div>
@@ -1315,7 +1361,7 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
   <div class="bar"><button class="back" type="button">←</button><div class="title">Срочный букет</div></div>
   <div class="body tight">
     <div class="h1">За 3 часа</div>
-    <div class="note peach">Окно времени не выбирается — везём сразу, как букет готов</div>
+    <div class="note peach" id="e2-note">Окно времени не выбирается — везём сразу, как букет готов</div>
 
     <div><div class="lbl" style="margin-bottom:7px">Кому</div>
       <div class="stack" style="gap:7px" id="e2-who"></div></div>
@@ -1333,7 +1379,7 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
 
     <div class="card" id="e2-sum"></div>
 
-    <p class="p">Три часа обещаем не автоматически: сначала флорист нажмёт «беру в работу», и только тогда мы назовём время. Согласование будет, но быстрое — 15 минут на ответ.</p>
+    <p class="p">Три часа считаем не с этой минуты. Сначала флорист подтвердит, что берётся — вот тогда назовём точное время доставки. Фото пришлём быстро, ответить на него нужно за 15 минут.</p>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="e2-err"></div>
@@ -1777,6 +1823,10 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
   <div class="body tight">
     <div style="display:flex;gap:9px" id="o1-tiles"></div>
 
+    <!-- ближайший пиковый день: 8 марта, 14 февраля -->
+    <button class="card hidden" id="o1-peak"
+      style="border:0;width:100%;text-align:left;cursor:pointer;background:var(--calm)"></button>
+
     <div id="o1-attention-wrap">
       <div class="lbl" style="margin:6px 0 8px">Требует внимания</div>
       <div class="list" id="o1-attention"></div>
@@ -1853,6 +1903,16 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
     <div>
       <div class="lbl" style="margin-bottom:8px">Назначение флориста</div>
       <div class="stack" style="gap:7px" id="o5-assign"></div>
+    </div>
+
+    <!-- 8 марта и 14 февраля: всё приходит в один день -->
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Пиковые дни</div>
+      <div class="card" id="o5-peak"></div>
+      <div class="hint" style="text-align:left;margin-top:7px">
+        В эти дни повод есть почти у всех сразу. Плановые заказы соберём заранее,
+        а срочных берём ограниченное число — чтобы не подвести тех, кто заказал вовремя.
+      </div>
     </div>
     <div>
       <div class="lbl" style="margin-bottom:8px">Цены</div>
@@ -2033,6 +2093,7 @@ function errText(res) {
     // Пока ЮKassa не подключена — говорим прямо, а не «что-то пошло не так».
     payment_not_configured: 'Оплата пока не подключена — скоро включим',
     redo_limit: 'Переделок больше нет — давайте обсудим голосом',
+    peak_rush_full: 'Сегодня срочные закончились — все руки заняты заказами, которые ждут с прошлой недели',
     already_taken: 'Заказ уже взяли',
     bad_code: 'Код не совпадает',
     no_photo: 'Нужно фото',
@@ -2134,9 +2195,78 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-/* Суммы с неразрывным пробелом: 7 000 ₽ */
+/* Суммы с неразрывным пробелом: 7 000 ₽.
+   Number() здесь обязателен: настройки приходят с сервера строками,
+   и без него «9500 + "700"» склеивалось бы в 9500700 вместо 10 200. */
 function money(n) {
-  return String(Math.round(n || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+  return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+}
+
+/* Настройки в базе лежат текстом — там вперемешку числа, время и окна доставки.
+   Числовые приводим к числам один раз при загрузке, чтобы дальше по всему
+   приложению с ними можно было спокойно считать. */
+const NUMERIC_SETTINGS = [
+  'reminder_days_default', 'draft_due_days', 'redo_limit', 'rush_fee',
+  'rush_take_minutes', 'rush_approve_minutes', 'payment_stuck_minutes',
+  'stale_order_days', 'custom_budget_min', 'delivery_fee',
+  'peak_rush_limit', 'peak_prepay_days', 'peak_reminder_days', 'courier_per_day',
+];
+function numericSettings(s) {
+  const out = Object.assign({}, s || {});
+  NUMERIC_SETTINGS.forEach(k => {
+    if (out[k] !== undefined && out[k] !== null && out[k] !== '') out[k] = Number(out[k]);
+  });
+  if (out.prices && typeof out.prices === 'object') {
+    Object.keys(out.prices).forEach(k => { out.prices[k] = Number(out.prices[k]); });
+  }
+  return out;
+}
+
+/* ---------- телефон ----------
+   Люди вводят номер как придётся: 8..., +7..., со скобками и без.
+   Приводим к одному виду прямо во время набора, чтобы курьер потом
+   видел одинаковые номера, а не десять разных написаний. */
+
+/* Только цифры, всегда в российском формате: 11 знаков, первый — 7. */
+function phoneDigits(v) {
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.startsWith('8')) d = '7' + d.slice(1);
+  else if (d.startsWith('9') && d.length <= 10) d = '7' + d;
+  else if (!d.startsWith('7') && d.length) d = '7' + d;
+  return d.slice(0, 11);
+}
+
+/* +7 916 200-11-22 — как в макете. */
+function phoneFormat(v) {
+  const d = phoneDigits(v);
+  if (!d) return '';
+  let out = '+7';
+  if (d.length > 1)  out += ' ' + d.slice(1, 4);
+  if (d.length > 4)  out += ' ' + d.slice(4, 7);
+  if (d.length > 7)  out += '-' + d.slice(7, 9);
+  if (d.length > 9)  out += '-' + d.slice(9, 11);
+  return out;
+}
+
+/* Номер введён полностью? Пустой считаем допустимым — телефон необязателен. */
+function phoneValid(v) {
+  const d = phoneDigits(v);
+  return d.length === 0 || d.length === 11;
+}
+
+/* Вешается на поле один раз: форматирует по мере набора и не даёт
+   курсору прыгать в начало, когда человек правит середину. */
+function bindPhone(el, onChange) {
+  if (!el || el.__phoneBound) return el;
+  el.__phoneBound = true;
+  el.value = phoneFormat(el.value);
+  el.addEventListener('input', () => {
+    const atEnd = el.selectionStart === el.value.length;
+    el.value = phoneFormat(el.value);
+    if (atEnd) { try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} }
+    if (onChange) onChange(el.value);
+  });
+  return el;
 }
 
 const MONTHS = ['января','февраля','марта','апреля','мая','июня',
@@ -2534,8 +2664,13 @@ SCREENS.B3 = {
         el.onclick = e => {
           if (e.target.closest('[data-pick]')) return;
           const k = el.dataset.occ;
+          // Раньше здесь было предупреждение — человек тыкал в строку и ничего
+          // не происходило. Теперь сразу открываем календарь: он и так шёл туда.
           if (k === 'birthday' && !occDate('birthday', d)) {
-            toast('Сначала укажите дату рождения');
+            pickDate({
+              value: d.birth, title: 'Дата рождения', askYear: true, back: 'B3',
+              onPick(v) { S.draft.birth = v; S.draft.birthUnknown = false; S.draft.occ.birthday = true; },
+            });
             return;
           }
           d.occ[k] = !d.occ[k];
@@ -2581,7 +2716,9 @@ SCREENS.B3 = {
     };
 
     render();
-    $('#b3-custom').onclick = () => go('B3a');
+    // Каждый новый повод начинаем с чистого листа — иначе покажется
+    // недозаполненный прошлый.
+    $('#b3-custom').onclick = () => { delete S.draft.customDraft; go('B3a'); };
     next.onclick = () => go('B4');
   },
 };
@@ -2608,11 +2745,15 @@ const RECURRENCES = [
 
 SCREENS.B3a = {
   enter() {
-    const c = S.draft.customDraft = { mode: 'date', recurrence: 'yearly',
+    // Календарь — отдельный экран, и возврат с него заново вызывает enter().
+    // Поэтому черновик повода не пересоздаём, а подхватываем начатый:
+    // иначе название и выбранный повтор слетали, и сохранить было нельзя.
+    const c = S.draft.customDraft = S.draft.customDraft || { mode: 'date', recurrence: 'yearly',
       rhythm_months: 1, part_of_month: 'начало', day_type: 'любой' };
 
     const title = $('#ba-title'), err = $('#ba-err');
-    title.value = '';
+    title.value = c.title || '';
+    title.oninput = () => { c.title = title.value; saveDraft(); };
 
     const setMode = m => {
       c.mode = m;
@@ -2624,6 +2765,7 @@ SCREENS.B3a = {
     };
     $('#ba-mode-date').onclick = () => setMode('date');
     $('#ba-mode-rhythm').onclick = () => setMode('rhythm');
+    setMode(c.mode || 'date');
 
     // повтор
     const paintRec = () => {
@@ -2653,7 +2795,7 @@ SCREENS.B3a = {
     paintDate();
     $('#ba-date-pick').onclick = () => pickDate({
       value: c.event_date, title: 'Дата повода', min: iso(new Date()),
-      onPick(v) { c.event_date = v; },
+      onPick(v) { S.draft.customDraft.event_date = v; saveDraft(); },
       back: 'B3a',
     });
 
@@ -2706,6 +2848,7 @@ SCREENS.B3a = {
             day_type: c.day_type, event_date: firstRhythmDate(c) };
       S.draft.custom = S.draft.custom || [];
       S.draft.custom.push(item);
+      delete S.draft.customDraft;
       saveDraft();
       go('B3', {}, { replace: true });
     };
@@ -2967,13 +3110,21 @@ SCREENS.B5 = {
     const d = S.draft;
     const f = {
       phone: $('#b5-phone'), street: $('#b5-street'), apt: $('#b5-apt'),
-      entrance: $('#b5-entrance'), intercom: $('#b5-intercom'),
+      entrance: $('#b5-entrance'), floor: $('#b5-floor'),
+      intercom: $('#b5-intercom'), addressNote: $('#b5-addr-note'),
     };
     Object.entries(f).forEach(([k, el]) => {
       el.value = d[k] || '';
       el.oninput = () => { d[k] = el.value; saveDraft(); };
     });
-    $('#b5-next').onclick = () => go('B6');
+    bindPhone(f.phone, v => { d.phone = v; saveDraft(); });
+
+    // Телефон необязателен, но если начали вводить — доводим до конца,
+    // иначе курьер получит обрубок.
+    $('#b5-next').onclick = () => {
+      if (!phoneValid(f.phone.value)) { toast('Телефон введён не полностью'); return; }
+      go('B6');
+    };
     $('#b5-skip').onclick = () => go('B6');
   },
 };
@@ -3034,7 +3185,8 @@ SCREENS.B6 = {
         birth_date: d.birth || null, birth_year_known: !d.noYear,
         note: d.note || '', social_media: d.social || '',
         phone: d.phone || '', street: d.street || '', apartment: d.apt || '',
-        entrance: d.entrance || '', intercom: d.intercom || '',
+        entrance: d.entrance || '', floor: d.floor || '',
+        intercom: d.intercom || '', address_note: d.addressNote || '',
         occasions,
       });
       btn.disabled = false;
@@ -3070,6 +3222,17 @@ async function refreshHome() {
 }
 
 /* Что сейчас требует внимания клиента. Порядок важен: сначала деньги. */
+/* Какой месяц открыт и какой день выбран в календаре C1. */
+let calView = null;
+let calPicked = null;
+
+/* Дата, к которой карточка относится: у заказа — доставка, у повода — событие. */
+function cardDate(c) {
+  if (c.order) return c.order.delivery_date || null;
+  if (c.occasion) return c.occasion.event_date || null;
+  return null;
+}
+
 function homeCards() {
   const cards = [];
 
@@ -3107,7 +3270,9 @@ SCREENS.C1 = {
     if (!S.recipients.length && !S.orders.length) await refreshHome();
 
     const now = new Date();
-    $('#c1-month').textContent = MONTHS_N[now.getMonth()] + ' ' + now.getFullYear();
+    // Какой месяц смотрим и какой день выбран — живёт между заходами на экран,
+    // чтобы возврат из карточки не сбрасывал листание.
+    calView = calView || { y: now.getFullYear(), m: now.getMonth() };
     $('#c1-profile').textContent = (S.profile.name || 'П')[0].toUpperCase();
     $('#c1-profile').onclick = () => go('E4');
     $('#c1-notify').classList.toggle('hidden', !S.notifyOff);
@@ -3134,19 +3299,58 @@ SCREENS.C1 = {
     $('#c1-dow').innerHTML = DOW_SHORT.slice(1).concat(DOW_SHORT[0])
       .map(d => `<div class="dow">${d}</div>`).join('');
 
-    const y = now.getFullYear(), m = now.getMonth();
-    const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
-    const days = new Date(y, m + 1, 0).getDate();
-    const prevDays = new Date(y, m, 0).getDate();
-    let html = '';
-    for (let i = firstDow - 1; i >= 0; i--) html += `<div class="cd out">${prevDays - i}</div>`;
-    for (let d = 1; d <= days; d++) {
-      const v = iso(new Date(y, m, d));
-      const isToday = d === now.getDate();
-      const cls = isToday ? 'cd today' : (marks.has(v) ? 'cd mark' : 'cd');
-      html += `<div class="${cls}">${d}</div>`;
-    }
-    $('#c1-days').innerHTML = html;
+    const todayIso = iso(now);
+
+    const paintMonth = () => {
+      const y = calView.y, m = calView.m;
+      $('#c1-month').textContent = MONTHS_N[m] + ' ' + y;
+
+      const firstDow = (new Date(y, m, 1).getDay() + 6) % 7;
+      const days = new Date(y, m + 1, 0).getDate();
+      const prevDays = new Date(y, m, 0).getDate();
+      let html = '';
+      for (let i = firstDow - 1; i >= 0; i--) html += `<div class="cd out">${prevDays - i}</div>`;
+      for (let d = 1; d <= days; d++) {
+        const v = iso(new Date(y, m, d));
+        const cls = ['cd'];
+        if (v === todayIso) cls.push('today');
+        else if (marks.has(v)) cls.push('mark');
+        if (v === calPicked) cls.push('picked');
+        html += `<button class="${cls.join(' ')}" type="button" data-d="${v}">${d}</button>`;
+      }
+      $('#c1-days').innerHTML = html;
+      $$('#c1-days [data-d]').forEach(b => {
+        b.onclick = () => {
+          calPicked = (calPicked === b.dataset.d) ? null : b.dataset.d;
+          paintMonth(); paintList();
+        };
+      });
+    };
+
+    const paintList = () => {
+      const box = $('#c1-day');
+      if (!calPicked) {
+        box.classList.add('hidden');
+        $('#c1-cards').classList.remove('hidden');
+        return;
+      }
+      box.classList.remove('hidden');
+      $('#c1-cards').classList.add('hidden');
+      $('#c1-day-title').textContent = dateWords(calPicked, false);
+
+      const day = cards.filter(c => cardDate(c) === calPicked);
+      $('#c1-day-list').innerHTML = day.length
+        ? day.map(cardHtml).join('')
+        : `<div class="card lg center" style="padding:20px">
+             <div class="h3">В этот день ничего нет</div>
+             <p class="p" style="text-align:center;margin-top:6px">Ни повода, ни доставки. Можно выбрать другой день или вернуться к списку.</p>
+           </div>`;
+      bindCards();
+    };
+
+    $('#c1-prev').onclick = () => { if (--calView.m < 0) { calView.m = 11; calView.y--; } paintMonth(); };
+    $('#c1-next').onclick = () => { if (++calView.m > 11) { calView.m = 0; calView.y++; } paintMonth(); };
+    $('#c1-day-clear').onclick = () => { calPicked = null; paintMonth(); paintList(); };
 
     $('#c1-cards').innerHTML = cards.length
       ? cards.map(cardHtml).join('')
@@ -3155,6 +3359,8 @@ SCREENS.C1 = {
            <p class="p" style="text-align:center;margin-top:6px">Ближайших дат нет. Напомним заранее — можно не держать в голове.</p>
          </div>`;
     bindCards();
+    paintMonth();
+    paintList();
   },
 };
 
@@ -3726,10 +3932,13 @@ function askAddress(onDone, preset) {
   sheet(`<div class="h2">Адрес</div>
     <input class="field" id="ad-street" placeholder="Город, улица, дом" value="${esc((preset && preset.street) || '')}">
     <div style="display:flex;gap:8px">
-      <input class="field grow" id="ad-apt" placeholder="Кв." value="${esc((preset && preset.apartment) || '')}">
-      <input class="field grow" id="ad-ent" placeholder="Подъезд" value="${esc((preset && preset.entrance) || '')}">
+      <input class="field grow" id="ad-apt" inputmode="numeric" placeholder="Кв." value="${esc((preset && preset.apartment) || '')}">
+      <input class="field grow" id="ad-ent" inputmode="numeric" placeholder="Подъезд" value="${esc((preset && preset.entrance) || '')}">
+      <input class="field grow" id="ad-fl"  inputmode="numeric" placeholder="Этаж" value="${esc((preset && preset.floor) || '')}">
       <input class="field grow" id="ad-int" placeholder="Домофон" value="${esc((preset && preset.intercom) || '')}">
     </div>
+    <textarea class="field ta" id="ad-note" rows="2"
+      placeholder="Что курьеру знать: код на калитке, вход со двора">${esc((preset && preset.address_note) || '')}</textarea>
     <div class="err-text hidden" id="ad-err"></div>
     <button class="btn" id="ad-ok">Сохранить</button>`);
   $('#ad-ok').onclick = () => {
@@ -3742,7 +3951,9 @@ function askAddress(onDone, preset) {
       street,
       apartment: $('#ad-apt').value.trim(),
       entrance: $('#ad-ent').value.trim(),
+      floor: $('#ad-fl').value.trim(),
       intercom: $('#ad-int').value.trim(),
+      address_note: $('#ad-note').value.trim(),
     };
     const text = [parts.street, parts.apartment && 'кв. ' + parts.apartment].filter(Boolean).join(', ');
     closeSheet();
@@ -4403,6 +4614,7 @@ SCREENS.E1 = {
       el.value = d[k] || '';
       el.oninput = () => { d[k] = el.value.trim(); saveDraft(); paint(); };
     });
+    bindPhone($('#e1-phone'), v => { d.phone = v; saveDraft(); });
     $('#e1-date').onclick = () => pickDate({
       value: d.date, title: 'Дата доставки', min: iso(new Date()),
       onPick(v) { d.date = v; saveDraft(); }, back: 'E1',
@@ -4411,6 +4623,7 @@ SCREENS.E1 = {
     paint();
 
     $('#e1-next').onclick = async () => {
+      if (!phoneValid(d.phone || '')) { toast('Телефон введён не полностью'); return; }
       const btn = $('#e1-next'); btn.disabled = true;
       const res = await api('createOneOff', {
         name: d.name, phone: d.phone || '', address: d.addr,
@@ -4440,12 +4653,22 @@ SCREENS.E2 = {
     const until = String(S.settings.rush_available_until || '18:00');
     const closed = new Date().getHours() >= parseInt(until, 10);
 
+    // Пиковый день — 8 марта, 14 февраля. Срочных берём ограниченное
+    // число: остальные руки заняты теми, кто заказал заранее.
+    const now = new Date();
+    const mmdd = String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                 String(now.getDate()).padStart(2, '0');
+    const isPeak = String(S.settings.peak_dates || '').split(',')
+                     .map(x => x.trim()).includes(mmdd);
+
     const paint = () => {
       $('#e2-who').innerHTML = people.map(r => `
         <button class="opt ${d.recipientId === r.id ? 'on' : ''}" data-r="${r.id}">
           <span>${esc(r.name)}<span class="sub" style="display:block;margin-top:4px;color:${d.recipientId === r.id ? 'var(--on-green)' : 'var(--muted-2)'}">${esc(String(r.who || '').toLowerCase())}</span></span>
           <span class="tick">✓</span></button>`).join('')
-        || `<div class="hint">Сначала добавьте близкого человека</div>`;
+        || `<button class="btn ghost" id="e2-add">+ Добавить близкого человека</button>
+             <div class="hint" style="margin-top:8px">Срочный букет везём тому, кто уже есть в списке — адрес и имя берём оттуда</div>`;
+      if ($('#e2-add')) $('#e2-add').onclick = () => startNewRecipient();
       $$('#e2-who [data-r]').forEach(b => b.onclick = () => {
         d.recipientId = b.dataset.r;
         const r = people.find(x => String(x.id) === String(b.dataset.r));
@@ -4466,9 +4689,18 @@ SCREENS.E2 = {
         `<div class="row"><span class="k">Итого</span><span class="v" style="font-size:16px">${money(base + rush)}</span></div>`,
       ].join('');
 
+      $('#e2-note').textContent = isPeak
+        ? `Сегодня срочных берём не больше ${S.settings.peak_rush_limit || 20} — остальные руки заняты теми, кто заказал заранее. Если места закончились, скажем честно`
+        : 'Окно времени не выбирается — везём сразу, как букет готов';
+
       $('#e2-send').disabled = closed || !(d.recipientId && d.address && d.size);
-      $('#e2-hint').textContent = closed
-        ? `Сегодня срочный уже не оформить — принимаем до ${until}`
+      // Кнопка не должна молча не нажиматься — всегда говорим, чего не хватает.
+      $('#e2-hint').textContent =
+          closed              ? `Сегодня срочный уже не оформить — принимаем до ${until}`
+        : !people.length      ? 'Сначала добавьте близкого человека — тогда сможем отправить'
+        : !d.recipientId      ? 'Выберите, кому везём'
+        : !d.address          ? 'Укажите адрес'
+        : !d.size             ? 'Выберите размер букета'
         : `Кнопка активна до ${until} — позже трёх часов до вечера не остаётся`;
     };
     paint();
@@ -4602,9 +4834,12 @@ SCREENS.E4 = {
       sheet(`<div class="h2">Ваш телефон</div>
         <p class="p">Запасной номер: курьер позвонит вам, если не дозвонится ей.</p>
         <input class="field" id="ph" inputmode="tel" value="${esc(pr.phone || '')}" placeholder="+7 903 111-22-33">
+        <div class="err-text center hidden" id="ph-err">Телефон введён не полностью</div>
         <button class="btn" id="ph-ok">Сохранить</button>`);
+      bindPhone($('#ph'));
       $('#ph-ok').onclick = async () => {
         const v = $('#ph').value.trim();
+        if (!phoneValid(v)) { $('#ph-err').classList.remove('hidden'); return; }
         const r = await api('saveProfile', { phone: v });
         closeSheet();
         if (!r.ok) { toast(errText(r)); return; }
@@ -5245,6 +5480,7 @@ SCREENS.K2 = {
       `<div class="row"><span class="k">Кому</span><span class="v">${esc(toSelf ? d.clientName + ' · заказчик' : d.recipientName + ' · получатель')}</span></div>`,
       `<div class="row"><span class="k">Куда</span><span class="v">${esc(d.address || '')}</span></div>`,
       `<div class="row"><span class="k">Окно</span><span class="v">${esc(d.window || 'как готов')}</span></div>`,
+      d.addressNote ? `<div class="row"><span class="k">Про адрес</span><span class="v">${esc(d.addressNote)}</span></div>` : '',
       d.callBefore ? `<div class="row"><span class="k">Просил позвонить</span><span class="v">за 30 минут</span></div>` : '',
     ].filter(Boolean).join('');
 
@@ -5414,6 +5650,34 @@ SCREENS.O1 = {
         </div>
         <div class="card center"><div class="h2">${t.onApproval || 0}</div><div class="lbl" style="margin-top:4px">на согласовании</div></div>
       </div>`;
+
+    // Пиковый день показываем отдельной карточкой: это не «внимание сейчас»,
+    // а «начинай готовиться» — про него нужно думать за месяц.
+    const pk = res.peak;
+    const peakBox = $('#o1-peak');
+    const showPeak = pk && pk.daysLeft >= 0 && pk.daysLeft <= 60;
+    peakBox.classList.toggle('hidden', !showPeak);
+    if (showPeak) {
+      const enough = pk.couriersHave >= pk.couriersNeeded;
+      peakBox.innerHTML = `
+        <div class="between">
+          <div class="grow">
+            <div style="font:600 13px/1.3 var(--sans)">${esc(pk.dateWords)} · через ${pk.daysLeft} ${plural(pk.daysLeft, 'день', 'дня', 'дней')}</div>
+            <div class="sub" style="margin-top:5px">
+              ${pk.orders} ${plural(pk.orders, 'заказ', 'заказа', 'заказов')} ·
+              срочных ${pk.rush} из ${pk.rushLimit} ·
+              курьеров нужно ${pk.couriersNeeded}, есть ${pk.couriersHave}
+            </div>
+          </div>
+          <span class="lbl" style="flex:none;background:${enough ? 'var(--green)' : 'var(--peach)'};color:${enough ? 'var(--bg)' : 'var(--peach-text)'};padding:5px 8px;border-radius:8px">ПИК</span>
+        </div>
+        <div class="sub" style="margin-top:8px;color:${enough ? 'var(--muted-2)' : 'var(--alarm)'}">
+          ${enough
+            ? 'Рук хватает. Букеты можно начинать собирать за два дня — цветы выдержат'
+            : 'Курьеров не хватает. Водителя на один день найти легко, флориста — нет: ищите сейчас'}
+        </div>`;
+      peakBox.onclick = () => go('O2');
+    }
 
     const items = res.attention || [];
     $('#o1-calm').classList.toggle('hidden', items.length > 0);
@@ -5705,7 +5969,16 @@ SCREENS.O5 = {
         numRow('rush_fee', 'Доплата за срочность', '', ' ₽'),
         numRow('rush_available_until', 'Срочный принимаем до'),
       ].join('');
-      $$('#o5-rows [data-edit]').forEach(el => el.onclick = () => {
+
+      $('#o5-peak').innerHTML = [
+        numRow('peak_dates', 'Какие дни', 'месяц-день, через запятую'),
+        numRow('peak_rush_limit', 'Срочных берём', 'больше не примем'),
+        numRow('peak_prepay_days', 'Оплата за', 'до даты — чтобы не было отмен', ' дн.'),
+        numRow('peak_reminder_days', 'Напоминаем за', 'вместо обычного срока', ' дн.'),
+        numRow('courier_per_day', 'Курьер вывозит', 'адресов в день'),
+      ].join('');
+
+      $$('#o5-rows [data-edit], #o5-peak [data-edit]').forEach(el => el.onclick = () => {
         const k = el.dataset.edit;
         sheet(`<div class="h2">${esc(el.querySelector('.k').childNodes[0].textContent.trim())}</div>
           <input class="field" id="ed" value="${esc(s[k] || '')}">
@@ -5766,7 +6039,7 @@ SCREENS.O5 = {
         $('#o5-err').textContent = errText(r);
         $('#o5-err').classList.remove('hidden'); return;
       }
-      S.settings = { ...S.settings, ...s, prices };
+      S.settings = numericSettings({ ...S.settings, ...s, prices });
       toast('Правила сохранены');
       back();
     };
@@ -5996,7 +6269,7 @@ async function boot() {
   S.role       = res.role || null;
   S.realRole   = res.role || null;
   S.profile    = res.profile || {};
-  S.settings   = res.settings || {};
+  S.settings   = numericSettings(res.settings || {});
   S.recipients = res.recipients || [];
   S.orders     = res.orders || [];
   S.notifyOff  = !!res.notifyOff;
