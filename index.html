@@ -1429,6 +1429,7 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
     </button>
 
     <div class="foot pad">
+      <button class="btn secondary hidden" id="e4-work">Вернуться в рабочий режим</button>
       <button class="btn ghost" id="e4-delete" style="color:var(--alarm)">Удалить аккаунт</button>
     </div>
   </div>
@@ -1786,7 +1787,10 @@ textarea.field{height:auto;min-height:96px;padding:14px 16px;line-height:1.5;res
       <p class="p center">Ничего не требует вмешательства. Система работает, вы отдыхаете.</p>
     </div>
 
-    <div class="foot pad"><button class="btn" id="o1-funnel">Открыть воронку</button></div>
+    <div class="foot pad">
+      <button class="btn" id="o1-funnel">Открыть воронку</button>
+      <button class="btn ghost" id="o1-client">Открыть как клиент</button>
+    </div>
   </div>
 </div>
 
@@ -1984,7 +1988,8 @@ const API = {
 /* Общее состояние приложения. Всё, что переживает переход между экранами. */
 const S = {
   chatId: null,
-  role: null,            // null(клиент) | owner | florist | courier
+  role: null,            // в каком режиме смотрим сейчас: null(клиент) | owner | florist | courier
+  realRole: null,        // кто человек на самом деле — из таблицы staff, не меняется
   profile: null,
   recipients: [],
   orders: [],
@@ -2025,6 +2030,12 @@ function errText(res) {
     forbidden: 'Нет доступа',
     rush_closed: 'Срочный заказ можно оформить до 18:00',
     payment_failed: 'Банк отклонил платёж',
+    // Пока ЮKassa не подключена — говорим прямо, а не «что-то пошло не так».
+    payment_not_configured: 'Оплата пока не подключена — скоро включим',
+    redo_limit: 'Переделок больше нет — давайте обсудим голосом',
+    already_taken: 'Заказ уже взяли',
+    bad_code: 'Код не совпадает',
+    no_photo: 'Нужно фото',
   };
   if (typeof res.error === 'string' && map[res.error]) return map[res.error];
   if (res.message) return String(res.message);
@@ -4671,6 +4682,15 @@ SCREENS.E4 = {
     $$('#s-E4 .doc-link').forEach(b => b.onclick = () => openDoc(b.dataset.doc));
     $('#e4-support').onclick = openSupport;
 
+    // Сотрудник, который смотрит клиентскую часть, должен уметь вернуться к работе.
+    const work = $('#e4-work');
+    work.classList.toggle('hidden', !S.realRole);
+    if (S.realRole) {
+      work.textContent = 'Вернуться в режим ' +
+        ({ owner: 'владельца', florist: 'флориста', courier: 'курьера' }[S.realRole] || 'работы');
+      work.onclick = switchToWork;
+    }
+
     $('#e4-delete').onclick = async () => {
       const ok = await confirmSheet({
         title: 'Удалить аккаунт?',
@@ -5057,7 +5077,7 @@ SCREENS.F6 = {
     $('#f6-payout-when').textContent = res.payoutWhen || 'за текущий месяц';
 
     $('#f6-support').onclick = openSupport;
-    $('#f6-exit').onclick = () => { S.role = null; renderTabs(); go('C1', {}, { replace: true }); };
+    $('#f6-exit').onclick = switchToClient;
   },
 };
 
@@ -5359,7 +5379,7 @@ SCREENS.K5 = {
       `Сегодня есть свободные доставки (${res.freeToday}) — берите, если есть время`;
 
     $('#k5-support').onclick = openSupport;
-    $('#k5-exit').onclick = () => { S.role = null; renderTabs(); go('C1', {}, { replace: true }); };
+    $('#k5-exit').onclick = switchToClient;
   },
 };
 
@@ -5426,6 +5446,7 @@ SCREENS.O1 = {
     });
 
     $('#o1-funnel').onclick = () => go('O2', {}, { replace: true });
+    $('#o1-client').onclick = switchToClient;
   },
 };
 
@@ -5846,10 +5867,54 @@ SCREENS.S3 = { back: false };
 
 SCREENS.S1 = {
   back: false,
-  enter() {
-    $('#s1-retry').onclick = () => boot();
+  enter(p) {
+    // Экран «нет сети» переиспользуем и для других тупиков на входе —
+    // меняем только заголовок, текст и кнопку.
+    $('#s-S1 .title').textContent = p.bar || 'Нет сети';
+    $('#s-S1 .h2').textContent = p.title || 'Связи нет';
+    $('#s-S1 .p').textContent = p.text ||
+      'Ничего не потерялось — всё, что вы заполнили, останется здесь. Попробуйте, когда сеть вернётся.';
+    $('#s1-retry').textContent = p.button || 'Повторить';
+    $('#s1-retry').onclick = p.onClick || (() => boot());
+    $('#s-S1 .hint').textContent = p.hint || 'Заказ и анкета сохранены на телефоне';
   },
 };
+
+/* Показать тупиковое состояние на входе: объясняем причину и даём выход. */
+function showStop(title, text, button) {
+  const toBot = title.indexOf('бота') >= 0;
+  go('S1', {
+    bar: toBot ? 'Bloomind' : 'Нет связи',
+    title, text, button,
+    hint: toBot ? 'Так мы бережём ваши данные' : 'Заказ и анкета сохранены на телефоне',
+    onClick: toBot
+      ? () => {
+          const u = 'https://t.me/' + (S.botUsername || 'Bloomind_bot');
+          if (TG && TG.openTelegramLink) TG.openTelegramLink(u); else window.open(u, '_blank');
+        }
+      : () => boot(),
+  }, { replace: true });
+}
+
+/* ---------- переключение между рабочим и клиентским режимом ----------
+   Сотрудник — тоже человек: он может заказывать букеты как обычный клиент.
+   Настоящая роль (S.realRole) при этом не меняется, меняется только то,
+   какие экраны показываем. */
+
+function switchToClient() {
+  S.role = null;
+  renderTabs();
+  go('C1', {}, { replace: true });
+  toast('Клиентский режим');
+}
+
+function switchToWork() {
+  if (!S.realRole) return;
+  S.role = S.realRole;
+  renderTabs();
+  go(homeScreen(), {}, { replace: true });
+  toast({ owner: 'Режим владельца', florist: 'Режим флориста', courier: 'Режим курьера' }[S.realRole]);
+}
 
 /* Нижние вкладки собираются под роль: у клиента одни, у команды другие. */
 function renderTabs() {
@@ -5912,13 +5977,24 @@ async function boot() {
 
   const res = await api('boot');
   if (!res.ok) {
+    // Разные причины — разный текст. Раньше всё показывало «нет сети»,
+    // и было непонятно, что делать: чаще всего приложение просто открыли
+    // в браузере, где подписи Telegram нет и быть не может.
+    if (res.error === 'forbidden') {
+      showStop('Откройте через бота',
+        'Приложение работает только внутри Telegram — так мы проверяем, что заказы ваши. Напишите боту и нажмите кнопку в сообщении.',
+        'Открыть бота');
+      return;
+    }
     if (res.error === 'network') { go('S1', {}, { replace: true }); return; }
-    toast(errText(res));
-    go('S1', {}, { replace: true });
+    showStop('Что-то пошло не так',
+      'Сервис не отвечает. Попробуйте через минуту — если не пройдёт, напишите нам.',
+      'Повторить');
     return;
   }
 
   S.role       = res.role || null;
+  S.realRole   = res.role || null;
   S.profile    = res.profile || {};
   S.settings   = res.settings || {};
   S.recipients = res.recipients || [];
