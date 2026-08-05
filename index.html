@@ -372,16 +372,10 @@ textarea.field.ta{min-height:60px}
     <div class="h1" style="margin-top:4px">Нужен букет</div>
     <p class="p" id="n1-lead">Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.</p>
 
-    <div class="chips" style="margin-top:2px">
-      <span class="chip on" id="n1-speed">сегодня</span>
-      <span class="chip" id="n1-price">разовый от 5 000 ₽</span>
-    </div>
-
-    <button class="btn" id="n1-go" style="margin-top:4px">Собрать букет</button>
-
-    <!-- близкие плитками: тап пропускает шаг «кому» -->
+    <!-- Близкие: тап по человеку и есть начало заказа.
+         Объяснять это словами не нужно — достаточно попробовать один раз. -->
     <div class="hidden" id="n1-people-wrap">
-      <div class="lbl" style="margin:10px 0 8px">Кому чаще всего · тап = шаг пропущен</div>
+      <div class="lbl" style="margin:12px 0 9px">Кому везём</div>
       <div style="display:flex;gap:9px;overflow-x:auto;padding-bottom:2px" id="n1-people"></div>
     </div>
 
@@ -391,21 +385,16 @@ textarea.field.ta{min-height:60px}
 
     <!-- галерея вместо пустоты: доказательство, что собираем руками -->
     <div class="hidden" id="n1-gallery-wrap">
-      <div class="lbl" style="margin:10px 0 8px">Что мы собирали на этой неделе</div>
+      <div class="lbl" style="margin:12px 0 9px">Что мы собирали на этой неделе</div>
       <div style="display:flex;gap:8px" id="n1-gallery"></div>
-      <div class="hint" style="text-align:left;margin-top:7px">Не каталог: выбрать нельзя. Это доказательство, что собираем руками</div>
     </div>
 
-    <!-- подписка: цена словами, чтобы не спутать с разовой -->
-    <button class="card" id="n1-sub" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px;margin-top:4px">
-      <div class="between">
-        <span>
-          <span style="display:block;font:600 13px/1.2 var(--sans)" id="n1-sub-title">Возить ей регулярно</span>
-          <span class="sub" style="display:block;margin-top:5px" id="n1-sub-text"></span>
-        </span>
-        <span style="color:var(--muted-3);flex:none">→</span>
-      </div>
-    </button>
+    <!-- Одна главная кнопка, и она внизу — правило брендбука.
+         Срок доставки стоит подписью под ней: это условие, а не ярлык. -->
+    <div class="foot pad">
+      <button class="btn" id="n1-go">Собрать букет</button>
+      <div class="hint" id="n1-when"></div>
+    </div>
   </div>
 </div>
 
@@ -512,7 +501,7 @@ textarea.field.ta{min-height:60px}
 
     <div><div class="lbl" style="margin-bottom:7px" id="n4-addr-label">Адрес</div>
       <div class="stack" style="gap:7px" id="n4-addr"></div>
-      <button class="btn ghost" id="n4-addr-new" style="margin-top:8px">+ Другой адрес</button>
+      <button class="btn ghost" id="n4-addr-new" style="margin-top:8px">Указать адрес</button>
       <button class="btn ghost hidden" id="n4-noaddr" style="margin-top:6px">Не знаю адрес</button>
     </div>
 
@@ -1293,7 +1282,7 @@ textarea.field.ta{min-height:60px}
   <div class="body tight">
     <div class="h1">Куда и когда<br>привезти вам?</div>
     <div class="stack" style="gap:7px" id="d4-addr"></div>
-    <button class="btn ghost" id="d4-new">+ Другой адрес — на один раз</button>
+    <button class="btn ghost" id="d4-new">Указать другой адрес</button>
     <div>
       <div class="lbl" style="margin-bottom:8px">Когда передать</div>
       <div class="stack" style="gap:7px" id="d4-windows"></div>
@@ -1318,7 +1307,7 @@ textarea.field.ta{min-height:60px}
   <div class="body tight">
     <div class="h1" id="d5-title">Куда везти?</div>
     <div class="stack" style="gap:7px" id="d5-addr"></div>
-    <button class="btn ghost" id="d5-new">+ Другой адрес — на этот раз</button>
+    <button class="btn ghost" id="d5-new">Указать другой адрес</button>
     <label class="card hidden" style="display:flex;gap:12px;align-items:center;cursor:pointer" id="d5-save-addr">
       <span class="cbox"></span>
       <span style="font:600 13px/1.3 var(--sans)" id="d5-save-text"></span>
@@ -1706,7 +1695,7 @@ textarea.field.ta{min-height:60px}
 
     <div><div class="lbl" style="margin-bottom:7px">Куда везти ей</div>
       <div class="stack" style="gap:7px" id="p3-addr"></div>
-      <button class="btn ghost" id="p3-addr-new" style="margin-top:8px">+ Другой адрес</button>
+      <button class="btn ghost" id="p3-addr-new" style="margin-top:8px">Указать адрес</button>
     </div>
 
     <div><div class="lbl" style="margin-bottom:7px">Окно</div>
@@ -2113,11 +2102,12 @@ textarea.field.ta{min-height:60px}
 <!-- F1 / F0 · доска дня -->
 <div class="screen" id="s-F1">
   <div class="bar">
+    <button class="back" type="button" style="display:none">←</button>
     <div class="grow">
       <div class="h2">Сегодня</div>
       <div class="sub" id="f1-sub" style="margin-top:6px"></div>
     </div>
-    <div class="eyebrow">ФЛОРИСТ</div>
+    <div class="eyebrow" id="f1-eyebrow">ФЛОРИСТ</div>
   </div>
   <div class="body tight">
     <div class="card" style="display:flex;padding:12px 8px" id="f1-counts"></div>
@@ -2305,11 +2295,12 @@ textarea.field.ta{min-height:60px}
 <!-- K1 / K0 · день одним списком -->
 <div class="screen" id="s-K1">
   <div class="bar">
+    <button class="back" type="button" style="display:none">←</button>
     <div class="grow">
       <div class="h2">Доставки</div>
       <div class="sub" id="k1-sub" style="margin-top:6px"></div>
     </div>
-    <div class="eyebrow">КУРЬЕР</div>
+    <div class="eyebrow" id="k1-eyebrow">КУРЬЕР</div>
   </div>
   <div class="body tight">
     <div class="card" style="display:flex;padding:12px 8px" id="k1-counts"></div>
@@ -2510,6 +2501,17 @@ textarea.field.ta{min-height:60px}
     <div class="card" style="display:flex;padding:12px 8px" id="o4-counts"></div>
     <div class="list" id="o4-list"></div>
     <p class="p">Приглашение — одноразовая ссылка в бот. Роль назначается при входе, доступ сразу ограничен своими заказами.</p>
+    <!-- Владелец — тоже пара рук. Пока команда маленькая, он сам собирает
+         и сам развозит; и в любой момент должен уметь подхватить. -->
+    <div>
+      <div class="lbl" style="margin:14px 0 8px">Встать за работу</div>
+      <div class="stack" style="gap:7px">
+        <button class="btn secondary" id="o4-as-florist">Открыть доску флориста</button>
+        <button class="btn secondary" id="o4-as-courier">Открыть день курьера</button>
+      </div>
+      <div class="hint" style="text-align:left;margin-top:7px">Вы видите все заказы и можете взять любой: снять фото, передать курьеру, вручить</div>
+    </div>
+
     <div class="foot pad">
       <button class="btn" id="o4-invite">Пригласить в команду</button>
       <button class="btn secondary" id="o4-rules">Правила</button>
@@ -2787,7 +2789,7 @@ function homeScreen() {
   if (S.role === 'florist') return 'F1';
   if (S.role === 'courier') return 'K1';
   if (S.role === 'owner')   return 'O1';
-  return 'C1';
+  return 'N1';   // приложение начинается с букета, а не с календаря
 }
 
 function paintBar(code, def) {
@@ -3011,6 +3013,47 @@ const vin = n => nameCase(n, 'vin');   // кого? — «сохранить И�
 const dat = n => nameCase(n, 'dat');   // кому? — «возить Ирине»
 
 
+/* ---------- «не загрузилось» вместо белого экрана ----------
+   Рабочие экраны команды рисуются целиком из ответа сервера. Если ответ
+   не пришёл, раньше оставался белый лист с одной шапкой: человек видел
+   пустоту и не понимал, у него нет заказов или всё сломалось.
+   Теперь на этом месте объяснение и кнопка «Повторить». */
+function screenFailed(screenId, retry) {
+  const scr = $('#s-' + screenId);
+  if (!scr) return;
+  const body = scr.querySelector('.body') || scr;
+  let box = body.querySelector('.load-fail');
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'load-fail';
+    box.style.cssText = 'flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;text-align:center';
+    box.innerHTML = `
+      <div class="h2">Не загрузилось</div>
+      <p class="p center">Связь пропала или сервис не ответил. Ничего не потерялось — попробуйте ещё раз.</p>
+      <button class="btn secondary">Повторить</button>`;
+    body.appendChild(box);
+  }
+  // Прячем остальное, чтобы не мигали пустые блоки, но запоминаем что именно —
+  // иначе после удачного «Повторить» экран остался бы наполовину скрытым.
+  const hidden = [];
+  [...body.children].forEach(el => {
+    if (el === box || el.classList.contains('hidden')) return;
+    el.classList.add('hidden');
+    hidden.push(el);
+  });
+  box.__hidden = hidden;
+  box.classList.remove('hidden');
+  box.querySelector('button').onclick = () => { screenLoaded(screenId); retry(); };
+}
+function screenLoaded(screenId) {
+  const box = $('#s-' + screenId + ' .load-fail');
+  if (!box) return;
+  box.classList.add('hidden');
+  (box.__hidden || []).forEach(el => el.classList.remove('hidden'));
+  box.__hidden = [];
+}
+
+
 /* ======== 05-N.js ======== */
 /* ============================================================
    N · БЫСТРЫЙ ЗАКАЗ
@@ -3107,22 +3150,13 @@ SCREENS.N1 = {
       if (TG && TG.close) setTimeout(() => TG.close(), 1200);
     };
 
-    // ---- красный 1: плашка знает время суток
+    // Срок доставки — подпись под кнопкой. Она знает время суток:
+    // «сегодня за 3 часа» в 23:40 было бы ложью. Цену здесь не пишем —
+    // человек увидит её на экране выбора размера, где она что-то значит.
     const rush = rushInfo();
-    $('#n1-speed').textContent = rush.label;
-    $('#n1-speed').classList.toggle('on', rush.open);
-
-    const p = S.settings.prices || { S: 5000, M: 7000, L: 9500 };
-    const from = Math.min(...Object.values(p).map(Number).filter(Boolean));
-    $('#n1-price').textContent = 'разовый от ' + money(from);
-
-    // ---- красный 5: цены разведены словами, а не двумя «от»
-    const sp = S.settings.subPrices || { S: 4500, M: 6300, L: 8500 };
-    const off = Math.round((1 - (sp.S || 4500) / (p.S || 5000)) * 100);
-    $('#n1-sub-title').textContent = people.length ? 'Возить ей регулярно' : 'Возить регулярно';
-    $('#n1-sub-text').textContent =
-      `Без дат и поводов, ${money(sp.S)} за букет — на ${off}% дешевле разового.`;
-    $('#n1-sub').onclick = () => startSubscription();
+    $('#n1-when').textContent = rush.open
+      ? `Успеем ${rush.label} · оплата после фото от флориста`
+      : `${rush.label[0].toUpperCase()}${rush.label.slice(1)} · оплата после фото от флориста`;
 
     // ---- активный заказ: узкая строка или карточка
     const live = (S.orders || []).find(o =>
@@ -3182,9 +3216,8 @@ SCREENS.N1 = {
 
     // ---- главная кнопка
     $('#n1-go').onclick = () => { S.draft.fast = {}; saveDraft(); go('N2'); };
-    $('#n1-lead').textContent = empty
-      ? 'Кому — решите на первом шаге. Себе в руки тоже можно.'
-      : 'Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.';
+    $('#n1-lead').textContent =
+      'Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.';
 
     // ---- близкие плитками: тап пропускает шаг «кому»
     $('#n1-people-wrap').classList.toggle('hidden', !people.length);
@@ -3457,6 +3490,10 @@ SCREENS.N4 = {
             fromCard === d.address ? 'сохранён в её карточке' : 'этот заказ'}</span></span><span class="tick">✓</span></button>`
         : `<div class="hint" style="text-align:left">Адрес пока не указан</div>`;
 
+      // Первый раз человек просто пишет адрес — «другой» появляется,
+      // только когда есть с чем сравнивать.
+      $('#n4-addr-new').textContent = d.address ? 'Указать другой адрес' : 'Указать адрес';
+
       // ---- адрес чужого человека: главное место отвала
       $('#n4-noaddr').classList.toggle('hidden', d.kind === 'self' || !!fromCard);
 
@@ -3468,9 +3505,16 @@ SCREENS.N4 = {
     };
     paint();
 
+    // Кому сохранять адрес — зависит от того, кому везём. Себе в свой
+    // профиль, сохранённой в её карточку, новому человеку — вместе с ним:
+    // одна галочка вместо анкеты на шесть шагов.
     $('#n4-addr-new').onclick = () => askAddress((text, parts) => {
       d.address = text; d.addressParts = parts; d.noAddress = false; saveDraft(); paint();
-    }, r);
+    }, r, {
+      title: d.kind === 'self' ? 'Куда привезти вам' : `Куда везём${d.name ? ' ' + vin(d.name) : ''}`,
+      mode: d.kind === 'self' ? 'self' : d.kind === 'saved' ? 'saved' : 'guest',
+      name: d.kind === 'self' ? '' : d.name,
+    });
 
     $('#n4-noaddr').onclick = () => {
       sheet(`<div class="h2">Не знаете адрес?</div>
@@ -5257,11 +5301,17 @@ SCREENS.D4 = {
     };
     paint();
 
-    $('#d4-new').onclick = () => askAddress(text => {
+    $('#d4-new').onclick = () => askAddress(async (text, parts) => {
       d.address = text; d.addressId = null; saveDraft();
-      list.push({ id: -1, label: 'На один раз', text });
+      // Галочку «сохранить как мой адрес» выполняем сразу: иначе человек
+      // отметил её, а адрес всё равно исчез бы после заказа.
+      if (parts.save) {
+        const r = await api('addAddress', { ...parts, label: 'Мой адрес' });
+        if (r.ok) { S.myAddresses = null; toast('Адрес сохранён в профиле'); }
+      }
+      list.push({ id: -1, label: parts.save ? 'Мой адрес' : 'Этот заказ', text });
       paint();
-    });
+    }, null, { title: 'Куда привезти вам', mode: 'self' });
     $('#d4-call').onclick = () => {
       d.callBefore = !(d.callBefore !== false);
       $('#d4-call .cbox').classList.toggle('on', d.callBefore !== false);
@@ -5270,20 +5320,71 @@ SCREENS.D4 = {
   },
 };
 
-/* Ввод адреса одним листом — используется и для себя, и для неё. */
-function askAddress(onDone, preset) {
-  sheet(`<div class="h2">Адрес</div>
-    <input class="field" id="ad-street" placeholder="Город, улица, дом" value="${esc((preset && preset.street) || '')}">
+/* ---------- ввод адреса ----------
+
+   Один лист на всё приложение: и для себя, и для неё.
+
+   Две вещи, которые тут были не так. Поля стояли в один ряд по четыре —
+   подписи не помещались и обрезались на «Подъе:» и «Домоф». И адрес
+   никуда не сохранялся: человек вводил его заново каждый заказ, а кнопка
+   называлась «на один раз», хотя один раз никому не нужен.
+
+   Теперь: улица отдельной строкой, три коротких поля в ряд, домофон и
+   заметка своими строками. И вопрос в конце — сохранить ли адрес. Формулировка
+   зависит от того, кому везём: своей карточке, её карточке или «сохраним её
+   вместе с адресом», если человека в списке ещё нет.
+*/
+function askAddress(onDone, preset, opts) {
+  const o = opts || {};
+  const v = k => esc((preset && preset[k]) || '');
+
+  // Кому предлагаем сохранить адрес. Три разных смысла — три разных текста.
+  const save =
+      o.mode === 'self'  ? { key: 'self',  title: 'Сохранить как мой адрес',
+                             sub: 'в следующий раз не придётся вводить' }
+    : o.mode === 'guest' ? { key: 'guest', title: `Сохранить ${o.name ? vin(o.name) : 'её'} вместе с адресом`,
+                             sub: 'заведём карточку — дальше хватит одного тапа' }
+    : o.mode === 'saved' ? { key: 'saved', title: `Сохранить в карточку ${o.name ? vin(o.name) : ''}`.trim(),
+                             sub: 'заменит адрес, который там сейчас' }
+    : null;
+
+  sheet(`<div class="h2">${esc(o.title || 'Куда везём')}</div>
+
+    <input class="field" id="ad-street" placeholder="Город, улица, дом" value="${v('street')}">
+
     <div style="display:flex;gap:8px">
-      <input class="field grow" id="ad-apt" inputmode="numeric" placeholder="Кв." value="${esc((preset && preset.apartment) || '')}">
-      <input class="field grow" id="ad-ent" inputmode="numeric" placeholder="Подъезд" value="${esc((preset && preset.entrance) || '')}">
-      <input class="field grow" id="ad-fl"  inputmode="numeric" placeholder="Этаж" value="${esc((preset && preset.floor) || '')}">
-      <input class="field grow" id="ad-int" placeholder="Домофон" value="${esc((preset && preset.intercom) || '')}">
+      <input class="field grow" id="ad-apt" inputmode="numeric" placeholder="Кв." value="${v('apartment')}">
+      <input class="field grow" id="ad-ent" inputmode="numeric" placeholder="Подъезд" value="${v('entrance')}">
+      <input class="field grow" id="ad-fl"  inputmode="numeric" placeholder="Этаж" value="${v('floor')}">
     </div>
+
+    <input class="field" id="ad-int" placeholder="Домофон, если нужен" value="${v('intercom')}">
+
     <textarea class="field ta" id="ad-note" rows="2"
-      placeholder="Что курьеру знать: код на калитке, вход со двора">${esc((preset && preset.address_note) || '')}</textarea>
+      placeholder="Что курьеру знать: код на калитке, вход со двора">${v('address_note')}</textarea>
+
+    ${save ? `
+    <button class="card" id="ad-save" style="border:0;width:100%;text-align:left;cursor:pointer;padding:12px 14px">
+      <div style="display:flex;gap:11px;align-items:flex-start">
+        <span class="cbox" style="margin-top:1px"></span>
+        <span>
+          <span style="display:block;font:600 13px/1.25 var(--sans)">${esc(save.title)}</span>
+          <span class="sub" style="display:block;margin-top:4px">${esc(save.sub)}</span>
+        </span>
+      </div>
+    </button>` : ''}
+
     <div class="err-text hidden" id="ad-err"></div>
     <button class="btn" id="ad-ok">Сохранить</button>`);
+
+  let keep = false;
+  if (save) {
+    $('#ad-save').onclick = () => {
+      keep = !keep;
+      $('#ad-save .cbox').classList.toggle('on', keep);
+    };
+  }
+
   $('#ad-ok').onclick = () => {
     const street = $('#ad-street').value.trim();
     if (!street) {
@@ -5297,6 +5398,8 @@ function askAddress(onDone, preset) {
       floor: $('#ad-fl').value.trim(),
       intercom: $('#ad-int').value.trim(),
       address_note: $('#ad-note').value.trim(),
+      save: keep,                       // что делать с адресом после заказа
+      saveMode: keep && save ? save.key : null,
     };
     const text = [parts.street, parts.apartment && 'кв. ' + parts.apartment].filter(Boolean).join(', ');
     closeSheet();
@@ -5362,8 +5465,14 @@ SCREENS.D5 = {
     paint();
 
     $('#d5-new').onclick = () => askAddress((text, parts) => {
-      d.address = text; d.addressParts = parts; d.addressSource = 'new'; saveDraft(); paint();
-    }, r);
+      d.address = text; d.addressParts = parts; d.addressSource = 'new';
+      // Галочка из листа — та же, что была отдельной строкой на экране.
+      if (parts.save) d.saveAddress = true;
+      saveDraft(); paint();
+    }, r, {
+      title: `Куда везём${r.name ? ' ' + vin(r.name) : ''}`,
+      mode: 'saved', name: r.name,
+    });
     $('#d5-save-addr').onclick = () => { d.saveAddress = !d.saveAddress; saveDraft(); paint(); };
     $('#d5-next').onclick = () => {
       if (!d.address) {
@@ -6131,9 +6240,14 @@ SCREENS.P3 = {
     });
 
     $('#p3-addr-new').onclick = () => askAddress((text, parts) => {
-      d.address = text; d.addressParts = parts; saveDraft();
+      d.address = text; d.addressParts = parts;
+      if (parts.save) d.saveAddress = true;
+      saveDraft();
       if (!list.some(a => a.text === text)) list.push({ id: 'new', label: 'Новый адрес', text });
       paint();
+    }, null, {
+      title: `Куда везём${d.name ? ' ' + vin(d.name) : ''}`,
+      mode: d.recipientId ? 'saved' : 'guest', name: d.name,
     });
 
     $('#p3-next').onclick = () => go('P4');
@@ -7198,11 +7312,18 @@ function floristAction(o) {
 }
 
 SCREENS.F1 = {
-  back: false,
+  // Для флориста и курьера это дом — стрелки назад нет.
+  // Владелец приходит сюда из «Команды», ему стрелка нужна.
+  get back() { return S.role === 'owner'; },
   tab: 'day',
   async enter() {
     const res = await team('board');
-    if (!res.ok) { toast(errText(res)); return; }
+    // Белый экран — худшее, что можно показать: непонятно, пусто или сломано.
+    if (!res.ok) { screenFailed('F1', () => SCREENS.F1.enter()); return; }
+    screenLoaded('F1');
+
+    // Владелец здесь гость: плашка не должна врать, что он флорист.
+    $('#f1-eyebrow').textContent = S.role === 'owner' ? 'ВЛАДЕЛЕЦ' : 'ФЛОРИСТ';
     const mine = res.mine || [], waiting = res.waiting || [];
 
     const now = new Date();
@@ -7601,11 +7722,18 @@ const K_STAGE = {
 };
 
 SCREENS.K1 = {
-  back: false,
+  // Для флориста и курьера это дом — стрелки назад нет.
+  // Владелец приходит сюда из «Команды», ему стрелка нужна.
+  get back() { return S.role === 'owner'; },
   tab: 'day',
   async enter() {
     const res = await team('day');
-    if (!res.ok) { toast(errText(res)); return; }
+    // Белый экран — худшее, что можно показать: непонятно, пусто или сломано.
+    if (!res.ok) { screenFailed('K1', () => SCREENS.K1.enter()); return; }
+    screenLoaded('K1');
+
+    // Владелец здесь гость: плашка не должна врать, что он флорист.
+    $('#k1-eyebrow').textContent = S.role === 'owner' ? 'ВЛАДЕЛЕЦ' : 'КУРЬЕР';
     const list = res.deliveries || [];
 
     const now = new Date();
@@ -7862,7 +7990,9 @@ SCREENS.O1 = {
   tab: 'day',
   async enter() {
     const res = await team('summary');
-    if (!res.ok) { toast(errText(res)); return; }
+    // Белый экран — худшее, что можно показать: непонятно, пусто или сломано.
+    if (!res.ok) { screenFailed('O1', () => SCREENS.O1.enter()); return; }
+    screenLoaded('O1');
 
     const now = new Date();
     $('#o1-sub').textContent = `${now.getDate()} ${MONTHS[now.getMonth()]}, ${DOW[now.getDay()]}`;
@@ -8077,13 +8207,20 @@ SCREENS.O3 = {
     $('#o3-reassign').onclick = async () => {
       const r = await team('florists');
       if (!r.ok) { toast(errText(r)); return; }
+      const list = r.florists || [];
+      // Пустой лист выглядел как поломка: белый экран с одним заголовком.
+      // Теперь видно, что флористов просто нет, и что делать дальше.
       sheet(`<div class="h2">Кому передать</div>` +
-        (r.florists || []).map(f => `
+        (list.length ? list.map(f => `
           <button class="opt" data-f="${esc(f.telegram_id)}">
-            <span>${esc(f.name || f.telegram_id)}<span class="sub" style="display:block;margin-top:4px">${f.todayCount || 0} заказов сегодня</span></span>
-            <span class="tick">✓</span></button>`).join('') +
+            <span>${esc(f.name || f.telegram_id)}${f.isMe ? ' · вы' : f.isOwner ? ' · владелец' : ''}<span class="sub" style="display:block;margin-top:4px">${
+              f.isMe ? 'соберёте сами' : `${f.todayCount || 0} ${plural(f.todayCount || 0, 'заказ', 'заказа', 'заказов')} сегодня`}</span></span>
+            <span class="tick">✓</span></button>`).join('')
+          : `<div class="note peach">Флористов пока нет. Можно собрать самому — заказ появится у вас на доске — или пригласить флориста в команду.</div>
+             <button class="btn secondary" id="rf-invite">Пригласить флориста</button>`) +
         `<button class="btn ghost" id="rf-no">Отмена</button>`);
       $('#rf-no').onclick = closeSheet;
+      if (!list.length) $('#rf-invite').onclick = () => { closeSheet(); go('O4'); };
       $$('#sheet [data-f]').forEach(b => b.onclick = async () => {
         const rr = await team('assignFlorist', { orderId: o.id, floristId: b.dataset.f });
         closeSheet();
@@ -8163,6 +8300,11 @@ SCREENS.O4 = {
         SCREENS.O4.enter();
       };
     });
+
+    // Роль не меняем: владелец остаётся владельцем и видит всё.
+    // Меняется только экран, на котором он работает.
+    $('#o4-as-florist').onclick = () => go('F1');
+    $('#o4-as-courier').onclick = () => go('K1');
 
     $('#o4-invite').onclick = inviteSheet;
     $('#o4-rules').onclick = () => go('O5');
