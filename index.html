@@ -370,7 +370,7 @@ textarea.field.ta{min-height:60px}
       style="border:0;width:100%;text-align:left;cursor:pointer;padding:12px 14px;background:var(--calm)"></button>
 
     <div class="h1" style="margin-top:4px">Нужен букет</div>
-    <p class="p" id="n1-lead">Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.</p>
+    <p class="p" id="n1-lead">Мы собираем букеты за вас. Вам — сказать кому и когда. Нам — собрать, согласовать с вами и довезти.</p>
 
     <!-- Близкие: тап по человеку и есть начало заказа.
          Объяснять это словами не нужно — достаточно попробовать один раз. -->
@@ -408,9 +408,10 @@ textarea.field.ta{min-height:60px}
   <div class="body tight">
     <div class="h1">Кому букет?</div>
     <div class="stack" style="gap:7px" id="n2-list"></div>
-    <p class="p">Из списка близких — быстрее всего: адрес, вкусы и прошлые букеты уже у флориста. «Мне в руки» — если вручите сами или букет для дома.</p>
+    <p class="p">Из списка близких — быстрее всего: адрес, вкусы и прошлые букеты уже у флориста. «Себе» — если вручите сами или букет для дома.</p>
     <div class="foot pad">
       <button class="btn" id="n2-next" disabled>Дальше</button>
+      <button class="btn ghost hidden" id="n2-drop">Отменить заказ</button>
     </div>
   </div>
 </div>
@@ -438,11 +439,12 @@ textarea.field.ta{min-height:60px}
 
     <div class="hint" style="text-align:left">Дату рождения и поводы здесь не спрашиваем. Предложим сохранить её в список после доставки — тогда напомним в следующий раз</div>
 
-    <button class="link" id="n2n-self" style="align-self:flex-start">Это букет мне в руки →</button>
+    <button class="link" id="n2n-self" style="align-self:flex-start">Это букет себе →</button>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="n2n-err"></div>
       <button class="btn" id="n2n-next" disabled>Дальше</button>
+      <button class="btn ghost hidden" id="n2n-drop">Отменить заказ</button>
     </div>
   </div>
 </div>
@@ -483,6 +485,7 @@ textarea.field.ta{min-height:60px}
 
     <div class="foot pad">
       <button class="btn" id="n3-next" disabled>Дальше</button>
+      <button class="btn ghost" id="n3-drop">Отменить заказ</button>
     </div>
   </div>
 </div>
@@ -513,6 +516,7 @@ textarea.field.ta{min-height:60px}
     <div class="foot pad">
       <div class="err-text center hidden" id="n4-err"></div>
       <button class="btn" id="n4-next" disabled>К фото букета</button>
+      <button class="btn ghost" id="n4-drop">Отменить заказ</button>
       <div class="hint">Пока бесплатно. Оплата — после того, как одобрите фото</div>
     </div>
   </div>
@@ -538,6 +542,7 @@ textarea.field.ta{min-height:60px}
       <div class="err-text center hidden" id="n5-err"></div>
       <button class="btn" id="n5-send">Отправить флористу</button>
       <button class="btn ghost" id="n5-edit">Изменить заказ</button>
+      <button class="btn ghost" id="n5-drop" style="color:var(--alarm)">Отменить заказ</button>
     </div>
   </div>
 </div>
@@ -676,7 +681,7 @@ textarea.field.ta{min-height:60px}
   <div class="body">
     <div class="h1">Вы говорите «да» —<br>остальное делаем мы</div>
     <div class="card lg">
-      <div class="step"><i>1</i><div><b>Нажимаете «Нужен букет»</b><span>Себе в руки или ей — скажете кому</span></div></div>
+      <div class="step"><i>1</i><div><b>Нажимаете «Нужен букет»</b><span>Себе или ей — скажете кому</span></div></div>
       <div class="step"><i>2</i><div><b>Выбираете размер и настроение</b><span>Состав каждый раз собирает флорист</span></div></div>
       <div class="step"><i>3</i><div><b>Флорист собирает и показывает фото</b><span>Согласуем с вами до оплаты</span></div></div>
       <div class="step"><i>4</i><div><b>Дарите сами или отвозим мы</b><span>Скажете, куда и когда — за 3 часа</span></div></div>
@@ -3131,6 +3136,44 @@ function hhmm(d) {
 
 /* ---------- N1 · главный экран ---------- */
 
+
+/* ---------- бросить начатый заказ ----------
+   Черновик переживает закрытие приложения — значит, должен быть способ
+   его выкинуть. Раньше его не было ни на одном экране: единственным
+   выходом было дособрать букет, который человек уже не хочет.
+
+   Спрашиваем один раз и без драмы: ничего ещё не оплачено и не собрано,
+   терять нечего кроме введённого. */
+function dropFastDraft() {
+  const d = S.draft.fast || {};
+  const started = d.size || d.recipientId || d.kind || d.name;
+  if (!started) { delete S.draft.fast; saveDraft(); go('N1', {}, { replace: true }); return; }
+
+  confirmSheet({
+    title: 'Отменить заказ?',
+    text: 'Ничего не оплачено и флорист ещё не начинал — просто сотрём то, что вы заполнили. Начать заново можно в любой момент.',
+    ok: 'Да, отменить',
+    cancel: 'Продолжить заказ',
+    danger: true,
+  }).then(yes => {
+    if (!yes) return;
+    delete S.draft.fast;
+    saveDraft();
+    go('N1', {}, { replace: true });
+    toast('Заказ отменён');
+  });
+}
+
+/* Кнопка «отменить» показывается только когда есть что отменять. */
+function bindDrop(id) {
+  const btn = $('#' + id);
+  if (!btn) return;
+  const d = S.draft.fast || {};
+  const started = !!(d.size || d.recipientId || d.kind || d.name);
+  btn.classList.toggle('hidden', !started);
+  btn.onclick = dropFastDraft;
+}
+
 SCREENS.N1 = {
   back: false,
   tab: 'bouquet',
@@ -3150,13 +3193,14 @@ SCREENS.N1 = {
       if (TG && TG.close) setTimeout(() => TG.close(), 1200);
     };
 
-    // Срок доставки — подпись под кнопкой. Она знает время суток:
-    // «сегодня за 3 часа» в 23:40 было бы ложью. Цену здесь не пишем —
-    // человек увидит её на экране выбора размера, где она что-то значит.
+    // Подпись под кнопкой. Срочность здесь — предложение, а не обещание:
+    // день человек ещё не выбрал, и «привезём за 3 часа» под заказом
+    // на следующую неделю читалось бы враньём. Когда срочная доставка
+    // закрыта, про неё вообще молчим — остаётся то, что верно всегда.
     const rush = rushInfo();
     $('#n1-when').textContent = rush.open
-      ? `Успеем ${rush.label} · оплата после фото от флориста`
-      : `${rush.label[0].toUpperCase()}${rush.label.slice(1)} · оплата после фото от флориста`;
+      ? `Если нужно сегодня — успеем ${rushWords()}. Оплата после фото от флориста`
+      : 'Оплата после того, как флорист покажет фото букета';
 
     // ---- активный заказ: узкая строка или карточка
     const live = (S.orders || []).find(o =>
@@ -3209,15 +3253,25 @@ SCREENS.N1 = {
             <span style="display:block;font:600 13px/1.2 var(--sans)">Черновик: ${esc(who)}${size ? ', ' + esc(size) : ''}</span>
             <span class="sub" style="display:block;margin-top:4px">вы не закончили заказ</span>
           </span>
-          <span class="link">продолжить</span>
+          <span style="display:flex;gap:12px;align-items:center;flex:none">
+            <span class="link" data-drop="1" style="color:var(--muted-2)">убрать</span>
+            <span class="link">продолжить</span>
+          </span>
         </div>`;
-      $('#n1-draft').onclick = () => go(d.size ? 'N4' : d.recipientId || d.kind ? 'N3' : 'N2');
+      $('#n1-draft').onclick = e => {
+        // «Убрать» внутри карточки: чтобы выкинуть черновик, не открывая его
+        if (e.target.closest('[data-drop]')) { dropFastDraft(); return; }
+        go(d.size ? 'N4' : d.recipientId || d.kind ? 'N3' : 'N2');
+      };
     }
 
     // ---- главная кнопка
     $('#n1-go').onclick = () => { S.draft.fast = {}; saveDraft(); go('N2'); };
+    // Говорит компания, а не флорист: человек имеет дело с нами.
+    // «Согласовать с вами» — не оборот вежливости: букет уходит
+    // в доставку только после его «да», и это главное отличие сервиса.
     $('#n1-lead').textContent =
-      'Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.';
+      'Мы собираем букеты за вас. Вам — сказать кому и когда. Нам — собрать, согласовать с вами и довезти.';
 
     // ---- близкие плитками: тап пропускает шаг «кому»
     $('#n1-people-wrap').classList.toggle('hidden', !people.length);
@@ -3230,7 +3284,7 @@ SCREENS.N1 = {
       <button class="card" data-self="1" style="border:0;cursor:pointer;flex:none;width:78px;padding:11px 6px;text-align:center">
         <div class="ava" style="margin:0 auto;background:var(--unselected);color:var(--muted-2)">+</div>
         <div style="font:600 11.5px/1.2 var(--sans);margin-top:7px">Себе</div>
-        <div class="sub" style="font-size:10px;margin-top:2px">в руки</div>
+        <div class="sub" style="font-size:10px;margin-top:2px">привезём вам</div>
       </button>`;
 
     $$('#n1-people [data-r]').forEach(b => b.onclick = () => {
@@ -3309,7 +3363,7 @@ SCREENS.N2 = {
               <span class="tick">✓</span></button>`;
         }),
         `<button class="opt ${d.kind === 'self' ? 'on' : ''}" data-self="1">
-           <span>Мне в руки<span class="sub" style="display:block;margin-top:4px;color:${
+           <span>Себе<span class="sub" style="display:block;margin-top:4px;color:${
              d.kind === 'self' ? 'var(--on-green)' : 'var(--muted-2)'}">привезём вам</span></span>
            <span class="tick">✓</span></button>`,
         `<button class="opt" data-new="1" style="justify-content:space-between">
@@ -3332,6 +3386,7 @@ SCREENS.N2 = {
     };
     paint();
 
+    bindDrop('n2-drop');
     $('#n2-next').onclick = () => go('N3');
   },
 };
@@ -3361,6 +3416,7 @@ SCREENS.N2n = {
       go('N3', {}, { replace: true });
     };
 
+    bindDrop('n2n-drop');
     $('#n2n-next').onclick = () => {
       if (!phoneValid(d.phone || '')) {
         $('#n2n-err').textContent = 'Телефон нужен курьеру — введите полностью';
@@ -3432,6 +3488,7 @@ SCREENS.N3 = {
     $('#n3-social').oninput = () => { d.social = $('#n3-social').value; saveDraft(); };
     paint();
 
+    bindDrop('n3-drop');
     $('#n3-next').onclick = () => go('N4');
   },
 };
@@ -3521,7 +3578,7 @@ SCREENS.N4 = {
         <p class="p">Два выхода, оба рабочие. Можем прислать ей ссылку — она пришлёт точку на карте сама,
         и вы даже не узнаете адрес. Или привезём букет вам в руки, и вы вручите сами.</p>
         <button class="btn" id="na-link">Пусть пришлёт сама</button>
-        <button class="btn secondary" id="na-self">Привезите мне в руки</button>`);
+        <button class="btn secondary" id="na-self">Привезите мне, вручу сам</button>`);
       $('#na-link').onclick = () => {
         d.noAddress = true; d.addressByHer = true; d.address = ''; saveDraft(); closeSheet(); paint();
         toast('Пришлём ей ссылку — ни имени сервиса, ни повода');
@@ -3537,6 +3594,7 @@ SCREENS.N4 = {
     $('#n4-card').value = d.card || '';
     $('#n4-card').oninput = () => { d.card = $('#n4-card').value; saveDraft(); };
 
+    bindDrop('n4-drop');
     $('#n4-next').onclick = () => go('N5');
   },
 };
@@ -3572,6 +3630,7 @@ SCREENS.N5 = {
       ? `Флорист начнёт собирать сразу. Фото придёт в бот и на этот экран — обычно в течение ${S.settings.photo_minutes || 20} минут.`
       : eta.text;
 
+    bindDrop('n5-drop');
     $('#n5-edit').onclick = () => go('N3');
 
     $('#n5-send').onclick = async () => {
