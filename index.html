@@ -348,6 +348,16 @@ textarea.field.ta{min-height:60px}
   </div>
   <div class="body tight">
 
+    <!-- S2 · уведомления выключены. Плашку нельзя закрыть: без бота
+         не придёт ни фото букета, ни напоминание об оплате. -->
+    <div class="note alarm hidden" id="n1-notify" style="border-radius:20px;display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div style="font:700 13px/1.25 var(--sans)">Уведомления выключены</div>
+        <div style="font:500 11.5px/1.5 var(--sans);color:#8A5B36;margin-top:6px">Мы не сможем показать фото букета, предупредить об оплате и напомнить о дате. Весь сервис в этом и состоит.</div>
+      </div>
+      <button class="btn danger" style="height:40px;font-size:12.5px" id="n1-notify-fix">Включить в Telegram</button>
+    </div>
+
     <!-- узкая строка: флорист собирает, от человека ничего не требуется -->
     <button class="card hidden" id="n1-strip"
       style="border:0;width:100%;text-align:left;cursor:pointer;padding:12px 14px"></button>
@@ -363,7 +373,7 @@ textarea.field.ta{min-height:60px}
     <p class="p" id="n1-lead">Не выбирайте цветы. Скажите, кому и с каким настроением — соберём сами и покажем фото до оплаты.</p>
 
     <div class="chips" style="margin-top:2px">
-      <span class="chip on" id="n1-speed">сегодня за 3 часа</span>
+      <span class="chip on" id="n1-speed">сегодня</span>
       <span class="chip" id="n1-price">разовый от 5 000 ₽</span>
     </div>
 
@@ -438,6 +448,8 @@ textarea.field.ta{min-height:60px}
     </div>
 
     <div class="hint" style="text-align:left">Дату рождения и поводы здесь не спрашиваем. Предложим сохранить её в список после доставки — тогда напомним в следующий раз</div>
+
+    <button class="link" id="n2n-self" style="align-self:flex-start">Это букет мне в руки →</button>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="n2n-err"></div>
@@ -628,7 +640,7 @@ textarea.field.ta{min-height:60px}
   <div style="flex:1;display:flex;flex-direction:column;padding:36px 24px 0">
     <div class="big">Bloomind</div>
     <div style="font:500 14.5px/1.5 var(--sans);color:#C3D6C8;margin-top:12px;max-width:262px">
-      Добавьте всех важных для вас женщин — и больше не придётся помнить даты самому
+      Нужен букет — нажмите одну кнопку. Скажете, кому и с каким настроением — соберём сами и привезём за 3 часа
     </div>
     <div class="ill on-green" style="flex:1;margin:20px -8px 0;padding:18px" data-ill="1">
       ИЛЛЮСТРАЦИЯ 1<br>мужчина с букетом за спиной,<br>тёплая рисованная сцена
@@ -649,8 +661,8 @@ textarea.field.ta{min-height:60px}
       ИЛЛЮСТРАЦИЯ 2<br>блокнот с датами и цветок
       <span style="display:block;margin-top:5px;font:700 9px/1.3 var(--sans);letter-spacing:.06em;opacity:.72">294 × 118</span>
     </div>
-    <div class="h1">Чтобы помнить даты,<br>нам нужно их хранить</div>
-    <p class="p">Храним имена и даты ваших близких, ваш телефон и адрес. Третьим лицам не передаём — адрес видит только курьер.</p>
+    <div class="h1">Чтобы довезти букет,<br>нам нужны данные</div>
+    <p class="p">Её имя и адрес, ваш телефон — чтобы собрать и довезти букет. Захотите помнить её даты — сохраним позже, по желанию. Третьим лицам не передаём — адрес видит только курьер.</p>
 
     <div class="stack" style="gap:8px">
       <button class="doc-link" data-doc="privacy">Политика конфиденциальности<span>→</span></button>
@@ -675,11 +687,11 @@ textarea.field.ta{min-height:60px}
   <div class="body">
     <div class="h1">Вы говорите «да» —<br>остальное делаем мы</div>
     <div class="card lg">
-      <div class="step"><i>1</i><div><b>Заносите даты</b><span>Мама, жена, дочь, сестра</span></div></div>
-      <div class="step"><i>2</i><div><b>За 5 дней напоминаем</b><span>Даже если неделя была тяжёлой</span></div></div>
-      <div class="step"><i>3</i><div><b>Выбираете размер и цену</b><span>Каждый раз заново — уникальный букет</span></div></div>
-      <div class="step"><i>4</i><div><b>Флорист собирает и показывает фото</b><span>Согласуем с вами до оплаты</span></div></div>
-      <div class="step last"><i>5</i><div><b>Дарите сами или отвозим мы</b><span>Скажете, куда и когда</span></div></div>
+      <div class="step"><i>1</i><div><b>Нажимаете «Нужен букет»</b><span>Себе в руки или ей — скажете кому</span></div></div>
+      <div class="step"><i>2</i><div><b>Выбираете размер и настроение</b><span>Состав каждый раз собирает флорист</span></div></div>
+      <div class="step"><i>3</i><div><b>Флорист собирает и показывает фото</b><span>Согласуем с вами до оплаты</span></div></div>
+      <div class="step"><i>4</i><div><b>Дарите сами или отвозим мы</b><span>Скажете, куда и когда — за 3 часа</span></div></div>
+      <div class="step last"><i>5</i><div><b>Захотите — сохраните её в список</b><span>Тогда напомним о датах сами</span></div></div>
     </div>
     <div class="foot pad">
       <button class="btn" id="a3-next">Почему нам доверяют</button>
@@ -708,7 +720,7 @@ textarea.field.ta{min-height:60px}
     </div>
     <div class="card" style="padding:11px 14px">
       <div style="font:700 13px/1.25 var(--sans)">Даты — потом и по желанию</div>
-      <div class="sub" style="margin-top:6px;color:var(--muted)">Сначала букет. Список женщин и напоминания предложим после доставки.</div>
+      <div class="sub" style="margin-top:6px;color:var(--muted)">Сначала букет. Список близких и напоминания предложим после доставки.</div>
     </div>
 
     <div class="foot pad">
@@ -1091,15 +1103,14 @@ textarea.field.ta{min-height:60px}
         <span style="display:block;margin-top:5px;font:700 9px/1.3 var(--sans);letter-spacing:.06em;opacity:.72">294 × 230</span>
       </div>
       <div class="h2">Пока никого нет</div>
-      <p class="p" style="text-align:center">Добавьте всех важных для вас женщин — и больше не придётся помнить даты самому.</p>
+      <p class="p" style="text-align:center">Здесь будут близкие, о которых вы хотите помнить, с адресом, вкусами и датами. Самый простой способ завести кого-то — собрать ей букет и сохранить после доставки.</p>
     </div>
 
     <div class="foot pad">
-      <button class="btn" id="c2-add2">Добавить близкого человека</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn secondary grow" id="c2-oneoff">Разовый букет</button>
-        <button class="btn secondary grow" id="c2-rush">Нужно за 3 часа</button>
-      </div>
+      <!-- В пустом состоянии главная кнопка — букет: человек заводится
+           сам собой после доставки. Анкета вручную остаётся вторым путём. -->
+      <button class="btn" id="c2-order">Собрать букет</button>
+      <button class="btn secondary" id="c2-add2">Добавить близкого вручную</button>
     </div>
   </div>
 </div>
@@ -1660,7 +1671,7 @@ textarea.field.ta{min-height:60px}
       <div class="chips" id="p2-part"></div></div>
 
     <div class="card lg" style="background:var(--green);color:var(--bg);padding:16px">
-      <div class="lbl" style="color:var(--on-green)">Будет списываться</div>
+      <div class="lbl" style="color:var(--on-green)">Каждый раз</div>
       <div class="between" style="margin-top:8px;align-items:baseline">
         <span style="font:500 12px/1.4 var(--sans);color:var(--on-green)" id="p2-what"></span>
         <span style="font:400 26px/1 var(--serif);flex:none" id="p2-sum"></span>
@@ -1710,7 +1721,7 @@ textarea.field.ta{min-height:60px}
   </div>
 </div>
 
-<!-- P4 · итог и первое списание -->
+<!-- P4 · итог и первая оплата -->
 <div class="screen" id="s-P4">
   <div class="bar"><button class="back" type="button">←</button><div class="title">Подписка</div></div>
   <div class="body tight">
@@ -1742,7 +1753,7 @@ textarea.field.ta{min-height:60px}
     </div>
 
     <div class="stack" style="gap:8px;margin-top:6px">
-      <button class="btn secondary" id="p5-skip">Пропустить месяц без списания</button>
+      <button class="btn secondary" id="p5-skip">Пропустить месяц</button>
       <button class="btn secondary" id="p5-edit">Поменять ритм или размер</button>
       <button class="btn secondary" id="p5-pause">Поставить на паузу</button>
     </div>
@@ -1753,7 +1764,7 @@ textarea.field.ta{min-height:60px}
   </div>
 </div>
 
-<!-- P6 · письмо перед списанием, открывается из бота -->
+<!-- P6 · письмо перед оплатой, открывается из бота -->
 <div class="screen" id="s-P6">
   <div class="bar"><button class="back" type="button">←</button><div class="title">Через 3 дня</div></div>
   <div class="body tight">
@@ -1765,6 +1776,7 @@ textarea.field.ta{min-height:60px}
     <p class="p" id="p6-note"></p>
 
     <div class="foot pad">
+      <button class="btn hidden" id="p6-pay">Оплатить</button>
       <button class="btn" id="p6-ok">Всё верно</button>
       <button class="btn secondary" id="p6-skip">Пропустить этот месяц</button>
       <button class="btn ghost" id="p6-change">Поменять дату или окно</button>
@@ -1920,6 +1932,8 @@ textarea.field.ta{min-height:60px}
       <span class="sub" id="m3-count"></span>
     </div>
 
+    <button class="link hidden" id="m3-past" style="align-self:flex-start">Прошлые заказы и документы</button>
+
     <label class="btn secondary" for="m3-file" style="cursor:pointer">Загрузить файл</label>
     <input type="file" id="m3-file" accept=".csv,.txt,.tsv" class="hidden">
     <div class="hint" style="text-align:left">Принимаем как есть: имя, адрес, дата, размер — по одной строке на человека</div>
@@ -2000,99 +2014,9 @@ textarea.field.ta{min-height:60px}
 
 
 <!-- ===== 50-E ===== -->
-<!-- E · РАЗОВЫЙ, СРОЧНЫЙ, ИСТОРИЯ, ПРОФИЛЬ -->
-
-<!-- E1 · разовый букет -->
-<div class="screen" id="s-E1">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Разовый букет</div></div>
-  <div class="body tight">
-    <div class="h1">Кому и куда?</div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Как её зовут</div>
-      <input class="field" id="e1-name" placeholder="Ольга" autocomplete="off"></div>
-    <div><div class="lbl" style="margin-bottom:7px">Её телефон · для курьера</div>
-      <input class="field" id="e1-phone" inputmode="tel" placeholder="+7 916 200-11-22" autocomplete="off"></div>
-    <div><div class="lbl" style="margin-bottom:7px">Адрес</div>
-      <input class="field" id="e1-addr" placeholder="Ленинский 45, кв. 12" autocomplete="off"></div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Размер</div>
-      <div class="stack" style="gap:7px" id="e1-sizes"></div></div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Когда</div>
-      <div class="card" style="padding:12px 14px">
-        <div class="between">
-          <span class="sub" id="e1-date-text">дата не выбрана</span>
-          <button class="link" id="e1-date">выбрать</button>
-        </div>
-      </div>
-      <div class="stack" style="gap:7px;margin-top:8px" id="e1-windows"></div>
-    </div>
-
-    <div style="display:flex;gap:8px">
-      <button class="opt grow" data-mode="self" style="justify-content:center">Подарю сам</button>
-      <button class="opt grow" data-mode="to_her" style="justify-content:center">Отвезите вы</button>
-    </div>
-
-    <div class="note green">Напоминаний по разовому заказу не будет, в список близких он не попадёт</div>
-
-    <div class="foot pad">
-      <div class="err-text center hidden" id="e1-err"></div>
-      <button class="btn" id="e1-next" disabled>Далее</button>
-    </div>
-  </div>
-</div>
-
-<!-- E2 · срочный за 3 часа -->
-<div class="screen" id="s-E2">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Срочный букет</div></div>
-  <div class="body tight">
-    <div class="h1">За 3 часа</div>
-    <div class="note peach" id="e2-note">Окно времени не выбирается — везём сразу, как букет готов</div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Кому</div>
-      <div class="stack" style="gap:7px" id="e2-who"></div></div>
-
-    <div class="card" id="e2-addr-card">
-      <div class="between">
-        <span><span class="sub" style="display:block">Адрес</span>
-        <span style="display:block;font:600 13px/1.2 var(--sans);margin-top:4px" id="e2-addr-text">не указан</span></span>
-        <button class="link" id="e2-addr">изменить</button>
-      </div>
-    </div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Размер</div>
-      <div class="stack" style="gap:7px" id="e2-sizes"></div></div>
-
-    <div class="card" id="e2-sum"></div>
-
-    <p class="p">Три часа считаем не с этой минуты. Сначала флорист подтвердит, что берётся — вот тогда назовём точное время доставки. Фото пришлём быстро, ответить на него нужно за 15 минут.</p>
-
-    <div class="foot pad">
-      <div class="err-text center hidden" id="e2-err"></div>
-      <button class="btn" id="e2-send" disabled>Отправить флористу</button>
-      <div class="hint" id="e2-hint">Кнопка активна до 18:00 — позже трёх часов до вечера не остаётся</div>
-    </div>
-  </div>
-</div>
-
-<!-- E2a · флорист взял срочный -->
-<div class="screen" id="s-E2a">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Срочный заказ</div></div>
-  <div class="body">
-    <div class="sub" id="e2a-sub"></div>
-    <div class="h1" id="e2a-title">Ждём флориста</div>
-    <div class="card">
-      <div class="lbl" style="margin-bottom:4px">Сегодня</div>
-      <div id="e2a-rows"></div>
-    </div>
-    <p class="p" id="e2a-text"></p>
-    <div class="note peach" id="e2a-note">Пока флорист не нажал «беру в работу», мы ничего не обещаем — и денег не берём</div>
-    <div class="foot pad">
-      <button class="btn" id="e2a-main">На главную</button>
-      <button class="btn secondary" id="e2a-support">Написать в Telegram</button>
-    </div>
-  </div>
-</div>
+<!-- E · ИСТОРИЯ И ПРОФИЛЬ
+     Разовый (E1) и срочный (E2, E2a) сняты с потока: их место занял
+     быстрый заказ N1–N6. Два пути к одному и тому же путали. -->
 
 <!-- E3 · история -->
 <div class="screen" id="s-E3">
@@ -2569,6 +2493,7 @@ textarea.field.ta{min-height:60px}
       <div style="margin-top:8px" id="o3-log"></div>
     </div>
     <div class="foot pad">
+      <button class="btn hidden" id="o3-paid">Отметить оплаченным</button>
       <button class="btn secondary" id="o3-reassign">Переназначить флориста</button>
       <button class="btn ghost" id="o3-cancel" style="color:var(--alarm)">Отменить заказ</button>
     </div>
@@ -2654,6 +2579,7 @@ textarea.field.ta{min-height:60px}
       <div id="o7-rows"></div>
     </div>
     <div class="card" id="o7-payouts"></div>
+    <div class="card hidden" id="o7-invoices"></div>
     <div class="card hidden" id="o7-refunds"></div>
     <div class="foot pad">
       <button class="btn secondary" id="o7-export">Выгрузить в таблицу</button>
@@ -3056,6 +2982,34 @@ function clearDraft() {
   try { localStorage.removeItem(KEEP); } catch (e) {}
 }
 
+/* ---------- имена в падежах ----------
+   «Сохранить Ирина» и «Возить Ирина без поводов» звучат как машина.
+   Именно на этих экранах человек решает, остаться ли с нами, — здесь
+   особенно нельзя говорить не по-русски.
+
+   Склоняем только то, в чём уверены: женские имена на -а, -я, -ия и -ь.
+   Всё остальное (Кэт, Мэри, Ким, «мне») оставляем как есть — лучше
+   не склонять, чем склонять неправильно. */
+function nameCase(name, form) {
+  const n = String(name || '').trim();
+  if (!n || n.length < 3) return n;
+  if (/\s/.test(n)) {                       // «Ирина Петровна» — склоняем первое слово
+    const parts = n.split(/\s+/);
+    return [nameCase(parts[0], form), ...parts.slice(1)].join(' ');
+  }
+  const low = n.toLowerCase();
+  const cut = k => n.slice(0, n.length - k);
+
+  if (/ия$/.test(low)) return cut(2) + (form === 'dat' ? 'ии' : 'ию');   // Мария, Ксения
+  if (/ья$/.test(low)) return cut(1) + (form === 'dat' ? 'е'  : 'ю');    // Софья, Наталья
+  if (/я$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'ю');    // Аня, Женя
+  if (/а$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'у');    // Ирина, Ольга, Даша
+  if (/ь$/.test(low))  return form === 'dat' ? cut(1) + 'и' : n;         // Любовь
+  return n;                                                             // Кэт, Мэри, Ким
+}
+const vin = n => nameCase(n, 'vin');   // кого? — «сохранить Ирину»
+const dat = n => nameCase(n, 'dat');   // кому? — «возить Ирине»
+
 
 /* ======== 05-N.js ======== */
 /* ============================================================
@@ -3080,6 +3034,16 @@ function fastDraft() {
   return S.draft.fast;
 }
 
+/* Срок срочной доставки — одно число из настроек, а не вписанное
+   в текст «3 часа». Владелец меняет правило, и все экраны меняются с ним. */
+function rushHours() {
+  return parseInt(String((S.settings || {}).rush_window_hours || '3'), 10);
+}
+function rushWords() {
+  const h = rushHours();
+  return `за ${h} ${plural(h, 'час', 'часа', 'часов')}`;
+}
+
 /* ---------- время суток решает, что мы обещаем ----------
    «сегодня за 3 часа» в 23:40 — ложь. После отсечки обещаем утро. */
 function rushInfo() {
@@ -3097,7 +3061,7 @@ function rushInfo() {
     return { open: false, label: `завтра с ${st.florist_start || '10:00'}`,
              why: `Сегодня срочный уже не успеем: принимаем до ${st.rush_available_until || '18:00'}` };
   }
-  return { open: true, label: 'сегодня за 3 часа', why: '' };
+  return { open: true, label: 'сегодня ' + rushWords(), why: '' };
 }
 
 /* Когда придёт фото. Вне смены флориста «через 20 минут» не существует. */
@@ -3135,6 +3099,13 @@ SCREENS.N1 = {
 
     $('#n1-profile').textContent = (S.profile.name || 'П')[0].toUpperCase();
     $('#n1-profile').onclick = () => go('E4');
+
+    // Без бота сервис молчит — плашка висит на главном, а не на втором экране.
+    $('#n1-notify').classList.toggle('hidden', !S.notifyOff);
+    $('#n1-notify-fix').onclick = () => {
+      toast('Откройте чат с ботом и включите уведомления');
+      if (TG && TG.close) setTimeout(() => TG.close(), 1200);
+    };
 
     // ---- красный 1: плашка знает время суток
     const rush = rushInfo();
@@ -3348,6 +3319,15 @@ SCREENS.N2n = {
 
     $('#n2n-policy').onclick = () => openDoc('privacy');
 
+    // Без сохранённых близких N2 пропускается, и «мне в руки» исчезал
+    // из потока совсем: человек с пустым списком не мог заказать себе.
+    $('#n2n-self').onclick = () => {
+      d.kind = 'self'; d.recipientId = null; d.name = S.profile.name || 'мне';
+      d.phone = S.profile.phone || '';
+      saveDraft();
+      go('N3', {}, { replace: true });
+    };
+
     $('#n2n-next').onclick = () => {
       if (!phoneValid(d.phone || '')) {
         $('#n2n-err').textContent = 'Телефон нужен курьеру — введите полностью';
@@ -3447,7 +3427,7 @@ SCREENS.N4 = {
         `<button class="opt ${d.when === 'now' ? 'on' : ''}" data-w="now" ${rushOff ? 'disabled style="opacity:.45"' : ''}>
            <span>Сейчас<span class="sub" style="display:block;margin-top:4px;color:${
              d.when === 'now' ? 'var(--on-green)' : 'var(--muted-2)'}">${
-             botOff ? 'нужны уведомления бота' : rush.open ? 'привезём за 3 часа' : esc(rush.why)}</span></span>
+             botOff ? 'нужны уведомления бота' : rush.open ? 'привезём ' + rushWords() : esc(rush.why)}</span></span>
            <span class="tick">✓</span></button>`,
         `<button class="opt ${d.when === 'today' ? 'on' : ''}" data-w="today">
            <span>Сегодня, к вечеру<span class="sub" style="display:block;margin-top:4px;color:${
@@ -3527,7 +3507,7 @@ SCREENS.N5 = {
     const rushFee = d.when === 'now' ? Number(S.settings.rush_fee || 700) : 0;
     const total = base + rushFee;
 
-    const whenText = d.when === 'now' ? `Сегодня, за 3 часа`
+    const whenText = d.when === 'now' ? `Сегодня, ${rushWords()}`
                    : d.when === 'today' ? 'Сегодня, 17:00–21:00'
                    : dateWords(d.date, false);
 
@@ -3620,7 +3600,7 @@ SCREENS.N7 = {
 
     const name = o.guest_name || o.recipientName || 'её';
     $('#n7-sub').textContent = `${name} получила букет${o.delivered_hhmm ? ' в ' + o.delivered_hhmm : ''}. Курьер отметил доставку.`;
-    $('#n7-title').innerHTML = `Сохранить ${esc(name)},<br>чтобы не вводить<br>заново?`;
+    $('#n7-title').innerHTML = `Сохранить ${esc(vin(name))},<br>чтобы не вводить<br>заново?`;
 
     $('#n7-known').textContent = [
       'Имя', o.guest_phone && 'телефон', o.delivery_address && 'адрес',
@@ -3659,7 +3639,7 @@ SCREENS.N8 = {
     const off = Math.round((1 - (sp.S || 4500) / (rp.S || 5000)) * 100);
 
     $('#n8-title').textContent = (p.name || 'Сохранено') + ' сохранена';
-    $('#n8-head').innerHTML = `Возить ${esc(p.name || '')}<br>без поводов`;
+    $('#n8-head').innerHTML = `Возить ${esc(dat(p.name || ''))}<br>без поводов`;
     $('#n8-price').textContent = `${money(sp.S)} за букет · на ${off}% дешевле разового`;
 
     $('#n8-go').parentElement.parentElement.onclick = () => startSubscription(p.id);
@@ -4849,8 +4829,9 @@ SCREENS.C2 = {
     $$('#c2-list [data-rec]').forEach(el => el.onclick = () => go('C3', { id: el.dataset.rec }));
 
     $('#c2-add').onclick = $('#c2-add2').onclick = () => startNewRecipient();
-    $('#c2-oneoff').onclick = () => startOneOff();
-    $('#c2-rush').onclick = () => startRush();
+    // Кнопка «Разовый букет» дублировала главную кнопку приложения —
+    // оставили одну, она ведёт в тот же быстрый заказ.
+    $('#c2-order').onclick = () => { S.draft.fast = {}; saveDraft(); go('N2'); };
   },
 };
 
@@ -4945,8 +4926,8 @@ SCREENS.C5 = {
     $('#c5-who').textContent = String(r.who || '').toLowerCase();
     const addr = [r.street, r.apartment && 'кв. ' + r.apartment].filter(Boolean).join(', ');
     $('#c5-addr-text').textContent = addr || 'не указан';
-    $('#c5-warn').textContent = `Удалить ${r.name} — сотрём имя, даты, адрес, всё, что вы о ней писали, и историю букетов. Вернуть будет нельзя.`;
-    $('#c5-delete').textContent = `Удалить ${r.name} и её данные`;
+    $('#c5-warn').textContent = `Удалить ${vin(r.name)} — сотрём имя, даты, адрес, всё, что вы о ней писали, и историю букетов. Вернуть будет нельзя.`;
+    $('#c5-delete').textContent = `Удалить ${vin(r.name)} и её данные`;
 
     const paintOcc = () => {
       $('#c5-occ').innerHTML = (r.occasions || []).map(o => `
@@ -4971,7 +4952,18 @@ SCREENS.C5 = {
     paintOcc();
 
     $('#c5-occ-add').onclick = () => { S.draft.editRecipientId = r.id; go('B3a'); };
-    $('#c5-addr').onclick = () => go('C5addr', { id: r.id });
+    // Адрес правим тем же листом, что и в заказе: отдельного экрана нет,
+    // а кнопка раньше вела на несуществующий C5addr и молча ничего не делала.
+    $('#c5-addr').onclick = () => askAddress(async (text, parts) => {
+      const rr = await api('updateRecipient', {
+        recipientId: r.id, street: parts.street, apartment: parts.apartment,
+        entrance: parts.entrance, floor: parts.floor,
+        intercom: parts.intercom, address_note: parts.address_note,
+      });
+      if (!rr.ok) { toast(errText(rr)); return; }
+      toast('Адрес сохранён');
+      SCREENS.C5.enter({ id: r.id });
+    }, r);
 
     $('#c5-save').onclick = async () => {
       const rr = await api('updateRecipient', { recipientId: r.id, name: $('#c5-name').value.trim() });
@@ -4983,7 +4975,7 @@ SCREENS.C5 = {
 
     $('#c5-delete').onclick = async () => {
       const ok = await confirmSheet({
-        title: `Удалить ${r.name}?`,
+        title: `Удалить ${vin(r.name)}?`,
         text: 'Сотрём имя, даты, адрес и историю букетов. Вернуть будет нельзя.',
         ok: 'Удалить', danger: true,
       });
@@ -5043,16 +5035,19 @@ function startOrderFor(recipient, occasion, orderId) {
   go('D2');
 }
 
+/* Разовый и срочный больше не отдельные потоки: и то и другое —
+   быстрый заказ, отличается только ответом на шаге «когда».
+   Два пути к одному результату путали, поэтому остался один. */
 function startOneOff() {
-  S.draft = { flow: 'oneoff', occ: {}, dates: {}, custom: [] };
+  S.draft.fast = {};
   saveDraft();
-  go('E1');
+  go('N2');
 }
 
 function startRush() {
-  S.draft = { flow: 'rush', occ: {}, dates: {}, custom: [] };
+  S.draft.fast = { when: 'now' };
   saveDraft();
-  go('E2');
+  go('N2');
 }
 
 /* ---------- D1 · напоминание ---------- */
@@ -5315,7 +5310,7 @@ SCREENS.D5 = {
   enter() {
     const d = orderDraft();
     const r = d.recipient || {};
-    $('#d5-title').textContent = `Куда везти ${r.name || ''}?`;
+    $('#d5-title').textContent = `Куда везти ${vin(r.name || '')}?`;
     $('#d5-callher').textContent = `Курьер позвонит ${r.name || 'ей'} за 15 минут, чтобы застать дома`;
     $('#d5-win-label').textContent = 'Окно доставки · ' + dateWords(d.deliveryDate, false);
 
@@ -5344,7 +5339,7 @@ SCREENS.D5 = {
       });
 
       $('#d5-save-addr').classList.toggle('hidden', d.addressSource !== 'new');
-      $('#d5-save-text').textContent = `Сохранить адрес в карточку ${r.name || ''}`;
+      $('#d5-save-text').textContent = `Сохранить адрес в карточку ${vin(r.name || '')}`;
       $('#d5-save-addr .cbox').classList.toggle('on', !!d.saveAddress);
 
       // В пиковую дату окон нет — там слоты по два часа, отдельным экраном.
@@ -5707,6 +5702,18 @@ SCREENS.D10 = {
     payBtn.onclick = async () => {
       payBtn.disabled = true;
       const r = await api('createPayment', { orderId: o.id });
+      // Касса ещё не подключена — это не «банк отклонил». Врать про банк
+      // хуже, чем сказать как есть: заказ на месте, деньги возьмём иначе.
+      if (!r.ok && r.error === 'payment_not_configured') {
+        payBtn.disabled = false;
+        sheet(`<div class="h2">Оплата пока не подключена</div>
+          <p class="p">Заказ никуда не делся — он ждёт вас на месте. Мы свяжемся и примем оплату другим способом, флорист начнёт собирать сразу после этого.</p>
+          <button class="btn" id="pnc-support">Написать нам</button>
+          <button class="btn ghost" id="pnc-ok">Понятно</button>`);
+        $('#pnc-ok').onclick = closeSheet;
+        $('#pnc-support').onclick = () => { closeSheet(); openSupport(); };
+        return;
+      }
       if (!r.ok || !r.url) {
         payBtn.disabled = false;
         go('D10', { id: o.id, state: 'err' }, { replace: true });
@@ -5849,7 +5856,7 @@ SCREENS.D16 = {
     const o = res.order;
     let picked = null;
 
-    $('#d16-title').innerHTML = `Когда привезти<br>букет ${esc(o.recipientName)}?`;
+    $('#d16-title').innerHTML = `Когда привезти<br>букет ${esc(dat(o.recipientName))}?`;
 
     const base = iso(new Date());
     const opts = [3, 4, 7].map(n => shiftIso(base, n));
@@ -6148,13 +6155,14 @@ SCREENS.P4 = {
       `<div class="row"><span class="k">Букет</span><span class="v">${esc(d.size)} · ${money(subPrices()[d.size])}</span></div>`,
       `<div class="row"><span class="k">Первый</span><span class="v">${esc(dateWords(d.date, false))}, ${esc(d.window || '')}</span></div>`,
       `<div class="row"><span class="k">Доставка</span><span class="v" style="color:var(--green)">бесплатно · в цене</span></div>`,
-      `<div class="row"><span class="k">Сегодня спишем</span><span class="v" style="font-size:16px">${money(sum)}</span></div>`,
+      `<div class="row"><span class="k">К оплате сегодня</span><span class="v" style="font-size:16px">${money(sum)}</span></div>`,
     ].join('');
 
     $('#p4-note').textContent =
       `Дальше — ${money(sum)} ${r.perMonth === 1 ? 'раз в месяц' : 'в месяц'}. ` +
-      `За ${warn} ${plural(warn, 'день', 'дня', 'дней')} до каждого букета приходит письмо с суммой ` +
-      `и кнопкой «пропустить». Отменить можно в любой момент, до списания.`;
+      `За ${warn} ${plural(warn, 'день', 'дня', 'дней')} до каждого букета приходит письмо с суммой, ` +
+      `кнопкой оплаты и кнопкой «пропустить». Карту мы не храним — каждый раз платите сами, ` +
+      `и без вашего «да» деньги не уходят. Отменить можно в любой момент.`;
 
     $('#p4-pay').textContent = 'Оплатить ' + money(sum);
     $('#p4-terms').onclick = () => openDoc('offer');
@@ -6173,7 +6181,7 @@ SCREENS.P4 = {
 
       clearDraft();
       await refreshHome();
-      // Первое списание идёт через обычную оплату — экран D10 уже всё умеет.
+      // Первая оплата идёт через обычный экран оплаты — D10 уже всё умеет.
       if (res.orderId) go('D10', { id: res.orderId }, { replace: true });
       else go('P5', { id: res.subscriptionId }, { replace: true });
     };
@@ -6201,7 +6209,7 @@ SCREENS.P5 = {
       `<div class="row"><span class="k">Ритм</span><span class="v">${esc(r.label.toLowerCase())}, ${esc(s.part_of_month)}</span></div>`,
       `<div class="row"><span class="k">Букет</span><span class="v">${esc(s.size)} · ${money(s.price)}</span></div>`,
       `<div class="row"><span class="k">Куда</span><span class="v">${esc(s.address || '')} · ${esc(s.delivery_window || '')}</span></div>`,
-      s.card_last4 ? `<div class="row"><span class="k">Карта</span><span class="v">•• ${esc(s.card_last4)}</span></div>` : '',
+      `<div class="row"><span class="k">Оплата</span><span class="v">каждый раз вами · карту не храним</span></div>`,
     ].filter(Boolean).join('');
 
     const past = res.past || [];
@@ -6216,11 +6224,11 @@ SCREENS.P5 = {
     });
 
     const skipMonth = s.next_date ? dateWords(s.next_date, false).split(' ').slice(1).join(' ') : 'месяц';
-    $('#p5-skip').textContent = `Пропустить ${skipMonth} без списания`;
+    $('#p5-skip').textContent = `Пропустить ${skipMonth}`;
 
     $('#p5-skip').onclick = async () => {
       const r2 = await api('subscriptionSkip', { id: s.id });
-      toast(r2.ok ? 'Месяц пропустим, деньги не спишем' : errText(r2));
+      toast(r2.ok ? 'Месяц пропустим' : errText(r2));
       if (r2.ok) SCREENS.P5.enter(p);
     };
 
@@ -6274,23 +6282,33 @@ SCREENS.P6 = {
     const c = res.charge;
 
     $('#p6-sub').textContent = `${dateWords(c.warn_date, false)} · за ${c.days_left} ${plural(c.days_left, 'день', 'дня', 'дней')} до букета`;
-    $('#p6-title').innerHTML = `${esc(dateWords(c.for_date, false))} везём<br>букет ${esc(c.recipientName || '')}`;
+    $('#p6-title').innerHTML = `${esc(dateWords(c.for_date, false))} везём<br>букет ${esc(dat(c.recipientName || ''))}`;
 
     $('#p6-rows').innerHTML = [
-      `<div class="row"><span class="k">Спишем</span><span class="v">${money(c.amount)}${c.card_last4 ? ' · карта •• ' + esc(c.card_last4) : ''}</span></div>`,
-      `<div class="row"><span class="k">Когда спишем</span><span class="v">${esc(dateWords(c.charge_date, false))}</span></div>`,
+      `<div class="row"><span class="k">К оплате</span><span class="v">${money(c.amount)}</span></div>`,
+      `<div class="row"><span class="k">Оплатить до</span><span class="v">${esc(dateWords(c.charge_date, false))}</span></div>`,
       `<div class="row"><span class="k">Окно</span><span class="v">${esc(c.window || '')}</span></div>`,
     ].join('');
 
-    $('#p6-note').textContent =
-      `Ничего делать не нужно — букет уже в плане. Если этот месяц пропускаем, ` +
-      `скажите до ${dateWords(c.charge_date, false)}, деньги не спишутся.`;
+    // Букет уже создан и ждёт денег — даём кнопку прямо здесь,
+    // иначе человек прочитает письмо и не поймёт, что от него нужно.
+    const waits = !!c.orderId;
+    $('#p6-pay').classList.toggle('hidden', !waits);
+    $('#p6-ok').classList.toggle('hidden', waits);
+    if (waits) {
+      $('#p6-pay').textContent = 'Оплатить ' + money(c.amount);
+      $('#p6-pay').onclick = () => go('D10', { id: c.orderId });
+    }
+
+    $('#p6-note').textContent = waits
+      ? `Букет уже в плане — осталось оплатить. Карту мы не храним, поэтому каждый раз это ваше решение. Если месяц пропускаем — скажите до ${dateWords(c.charge_date, false)}.`
+      : `Ничего делать не нужно — букет в плане. Оплату попросим ${dateWords(c.charge_date, false)}, одной кнопкой. Если этот месяц пропускаем, скажите заранее.`;
 
     $('#p6-ok').onclick = () => go('C1', {}, { replace: true });
 
     $('#p6-skip').onclick = async () => {
       const r2 = await api('subscriptionSkip', { id: c.subscription_id });
-      toast(r2.ok ? 'Пропускаем, деньги не спишем' : errText(r2));
+      toast(r2.ok ? 'Пропускаем этот месяц' : errText(r2));
       if (r2.ok) go('C1', {}, { replace: true });
     };
 
@@ -6669,6 +6687,32 @@ SCREENS.M3 = {
     };
 
     $('#m3-next').onclick = () => go('M4');
+
+    // Закрывающие лежат в прошлых заказах — без этой ссылки бухгалтерия
+    // не могла до них добраться: экран документов существовал, а входа не было.
+    api('groupList').then(res => {
+      const list = (res.groups || []).filter(g => g.status !== 'Черновик');
+      $('#m3-past').classList.toggle('hidden', !list.length);
+      $('#m3-past').textContent = `Прошлые заказы и документы · ${list.length}`;
+      $('#m3-past').onclick = () => {
+        sheet(`<div class="h2">Заказы компании</div>` + list.map(g => `
+          <button class="card" data-g="${g.id}" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px">
+            <div class="between">
+              <span>
+                <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(dateWords(g.event_date, false))} · ${g.count} ${plural(g.count, 'букет', 'букета', 'букетов')}</span>
+                <span class="sub" style="display:block;margin-top:4px">${
+                  g.status === 'Закрыт' ? 'вручены все · документы готовы'
+                  : g.status === 'В работе' ? `вручено ${g.delivered} из ${g.count}`
+                  : 'ждёт оплату'}</span>
+              </span>
+              <span class="v" style="flex:none">${money(g.total)}</span>
+            </div>
+          </button>`).join(''));
+        $$('#sheet [data-g]').forEach(b => b.onclick = () => {
+          closeSheet(); go('M6', { id: b.dataset.g });
+        });
+      };
+    });
   },
 };
 
@@ -6832,6 +6876,16 @@ SCREENS.M5 = {
     $('#m5-card').classList.toggle('hidden', inv.status === 'Оплачен');
     $('#m5-card').onclick = async () => {
       const r = await api('invoicePayCard', { id: inv.id });
+      if (!r.ok && r.error === 'payment_not_configured') {
+        // Счёт при этом рабочий: по нему платят переводом, а картой пока нет.
+        sheet(`<div class="h2">Картой пока нельзя</div>
+          <p class="p">Оплата картой ещё подключается. Счёт рабочий — оплатите переводом по реквизитам из PDF, и мы поставим заказ в работу в тот же день.</p>
+          <button class="btn" id="pnc-pdf">Скачать счёт</button>
+          <button class="btn ghost" id="pnc-ok">Понятно</button>`);
+        $('#pnc-ok').onclick = closeSheet;
+        $('#pnc-pdf').onclick = () => { closeSheet(); $('#m5-pdf').click(); };
+        return;
+      }
       if (!r.ok) { toast(errText(r)); return; }
       if (r.url) { TG && TG.openLink ? TG.openLink(r.url) : window.open(r.url, '_blank'); }
     };
@@ -6890,166 +6944,9 @@ SCREENS.M6 = {
    E · РАЗОВЫЙ, СРОЧНЫЙ, ИСТОРИЯ, ПРОФИЛЬ
    ============================================================ */
 
-function sizeOptions(host, selected, onPick) {
-  const prices = S.settings.prices || { S: 5000, M: 7000, L: 9500 };
-  $(host).innerHTML = ['S', 'M', 'L'].map(s => `
-    <button class="opt ${selected === s ? 'on' : ''}" data-size="${s}">
-      <span>${s} <span class="sub" style="margin-left:6px;color:${selected === s ? 'var(--on-green)' : 'var(--muted-2)'}">${
-        s === 'S' ? 'небольшой' : s === 'M' ? 'заметный' : 'большой'}</span></span>
-      <span style="font-weight:700">${money(prices[s])}</span>
-    </button>`).join('');
-  $$(host + ' [data-size]').forEach(b => b.onclick = () => onPick(b.dataset.size));
-}
-
 /* ---------- E1 · разовый ---------- */
 
-SCREENS.E1 = {
-  enter() {
-    const d = S.draft.one = S.draft.one || { deliveryMode: 'to_her' };
-
-    const paint = () => {
-      sizeOptions('#e1-sizes', d.size, s => { d.size = s; saveDraft(); paint(); });
-      renderWindows('#e1-windows', d.window, w => { d.window = w; saveDraft(); paint(); }, d.date);
-      $('#e1-date-text').textContent = d.date ? dateWords(d.date) : 'дата не выбрана';
-      $$('#s-E1 [data-mode]').forEach(b => b.classList.toggle('on', d.deliveryMode === b.dataset.mode));
-      $('#e1-next').disabled = !(d.name && d.addr && d.size && d.date && d.window);
-    };
-
-    ['name', 'phone', 'addr'].forEach(k => {
-      const el = $('#e1-' + k);
-      el.value = d[k] || '';
-      el.oninput = () => { d[k] = el.value.trim(); saveDraft(); paint(); };
-    });
-    bindPhone($('#e1-phone'), v => { d.phone = v; saveDraft(); });
-    $('#e1-date').onclick = () => pickDate({
-      value: d.date, title: 'Дата доставки', min: iso(new Date()),
-      onPick(v) { d.date = v; saveDraft(); }, back: 'E1',
-    });
-    $$('#s-E1 [data-mode]').forEach(b => b.onclick = () => { d.deliveryMode = b.dataset.mode; saveDraft(); paint(); });
-    paint();
-
-    $('#e1-next').onclick = async () => {
-      if (!phoneValid(d.phone || '')) { toast('Телефон введён не полностью'); return; }
-      const btn = $('#e1-next'); btn.disabled = true;
-      const res = await api('createOneOff', {
-        name: d.name, phone: d.phone || '', address: d.addr,
-        size: d.size, deliveryMode: d.deliveryMode,
-        deliveryDate: d.date, window: d.window,
-      });
-      btn.disabled = false;
-      if (!res.ok) {
-        $('#e1-err').textContent = errText(res);
-        $('#e1-err').classList.remove('hidden'); return;
-      }
-      delete S.draft.one; saveDraft();
-      await refreshHome();
-      go('D7', { id: res.orderId }, { replace: true });
-    };
-  },
-};
-
 /* ---------- E2 · срочный ---------- */
-
-SCREENS.E2 = {
-  async enter() {
-    const d = S.draft.rush = S.draft.rush || {};
-    await refreshHome();
-    const people = S.recipients.filter(r => !r.is_one_off);
-
-    const until = String(S.settings.rush_available_until || '18:00');
-    const closed = new Date().getHours() >= parseInt(until, 10);
-
-    // Пиковый день — 8 марта, 14 февраля. Срочных берём ограниченное
-    // число: остальные руки заняты теми, кто заказал заранее.
-    const now = new Date();
-    const mmdd = String(now.getMonth() + 1).padStart(2, '0') + '-' +
-                 String(now.getDate()).padStart(2, '0');
-    const isPeak = String(S.settings.peak_dates || '').split(',')
-                     .map(x => x.trim()).includes(mmdd);
-
-    const paint = () => {
-      $('#e2-who').innerHTML = people.map(r => `
-        <button class="opt ${d.recipientId === r.id ? 'on' : ''}" data-r="${r.id}">
-          <span>${esc(r.name)}<span class="sub" style="display:block;margin-top:4px;color:${d.recipientId === r.id ? 'var(--on-green)' : 'var(--muted-2)'}">${esc(String(r.who || '').toLowerCase())}</span></span>
-          <span class="tick">✓</span></button>`).join('')
-        || `<button class="btn ghost" id="e2-add">+ Добавить близкого человека</button>
-             <div class="hint" style="margin-top:8px">Срочный букет везём тому, кто уже есть в списке — адрес и имя берём оттуда</div>`;
-      if ($('#e2-add')) $('#e2-add').onclick = () => startNewRecipient();
-      $$('#e2-who [data-r]').forEach(b => b.onclick = () => {
-        d.recipientId = b.dataset.r;
-        const r = people.find(x => String(x.id) === String(b.dataset.r));
-        d.address = [r.street, r.apartment && 'кв. ' + r.apartment].filter(Boolean).join(', ');
-        saveDraft(); paint();
-      });
-
-      $('#e2-addr-text').textContent = d.address || 'не указан';
-      sizeOptions('#e2-sizes', d.size, s => { d.size = s; saveDraft(); paint(); });
-
-      const prices = S.settings.prices || { S: 5000, M: 7000, L: 9500 };
-      const base = prices[d.size] || 0;
-      const rush = S.settings.rush_fee || 700;
-      $('#e2-sum').innerHTML = [
-        `<div class="row"><span class="k">Букет ${esc(d.size || '')}</span><span class="v">${money(base)}</span></div>`,
-        `<div class="row"><span class="k">Доставка</span><span class="v" style="color:var(--green)">бесплатно · в цене</span></div>`,
-        `<div class="row"><span class="k">Срочность</span><span class="v">${money(rush)}</span></div>`,
-        `<div class="row"><span class="k">Итого</span><span class="v" style="font-size:16px">${money(base + rush)}</span></div>`,
-      ].join('');
-
-      $('#e2-note').textContent = isPeak
-        ? `Сегодня срочных берём не больше ${S.settings.peak_rush_limit || 20} — остальные руки заняты теми, кто заказал заранее. Если места закончились, скажем честно`
-        : 'Окно времени не выбирается — везём сразу, как букет готов';
-
-      $('#e2-send').disabled = closed || !(d.recipientId && d.address && d.size);
-      // Кнопка не должна молча не нажиматься — всегда говорим, чего не хватает.
-      $('#e2-hint').textContent =
-          closed              ? `Сегодня срочный уже не оформить — принимаем до ${until}`
-        : !people.length      ? 'Сначала добавьте близкого человека — тогда сможем отправить'
-        : !d.recipientId      ? 'Выберите, кому везём'
-        : !d.address          ? 'Укажите адрес'
-        : !d.size             ? 'Выберите размер букета'
-        : `Кнопка активна до ${until} — позже трёх часов до вечера не остаётся`;
-    };
-    paint();
-
-    $('#e2-addr').onclick = () => askAddress(text => { d.address = text; saveDraft(); paint(); });
-
-    $('#e2-send').onclick = async () => {
-      const btn = $('#e2-send'); btn.disabled = true;
-      const res = await api('createRush', {
-        recipientId: d.recipientId, size: d.size, address: d.address,
-      });
-      btn.disabled = false;
-      if (!res.ok) {
-        $('#e2-err').textContent = errText(res);
-        $('#e2-err').classList.remove('hidden'); return;
-      }
-      delete S.draft.rush; saveDraft();
-      await refreshHome();
-      go('E2a', { id: res.orderId }, { replace: true });
-    };
-  },
-};
-
-SCREENS.E2a = {
-  async enter(p) {
-    const res = await api('order', { orderId: p.id });
-    if (!res.ok) { toast(errText(res)); back(); return; }
-    const o = res.order;
-    const taken = !!o.rush_taken_at;
-
-    $('#e2a-sub').textContent = `${o.recipientName} · срочный букет · ${money(o.total)}`;
-    $('#e2a-title').innerHTML = taken ? 'Флорист взял<br>в работу' : 'Ждём флориста';
-    $('#e2a-rows').innerHTML = (o.rushTimes || []).map(t =>
-      `<div class="row"><span class="k">${esc(t.label)}</span><span class="v">${esc(t.value)}</span></div>`).join('');
-    $('#e2a-text').textContent = taken
-      ? 'Согласование будет как обычно — фото и ваше слово. Только быстрое: ответьте в течение 15 минут, иначе позвоним.'
-      : 'Флорист отвечает в течение 10 минут. Если не возьмёт — честно скажем, что сегодня не успеваем.';
-    $('#e2a-note').classList.toggle('hidden', taken);
-
-    $('#e2a-main').onclick = () => go('C1', {}, { replace: true });
-    $('#e2a-support').onclick = openSupport;
-  },
-};
 
 /* ---------- E3 · история ---------- */
 
@@ -8009,7 +7906,9 @@ SCREENS.O1 = {
             ? 'Рук хватает. Букеты можно начинать собирать за два дня — цветы выдержат'
             : 'Курьеров не хватает. Водителя на один день найти легко, флориста — нет: ищите сейчас'}
         </div>`;
-      peakBox.onclick = () => go('O2');
+      // Ведём в ёмкость дня, а не в общую воронку: с этой карточки
+      // владельцу нужно решать, хватает ли курьеров, а не смотреть статусы.
+      peakBox.onclick = () => go('O6b', { date: pk.date });
     }
 
     const items = res.attention || [];
@@ -8149,6 +8048,31 @@ SCREENS.O3 = {
     $('#o3-log').innerHTML = (res.log || []).map(e => `
       <div class="row"><span class="k">${esc(e.time)}</span><span class="v" style="font-weight:500;text-align:right">${esc(e.event)}</span></div>`).join('')
       || '<div class="sub">Пока пусто</div>';
+
+    // Провести оплату руками. Нужно, пока ЮKassa не подключена, и после —
+    // когда платёж завис или деньги пришли мимо кассы. Кнопка живёт только
+    // на заказах, которые ждут денег, и всегда оставляет след в логе.
+    const waitsMoney = o.status === 'Ждёт оплаты';
+    $('#o3-paid').classList.toggle('hidden', !waitsMoney);
+    if (waitsMoney) {
+      $('#o3-paid').textContent = `Отметить оплаченным · ${money(o.total)}`;
+      $('#o3-paid').onclick = async () => {
+        sheet(`<div class="h2">Деньги пришли?</div>
+          <p class="p">Заказ станет оплаченным, флорист получит его в работу. Отменить одной кнопкой уже нельзя — сначала проверьте, что деньги действительно на счёте.</p>
+          <button class="btn" data-how="transfer">Перевод на счёт</button>
+          <button class="btn secondary" data-how="cash">Наличные</button>
+          <button class="btn secondary" data-how="other">Другое</button>
+          <button class="btn ghost" id="mp-no">Отмена</button>`);
+        $('#mp-no').onclick = closeSheet;
+        $$('#sheet [data-how]').forEach(b => b.onclick = async () => {
+          closeSheet();
+          const r = await team('markPaid', { orderId: o.id, how: b.dataset.how });
+          if (!r.ok) { toast(errText(r)); return; }
+          toast(r.already ? 'Заказ уже был оплачен' : 'Заказ в работе у флориста');
+          SCREENS.O3.enter({ id: o.id });
+        });
+      };
+    }
 
     $('#o3-reassign').onclick = async () => {
       const r = await team('florists');
@@ -8300,6 +8224,7 @@ SCREENS.O5 = {
         numRow('pay_hold_until', 'Держим букет до', 'утром в день доставки'),
         numRow('redo_limit', 'Переделок варианта'),
         numRow('rush_fee', 'Доплата за срочность', '', ' ₽'),
+        numRow('rush_window_hours', 'Срочный привозим за', 'это обещание видит клиент', ' ч.'),
         numRow('rush_available_until', 'Срочный принимаем до'),
       ].join('');
 
@@ -8449,6 +8374,42 @@ SCREENS.O7 = {
         `<p class="p" style="margin-top:8px">Возврат делает владелец вручную в кабинете ЮKassa: обычной отмены после оплаты в сервисе нет.</p>`;
     }
 
+    // Счета компаний. Перевод по счёту банк нам не подтверждает —
+    // деньги на счёте видит только владелец, поэтому оплату отмечает он.
+    // До отметки букеты не уходят флористам и никто не собирает в долг.
+    const inv = await team('invoices');
+    const list = ((inv.ok && inv.invoices) || []).filter(i => i.status !== 'Оплачен');
+    $('#o7-invoices').classList.toggle('hidden', !list.length);
+    if (list.length) {
+      $('#o7-invoices').innerHTML =
+        `<div class="lbl">Счета компаний · ${list.length}</div>` +
+        list.map(i => `
+          <div style="margin-top:10px">
+            <div class="between">
+              <span>
+                <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(i.company)} · ${money(i.amount)}</span>
+                <span class="sub" style="display:block;margin-top:4px;${i.overdue ? 'color:var(--alarm)' : ''}">
+                  Счёт №${esc(i.number)} · ${i.overdue ? 'срок прошёл' : 'до ' + esc(dateWords(i.due, false))}${
+                    i.eventDate ? ' · букеты ' + esc(dateWords(i.eventDate, false)) : ''}</span>
+              </span>
+            </div>
+            <button class="btn secondary" style="height:40px;font-size:13px;margin-top:8px" data-paid="${i.id}">Деньги пришли — в работу</button>
+          </div>`).join('');
+
+      $$('#o7-invoices [data-paid]').forEach(b => b.onclick = async () => {
+        const ok = await confirmSheet({
+          title: 'Деньги пришли?',
+          text: 'Букеты уйдут флористам, и заказ станет рабочим. Отменить это одной кнопкой уже нельзя — проверьте выписку.',
+          ok: 'Да, деньги на счёте',
+        });
+        if (!ok) return;
+        const r = await team('invoicePaid', { id: b.dataset.paid });
+        if (!r.ok) { toast(errText(r)); return; }
+        toast(r.already ? 'Счёт уже был оплачен' : `${r.orders} ${plural(r.orders, 'букет ушёл', 'букета ушли', 'букетов ушли')} флористам`);
+        SCREENS.O7.enter();
+      });
+    }
+
     $('#o7-export').onclick = async () => {
       const r = await team('exportMoney');
       if (!r.ok || !r.csv) { toast(errText(r)); return; }
@@ -8553,7 +8514,8 @@ function linkParams() {
   if (raw) {
     const m = raw.match(/^([a-z]+)_?(\d+)?$/i);
     if (m) {
-      const map = { order: 'D7', pay: 'D10', draft: 'D8', rush: 'E2a',
+      const map = { order: 'D7', pay: 'D10', draft: 'D8', rush: 'D7',
+                    saved: 'N7', sub: 'P5', charge: 'P6', invoice: 'M5',
                     team: null, day: null, sum: 'O1' };
       if (map[m[1]] !== undefined) p = { screen: map[m[1]], id: m[2] };
     }
