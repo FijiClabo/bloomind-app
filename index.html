@@ -1534,14 +1534,27 @@ textarea.field.ta{min-height:60px}
 <div class="screen" id="s-D12">
   <div class="bar"><button class="back" type="button">←</button><div class="title">Фото букета</div></div>
   <div class="body">
-    <div class="ill" style="height:230px" id="d12-photo">собран сегодня утром · свежие цветы</div>
+    <!-- Фото пришло в чат вместе с двумя кнопками. Здесь запасной путь
+         для тех, кто открыл приложение: те же два решения, тот же смысл. -->
+    <button class="card lg" id="d12-photo"
+      style="border:0;width:100%;text-align:left;cursor:pointer;background:var(--calm);padding:16px">
+      <div class="between">
+        <span>
+          <span style="display:block;font:600 13px/1.25 var(--sans);color:var(--green)">Фото букета — в чате с ботом</span>
+          <span class="sub" style="display:block;margin-top:5px">Там же обе кнопки. Решать удобнее рядом с фотографией</span>
+        </span>
+        <span class="link" style="flex:none">открыть →</span>
+      </div>
+    </button>
+
     <div class="h1">Собран<br>и упакован</div>
     <p class="p" id="d12-text"></p>
     <div class="note green" id="d12-comment" style="display:none"></div>
-    <div class="hint">Поменять его уже нельзя — так мы и договаривались при согласовании</div>
+
     <div class="foot pad">
-      <button class="btn" id="d12-ok">Хорошо</button>
-      <button class="btn ghost" id="d12-support">Что-то не так — написать в Telegram</button>
+      <div class="hint" id="d12-hint"></div>
+      <button class="btn" id="d12-ok">Всё хорошо, везите</button>
+      <button class="btn secondary" id="d12-stop" style="color:var(--alarm)">Это не то, что согласовали</button>
     </div>
   </div>
 </div>
@@ -1745,6 +1758,7 @@ textarea.field.ta{min-height:60px}
     </div>
 
     <div class="stack" style="gap:8px;margin-top:6px">
+      <button class="btn secondary hidden" id="p5-next">Ближайшее списание</button>
       <button class="btn secondary" id="p5-skip">Пропустить месяц</button>
       <button class="btn secondary" id="p5-edit">Поменять ритм или размер</button>
       <button class="btn secondary" id="p5-pause">Поставить на паузу</button>
@@ -2120,6 +2134,7 @@ textarea.field.ta{min-height:60px}
     <div class="eyebrow" id="f1-eyebrow">ФЛОРИСТ</div>
   </div>
   <div class="body tight">
+    <div class="card hidden" id="f1-queue" style="padding:11px 13px;font-weight:600;background:var(--peach);color:var(--peach-text)"></div>
     <div class="card" style="display:flex;padding:12px 8px" id="f1-counts"></div>
 
     <!-- мой ход -->
@@ -2606,6 +2621,18 @@ textarea.field.ta{min-height:60px}
     <div class="card" id="o7-payouts"></div>
     <div class="card hidden" id="o7-invoices"></div>
     <div class="card hidden" id="o7-refunds"></div>
+
+    <!-- Журнал доступов к контактам: кто и когда открывал телефон и адрес.
+         Если данные утекут, это единственный способ понять, через кого. -->
+    <button class="card" id="o7-access" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px">
+      <div class="between">
+        <span>
+          <span style="display:block;font:600 13px/1.2 var(--sans)">Кто смотрел контакты</span>
+          <span class="sub" style="display:block;margin-top:4px" id="o7-access-sub"></span>
+        </span>
+        <span class="link" style="flex:none">открыть →</span>
+      </div>
+    </button>
     <div class="foot pad">
       <button class="btn secondary" id="o7-export">Выгрузить в таблицу</button>
     </div>
@@ -2741,6 +2768,7 @@ function errText(res) {
     no_address: 'Нужен адрес доставки',
     forbidden: 'Нет доступа',
     rush_closed: 'Срочный заказ можно оформить до 18:00',
+    rush_no_florist: 'Сегодня все флористы заняты — срочный не возьмём. Обычный заказ на завтра соберём с утра',
     payment_failed: 'Банк отклонил платёж',
     // Пока ЮKassa не подключена — говорим прямо, а не «что-то пошло не так».
     payment_not_configured: 'Оплата пока не подключена — скоро включим',
@@ -3202,6 +3230,12 @@ function rushInfo() {
   if (h >= until) {
     return { open: false, label: `завтра с ${st.florist_start || '10:00'}`,
              why: `Сегодня срочный уже не успеем: принимаем до ${st.rush_available_until || '18:00'}` };
+  }
+  // 17 · Часы открыты, но собирать некому. Обещать три часа в такой день
+  // значит подвести человека уже после того, как он заплатил.
+  if (S.floristsToday === 0) {
+    return { open: false, label: 'завтра',
+             why: 'Сегодня все флористы заняты — срочный не возьмём. Обычный заказ на завтра соберём с утра' };
   }
   return { open: true, label: 'сегодня ' + rushWords(), why: '' };
 }
@@ -4815,7 +4849,7 @@ function homeCards() {
     for (const oc of (r.occasions || [])) {
       if (oc.paused || !oc.event_date) continue;
       if (S.orders.some(o => o.occasion_id === oc.id &&
-          !['Доставлено', 'Отменён'].includes(o.status))) continue;
+          !['Доставлено', 'Отменён', 'Возвращён'].includes(o.status))) continue;
       const dl = daysUntil(oc.event_date);
       if (dl == null || dl < 0 || dl > 45) continue;
       cards.push({ kind: 'soon', recipient: r, occasion: oc, weight: 4 + dl / 100 });
@@ -4998,7 +5032,8 @@ function cardHtml(c) {
     const o = c.order;
     const label = { 'Подтверждён': 'Флорист готовит вариант',
                     'Оплачено': 'Оплачено — соберём утром',
-                    'Собран': 'Букет собран, курьер везёт' }[o.status] || o.status;
+                    'Собран': 'Букет собран, курьер везёт',
+                    'Возвращён': 'Деньги вернули' }[o.status] || o.status;
     return `
       <div class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer" data-track="${o.id}">
         <div class="ava sm" style="background:var(--calm)">${initial(o.recipientName)}</div>
@@ -5802,6 +5837,9 @@ function stepStateFor(o) {
   else if (st === 'Оплачено') now = 'assemble';
   else if (st === 'Собран') now = 'deliver';
   else if (st === 'Доставлено') now = null;
+  // Отменённый и возвращённый заказ никуда не идёт: «сейчас» на середине
+  // пути выглядело бы как будто мы всё ещё что-то собираем.
+  else if (st === 'Отменён' || st === 'Возвращён') now = null;
   return { done, now };
 }
 
@@ -5846,7 +5884,19 @@ SCREENS.D7 = {
       ? 'Букет собран и оплачен — отмены уже нет. Сдвинуть время или адрес можно, пока курьер не выехал.'
       : 'Приложение можно закрыть: заказ виден на главной, а бот позовёт, когда придёт фото.';
 
-    $('#d7-main').onclick = () => go('C1', {}, { replace: true });
+    /* Букет собран и ждёт решения — трекер ведёт туда, а не на главную.
+       Это последняя точка, где клиент может сказать «стоп», и прятать
+       её за кнопкой «на главную» нельзя. */
+    const waitingRelease = o.release_left_minutes > 0;
+    if (waitingRelease) {
+      $('#d7-main').textContent = `Букет собран — посмотреть (${o.release_left_minutes} мин)`;
+      $('#d7-main').onclick = () => go('D12', { id: o.id });
+    } else if (o.final_photo || o.status === 'Собран' || o.status === 'Доставлено') {
+      $('#d7-main').textContent = 'Фото собранного букета';
+      $('#d7-main').onclick = () => go('D12', { id: o.id });
+    } else {
+      $('#d7-main').onclick = () => go('C1', {}, { replace: true });
+    }
     // Вопрос по заказу уходит тому, кто его собирает, а не в общую
     // поддержку: раньше сообщение приходило без контекста и без адресата.
     $('#d7-support').textContent = 'Спросить по заказу';
@@ -6116,7 +6166,10 @@ SCREENS.D10 = {
       go('D10', { id: o.id, state: 'wait' }, { replace: true });
     };
 
-    // Ждём подтверждение банка: опрашиваем, пока не решится.
+    // Ждём подтверждение банка. Опрос — только чтобы экран ожил сам,
+    // пока человек смотрит на него. Решение принимает вебхук: если
+    // приложение закрыть в этот момент, оплата всё равно дойдёт до конца
+    // и человек узнает об этом из чата. Третьего состояния нет.
     if (state === 'wait') {
       let tries = 0;
       payPoll = setInterval(async () => {
@@ -6182,16 +6235,52 @@ SCREENS.D12 = {
     const res = await api('order', { orderId: p.id });
     if (!res.ok) { toast(errText(res)); back(); return; }
     const o = res.order;
-    $('#d12-photo').innerHTML = o.finalPhotoUrl
-      ? `<img src="${esc(o.finalPhotoUrl)}" alt="букет">`
-      : 'собран сегодня утром · свежие цветы';
-    $('#d12-text').textContent =
-      `Утром из свежих цветов, по согласованному варианту. Дальше только доставка — ${dateWords(o.delivery_date, false)}${o.delivery_window ? ', ' + o.delivery_window : ''}.`;
+    $('#d12-photo').onclick = openBot;
+
+    // Сколько осталось на «стоп». Молчание считается согласием — курьер
+    // выедет сам, и человек должен понимать, что время идёт.
+    const left = o.release_left_minutes;
+    $('#d12-text').textContent = o.rejected_at
+      ? 'Выезд остановлен, букет у флориста. С вами свяжутся — разберёмся, что не так.'
+      : left > 0
+      ? `Собран по согласованному варианту. Курьер выедет через ${left} ${
+          plural(left, 'минуту', 'минуты', 'минут')} — если что-то не так, скажите сейчас.`
+      : `Собран по согласованному варианту. Доставка ${dateWords(o.delivery_date, false)}${
+          o.delivery_window ? ', ' + o.delivery_window : ''}.`;
+
     const c = $('#d12-comment');
     c.style.display = o.floristComment ? 'block' : 'none';
     c.textContent = o.floristComment ? 'Флорист: «' + o.floristComment + '»' : '';
-    $('#d12-ok').onclick = () => go('D7', { id: o.id }, { replace: true });
-    $('#d12-support').onclick = openSupport;
+
+    // После выезда решать нечего — остаётся трекер.
+    const canStop = !o.rejected_at && left > 0;
+    $('#d12-stop').classList.toggle('hidden', !canStop);
+    $('#d12-ok').textContent = canStop ? 'Всё хорошо, везите' : 'Хорошо';
+    $('#d12-hint').textContent = canStop
+      ? 'Если промолчать, курьер выедет сам — это тоже согласие'
+      : '';
+
+    $('#d12-ok').onclick = async () => {
+      if (canStop) {
+        const r = await api('releaseCourier', { orderId: o.id });
+        if (!r.ok) { toast(errText(r)); return; }
+        toast('Курьер выезжает');
+      }
+      go('D7', { id: o.id }, { replace: true });
+    };
+
+    $('#d12-stop').onclick = async () => {
+      const yes = await confirmSheet({
+        title: 'Это не тот букет?',
+        text: 'Остановим выезд и свяжемся с вами. Букет останется у флориста, деньги никуда не денутся.',
+        ok: 'Да, остановить', cancel: 'Отмена', danger: true,
+      });
+      if (!yes) return;
+      const r = await api('rejectFinal', { orderId: o.id });
+      if (!r.ok) { toast(errText(r)); return; }
+      toast('Остановили — с вами свяжутся');
+      go('D7', { id: o.id }, { replace: true });
+    };
   },
 };
 
@@ -6611,6 +6700,13 @@ SCREENS.P5 = {
     const skipMonth = s.next_date ? dateWords(s.next_date, false).split(' ').slice(1).join(' ') : 'месяц';
     $('#p5-skip').textContent = `Пропустить ${skipMonth}`;
 
+    // Ближайшее списание открывается отдельным экраном: там сумма,
+    // дата и окно — то, ради чего человек сюда и заходит.
+    $('#p5-next').classList.toggle('hidden', !s.nextChargeId);
+    if (s.nextChargeId) {
+      $('#p5-next').onclick = () => go('P6', { id: s.nextChargeId });
+    }
+
     $('#p5-skip').onclick = async () => {
       const r2 = await api('subscriptionSkip', { id: s.id });
       toast(r2.ok ? 'Месяц пропустим' : errText(r2));
@@ -6766,7 +6862,19 @@ SCREENS.D5p = {
         b.onclick = async () => {
           const r = await api('holdSlot', { slotId: +b.dataset.slot, date });
           if (!r.ok) {
-            $('#d5p-err').textContent = errText(r);
+            /* 27 · Кто-то занял это окно на секунду раньше.
+
+               Это не ошибка человека и не поломка — так бывает 8 марта.
+               Говорим что случилось, сразу показываем оставшиеся окна
+               и не выкидываем его из оформления. */
+            if (r.error === 'slot_full') {
+              $('#d5p-err').innerHTML = r.dayFull
+                ? `Окно ${esc(r.window || '')} только что заняли, и других на этот день не осталось. Выберите соседний день — букет привезут накануне вечером, утром он уже будет стоять.`
+                : `Окно ${esc(r.window || '')} заняли за секунду до вас. Свободн${r.free && r.free.length === 1 ? 'о' : 'ы'} ${
+                    (r.free || []).map(f => esc(f.window)).join(', ')} — выберите любое.`;
+            } else {
+              $('#d5p-err').textContent = errText(r);
+            }
             $('#d5p-err').classList.remove('hidden');
             SCREENS.D5p.enter(p);
             return;
@@ -7626,6 +7734,17 @@ SCREENS.F1 = {
     $('#f1-sub').textContent = `${now.getDate()} ${MONTHS[now.getMonth()]}, ${DOW_SHORT[now.getDay()]}` +
       (res.nextAssemblyIn ? ` · сборка через ${res.nextAssemblyIn}` : '');
 
+    // Фото, ждущие сети. Флорист должен видеть, что они не потерялись:
+    // иначе он либо снимет заново, либо решит, что клиент уже посмотрел.
+    const q = queueCount();
+    const qBox = $('#f1-queue');
+    if (qBox) {
+      qBox.classList.toggle('hidden', !q);
+      if (q) qBox.textContent = q === 1
+        ? 'Одно фото ждёт сети — уйдёт само, как появится'
+        : `${q} фото ждут сети — уйдут сами, как появится`;
+    }
+
     const empty = !mine.length && !waiting.length;
     $('#f1-empty').classList.toggle('hidden', !empty);
     $('#f1-mine-wrap').classList.toggle('hidden', !mine.length);
@@ -7809,21 +7928,109 @@ function bindPhoto(dropSel, fileSel, textSel, onPicked) {
   };
 }
 
-async function uploadPhoto(action, orderId, file, extra = {}) {
+/* 26 · Очередь отправки фото.
+
+   Флорист снимает букет в мастерской, где сеть ловит через раз, а иногда
+   и в подвале. Раньше при обрыве он видел ошибку и должен был помнить,
+   что надо повторить. В рабочий день на двадцать заказов это забывается,
+   и клиент остаётся без фото — а мы даже не знаем об этом.
+
+   Теперь фото становится в очередь и уходит само, как только сеть
+   вернулась. Флорист может закрыть приложение: очередь переживает
+   закрытие, потому что лежит рядом с приложением, а не в памяти.
+
+   Держим не сам файл, а его содержимое строкой: File после перезагрузки
+   страницы уже не открыть. */
+const PHOTO_QUEUE = 'bloomind_photo_queue';
+
+function queueRead() {
+  try { return JSON.parse(sessionStorage.getItem(PHOTO_QUEUE) || '[]'); }
+  catch (e) { return []; }
+}
+function queueWrite(list) {
+  try { sessionStorage.setItem(PHOTO_QUEUE, JSON.stringify(list)); } catch (e) {}
+}
+
+function fileToText(file) {
+  return new Promise(res => {
+    // Без файла читать нечего. Раньше на этом падало всё приложение —
+    // причём именно в тот момент, когда флорист остался без сети.
+    if (!file || typeof Blob === 'undefined' || !(file instanceof Blob)) { res(null); return; }
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => res(null);
+    fr.readAsDataURL(file);
+  });
+}
+function textToBlob(dataUrl) {
+  const [head, b64] = String(dataUrl).split(',');
+  const type = (head.match(/:(.*?);/) || [])[1] || 'image/jpeg';
+  const bin = atob(b64 || '');
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type });
+}
+
+async function sendPhotoNow(action, orderId, blob, extra) {
   const fd = new FormData();
   fd.append('action', action);
   fd.append('orderId', String(orderId));
-  fd.append('photo', file);
-  Object.entries(extra).forEach(([k, v]) => fd.append(k, String(v == null ? '' : v)));
+  fd.append('photo', blob, 'bouquet.jpg');
+  Object.entries(extra || {}).forEach(([k, v]) => fd.append(k, String(v == null ? '' : v)));
   if (TG && TG.initData) fd.append('initData', TG.initData);
   if (S.chatId) fd.append('chatId', String(S.chatId));
+  const r = await fetch(API.team, { method: 'POST', body: fd });
+  return await r.json();
+}
+
+/* Разгребаем очередь: что ушло — убираем, что не ушло — оставляем.
+   Ошибку сервера («заказ уже собран») не повторяем вечно: такое фото
+   выкидываем, иначе очередь будет стучать до конца дня. */
+let queueBusy = false;
+async function queueFlush() {
+  if (queueBusy || !navigator.onLine) return;
+  const list = queueRead();
+  if (!list.length) return;
+  queueBusy = true;
+  const left = [];
+  for (const item of list) {
+    try {
+      const r = await sendPhotoNow(item.action, item.orderId, textToBlob(item.data), item.extra);
+      if (!r.ok && r.error !== 'too_early') continue;   // сервер отказал по делу
+      if (!r.ok) left.push(item);
+      else toast('Фото по заказу #' + item.orderId + ' ушло');
+    } catch (e) {
+      left.push(item);                                   // сети всё ещё нет
+    }
+  }
+  queueWrite(left);
+  queueBusy = false;
+  if (!left.length) refreshHome && refreshHome();
+}
+
+window.addEventListener('online', queueFlush);
+setInterval(queueFlush, 20000);
+
+async function uploadPhoto(action, orderId, file, extra = {}) {
   try {
-    const r = await fetch(API.team, { method: 'POST', body: fd });
-    return await r.json();
+    const r = await sendPhotoNow(action, orderId, file, extra);
+    return r;
   } catch (e) {
+    // Сети нет. Кладём в очередь и говорим об этом честно: фото не
+    // потеряно, но и клиент его пока не видит.
+    const data = await fileToText(file);
+    if (data) {
+      const list = queueRead();
+      list.push({ action, orderId, extra, data, at: Date.now() });
+      queueWrite(list);
+      return { ok: true, queued: true };
+    }
     return { ok: false, error: 'network' };
   }
 }
+
+/* Сколько фото ждут сети — показываем флористу на доске. */
+function queueCount() { return queueRead().length; }
 
 /* ---------- F3 / F4 · вариант букета ---------- */
 
@@ -7861,7 +8068,9 @@ SCREENS.F3 = {
         $('#f3-err').classList.remove('hidden');
         return;
       }
-      toast('Отправили клиенту');
+      toast(r.queued
+        ? 'Сети нет — фото уйдёт само, как появится'
+        : 'Отправили клиенту');
       go('F1', {}, { replace: true });
     };
   },
@@ -7940,7 +8149,11 @@ SCREENS.F5 = {
         $('#f5-err').classList.remove('hidden');
         return;
       }
-      toast('Клиент увидел букет');
+      // Фото собранного букета особенно важно не потерять: за ним стоит
+      // задержка выезда курьера и право клиента сказать «это не то».
+      toast(r.queued
+        ? 'Сети нет — фото уйдёт само, как появится'
+        : 'Клиент увидел букет');
       SCREENS.F5.enter({ id: o.id });
     };
 
@@ -8082,10 +8295,13 @@ SCREENS.K1 = {
           <div class="between">
             <div class="grow">
               <div style="font:700 13px/1.2 var(--sans)">
-                ${d.stage === 'pickup' ? esc(d.pickupTime || '') : esc(d.window || '')}
+                ${d.rush ? '<span style="color:var(--alarm);font-weight:800">СРОЧНО · </span>' : ''}${
+                d.stage === 'pickup' ? esc(d.pickupTime || '') : esc(d.window || '')}
                 <span style="font-weight:600;color:var(--muted-2)"> · ${
+                  // Брендбук: «получательница» — слово из накладной.
+                  // У курьера есть имя — им и называем человека.
                   d.stage === 'pickup' ? 'забрать у флориста'
-                  : d.toSelf ? 'клиенту' : 'получательнице'}</span>
+                  : d.toSelf ? 'клиенту' : (d.recipientName || 'вручить')}</span>
               </div>
               <div class="sub" style="margin-top:5px">${esc(d.address || '')}</div>
               <div class="sub" style="margin-top:3px">
@@ -8157,7 +8373,10 @@ SCREENS.K2 = {
     const d = res.delivery;
     S.screenParams.delivery = d;
 
-    $('#k2-title').textContent = 'Доставка #' + d.id;
+    // Срочный виден в заголовке: это первое, что читает курьер, открыв
+    // карточку. Обещание в три часа держится только если он это знает.
+    $('#k2-title').innerHTML = (d.rush
+      ? '<span style="color:var(--alarm)">СРОЧНО</span> · ' : '') + 'Доставка #' + d.id;
     const toSelf = d.delivery_mode === 'self';
 
     $('#k2-selfnote').classList.toggle('hidden', !toSelf);
@@ -8165,7 +8384,11 @@ SCREENS.K2 = {
 
     $('#k2-rows').innerHTML = [
       `<div class="row"><span class="k">Кому</span><span class="v">${esc(toSelf ? d.clientName + ' · заказчик' : d.recipientName + ' · получатель')}</span></div>`,
-      `<div class="row"><span class="k">Куда</span><span class="v">${esc(d.address || '')}</span></div>`,
+      // До дня доставки показываем район, а не точный адрес. Курьеру
+      // важно понимать географию заранее, но дом и квартира ему в этот
+      // момент не нужны — и объясняем это, чтобы он не решил, что баг.
+      `<div class="row"><span class="k">Куда</span><span class="v">${esc(d.address || '')}${
+        d.addressExact === false ? ' <span style="color:var(--muted-4)">· точный адрес в день доставки</span>' : ''}</span></div>`,
       `<div class="row"><span class="k">Окно</span><span class="v">${esc(d.window || 'как готов')}</span></div>`,
       d.addressNote ? `<div class="row"><span class="k">Про адрес</span><span class="v">${esc(d.addressNote)}</span></div>` : '',
       d.callBefore ? `<div class="row"><span class="k">Просил позвонить</span><span class="v">за 30 минут</span></div>` : '',
@@ -8688,26 +8911,66 @@ SCREENS.O4 = {
   },
 };
 
+/* Приглашение в команду.
+
+   За ссылкой стоят чужие адреса и телефоны, поэтому она привязывается
+   к человеку: владелец говорит, кому её выписал. Пересланная не сработает
+   никогда — вошедший должен совпасть.
+
+   Если контакт неизвестен, ссылка всё равно создастся, но проживёт
+   полчаса: столько нужно, чтобы человек открыл её при вас. */
 function inviteSheet() {
   let role = 'florist';
+  let bindBy = 'username';
+
   const paint = () => {
     sheet(`<div class="h2">Пригласить в команду</div>
-      <p class="p">Одноразовая ссылка. Человек откроет её, нажмёт «старт» — и сразу окажется в нужной роли.</p>
+
       <div class="chips">
         ${[['florist', 'Флорист'], ['courier', 'Курьер'], ['owner', 'Владелец']]
           .map(([id, l]) => `<button class="chip ${role === id ? 'on' : ''}" data-r="${id}">${l}</button>`).join('')}
       </div>
+
+      <div><div class="lbl" style="margin:12px 0 7px">Кому эта ссылка</div>
+        <div class="chips">
+          ${[['username', 'По @имени'], ['phone', 'По телефону'], ['none', 'Не знаю']]
+            .map(([id, l]) => `<button class="chip ${bindBy === id ? 'on' : ''}" data-b="${id}">${l}</button>`).join('')}
+        </div>
+      </div>
+
+      <input class="field ${bindBy === 'username' ? '' : 'hidden'}" id="inv-username"
+             placeholder="@nick — как в Telegram" autocomplete="off">
+      <input class="field ${bindBy === 'phone' ? '' : 'hidden'}" id="inv-phone"
+             inputmode="tel" placeholder="+7 916 300-44-55" autocomplete="off">
+      <input class="field" id="inv-name" placeholder="Имя — чтобы вы не путались в списке" autocomplete="off">
+
+      <div class="note ${bindBy === 'none' ? 'peach' : 'green'}">${
+        bindBy === 'none'
+          ? 'Ссылка проживёт 30 минут — откройте её при человеке. Без привязки переслать её может кто угодно.'
+          : 'Пересланная ссылка не сработает: мы сверим, кто вошёл. Живёт 7 дней.'}</div>
+
       <button class="btn" id="inv-make">Создать ссылку</button>
       <div id="inv-out"></div>
       <button class="btn ghost" id="inv-close">Закрыть</button>`);
+
     $$('#sheet [data-r]').forEach(b => b.onclick = () => { role = b.dataset.r; paint(); });
+    $$('#sheet [data-b]').forEach(b => b.onclick = () => { bindBy = b.dataset.b; paint(); });
     $('#inv-close').onclick = closeSheet;
+    if ($('#inv-phone')) bindPhone($('#inv-phone'), () => {});
+
     $('#inv-make').onclick = async () => {
-      const r = await team('createInvite', { role });
+      const r = await team('createInvite', {
+        role,
+        username: bindBy === 'username' ? $('#inv-username').value.trim() : '',
+        phone:    bindBy === 'phone'    ? $('#inv-phone').value.trim()    : '',
+        name: $('#inv-name').value.trim(),
+      });
       if (!r.ok || !r.link) { toast(errText(r)); return; }
       $('#inv-out').innerHTML = `
         <div class="card" style="margin-top:10px">
           <div class="sub" style="word-break:break-all">${esc(r.link)}</div>
+          <div class="lbl" style="margin-top:8px;color:${r.bound ? 'var(--green)' : 'var(--alarm)'}">${
+            r.bound ? 'Привязана — переслать нельзя' : `Не привязана · ${r.minutes} минут`}</div>
         </div>
         <button class="btn secondary" id="inv-copy" style="margin-top:8px">Скопировать ссылку</button>`;
       $('#inv-copy').onclick = () => {
@@ -8718,6 +8981,7 @@ function inviteSheet() {
   };
   paint();
 }
+
 
 /* ---------- O5 · правила ---------- */
 
@@ -8745,10 +9009,23 @@ SCREENS.O5 = {
         numRow('rush_fee', 'Доплата за срочность', '', ' ₽'),
         numRow('rush_window_hours', 'Срочный привозим за', 'это обещание видит клиент', ' ч.'),
         numRow('rush_available_until', 'Срочный принимаем до'),
+        // Сколько срочных берём в обычный день. Их непредсказуемость и
+        // ломает график: обещание в три часа держится, только пока их мало.
+        numRow('rush_daily_limit', 'Срочных в день', 'больше не примем', ' шт.'),
+        // Тихие часы: ночью не пишем никому — ни клиенту, ни команде.
+        numRow('quiet_from', 'Не пишем с', 'ночью бот молчит', ':00'),
+        numRow('quiet_to', 'Пишем снова с', '', ':00'),
+        // Куда ведёт «написать нам» на всех экранах.
+        numRow('support_username', 'Поддержка', 'telegram без собаки'),
+        numRow('subscription_warn_days', 'Письмо перед списанием за', 'по подписке', ' дн.'),
       ].join('');
 
       $('#o5-peak').innerHTML = [
         numRow('peak_dates', 'Какие дни', 'месяц-день, через запятую'),
+        // Сколько букетов реально собираем в одно окно. От этой цифры
+        // зависит, сколько заказов система примет, прежде чем закрыть день:
+        // поставите больше правды — наберёте того, что не успеете.
+        numRow('slot_capacity', 'Букетов в одно окно', 'спросите флориста — на этом держится весь расчёт'),
         numRow('peak_rush_limit', 'Срочных берём', 'больше не примем'),
         numRow('peak_prepay_days', 'Оплата за', 'до даты — чтобы не было отмен', ' дн.'),
         numRow('peak_reminder_days', 'Напоминаем за', 'вместо обычного срока', ' дн.'),
@@ -8929,6 +9206,30 @@ SCREENS.O7 = {
       });
     }
 
+    /* Журнал доступов. Владелец должен видеть, кто открывал телефоны
+       и адреса клиентов: это и след на случай утечки, и то, что
+       удерживает команду от «посмотрю из любопытства». */
+    const acc = await team('accessLog');
+    const log = (acc.ok && acc.log) || [];
+    $('#o7-access-sub').textContent = log.length
+      ? `${log.length} ${plural(log.length, 'открытие', 'открытия', 'открытий')} за последнее время`
+      : 'Пока никто не открывал';
+    $('#o7-access').onclick = () => {
+      sheet(`<div class="h2">Кто смотрел контакты</div>` +
+        (log.length
+          ? `<p class="p">Каждое открытие телефона или адреса. Команда об этом знает.</p>` +
+            log.map(x => `
+              <div class="row">
+                <span class="k">${esc(x.who)} · ${esc(x.role)}<span style="display:block;font-size:11px;color:var(--muted-3)">${
+                  esc(x.when)}</span></span>
+                <span class="v">${esc(x.what)}<span style="display:block;font-size:11px;color:var(--muted-3)">${
+                  x.order_id ? 'заказ #' + x.order_id : ''}</span></span>
+              </div>`).join('')
+          : `<div class="note green">Пока никто не открывал контакты. Здесь появится каждое открытие — кто, когда и по какому заказу.</div>`) +
+        `<button class="btn ghost" id="acc-close">Закрыть</button>`);
+      $('#acc-close').onclick = closeSheet;
+    };
+
     $('#o7-export').onclick = async () => {
       const r = await team('exportMoney');
       if (!r.ok || !r.csv) { toast(errText(r)); return; }
@@ -9086,6 +9387,8 @@ async function boot() {
   S.orders     = res.orders || [];
   S.notifyOff  = !!res.notifyOff;
   S.botUsername = res.botUsername || S.botUsername || '';
+  // Сколько флористов сегодня в смене. Ноль — срочный не предлагаем.
+  S.floristsToday = res.floristsToday;
 
   renderTabs();
 
