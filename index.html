@@ -536,12 +536,12 @@ textarea.field.ta{min-height:60px}
       <div style="font:400 30px/1 var(--serif);margin-top:8px" id="n5-total"></div>
     </div>
 
+    <div class="hint" style="text-align:left;margin-top:-4px">Нажмите на строку, чтобы поправить</div>
     <p class="p" id="n5-note"></p>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="n5-err"></div>
       <button class="btn" id="n5-send">Отправить флористу</button>
-      <button class="btn ghost" id="n5-edit">Изменить заказ</button>
       <button class="btn ghost" id="n5-drop" style="color:var(--alarm)">Отменить заказ</button>
     </div>
   </div>
@@ -589,7 +589,7 @@ textarea.field.ta{min-height:60px}
       </button>
     </div>
 
-    <div class="note green">Напомним за 5 дней до дня рождения и 8 марта. Остальные поводы добавите в её карточке, когда захотите</div>
+    <div class="note green" id="n7-promise"></div>
 
     <div class="foot pad">
       <button class="btn" id="n7-save">Сохранить в близкие</button>
@@ -616,7 +616,7 @@ textarea.field.ta{min-height:60px}
     <button class="card" id="n8-dates" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px">
       <div class="between">
         <span><span style="display:block;font:600 13px/1.2 var(--sans)">Добавить её даты</span>
-        <span class="sub" style="display:block;margin-top:4px">8 марта, годовщина, свой повод — напомним за 5 дней</span></span>
+        <span class="sub" style="display:block;margin-top:4px" id="n8-dates-sub"></span></span>
         <span style="color:var(--muted-3)">→</span>
       </div>
     </button>
@@ -634,7 +634,7 @@ textarea.field.ta{min-height:60px}
   <div style="flex:1;display:flex;flex-direction:column;padding:36px 24px 0">
     <div class="big">Bloomind</div>
     <div style="font:500 14.5px/1.5 var(--sans);color:#C3D6C8;margin-top:12px;max-width:262px">
-      Нужен букет — нажмите одну кнопку. Скажете, кому и с каким настроением — соберём сами и привезём за 3 часа
+      <span id="a1-lead">Нужен букет — нажмите одну кнопку. Скажете, кому и с каким настроением — соберём сами и привезём быстро</span>
     </div>
     <div class="ill on-green" style="flex:1;margin:20px -8px 0;padding:18px" data-ill="1">
       ИЛЛЮСТРАЦИЯ 1<br>мужчина с букетом за спиной,<br>тёплая рисованная сцена
@@ -684,7 +684,7 @@ textarea.field.ta{min-height:60px}
       <div class="step"><i>1</i><div><b>Нажимаете «Нужен букет»</b><span>Себе или ей — скажете кому</span></div></div>
       <div class="step"><i>2</i><div><b>Выбираете размер и настроение</b><span>Состав каждый раз собирает флорист</span></div></div>
       <div class="step"><i>3</i><div><b>Флорист собирает и показывает фото</b><span>Согласуем с вами до оплаты</span></div></div>
-      <div class="step"><i>4</i><div><b>Дарите сами или отвозим мы</b><span>Скажете, куда и когда — за 3 часа</span></div></div>
+      <div class="step"><i>4</i><div><b>Дарите сами или отвозим мы</b><span id="a3-fast">Скажете, куда и когда</span></div></div>
       <div class="step last"><i>5</i><div><b>Захотите — сохраните её в список</b><span>Тогда напомним о датах сами</span></div></div>
     </div>
     <div class="foot pad">
@@ -1387,9 +1387,21 @@ textarea.field.ta{min-height:60px}
 <div class="screen" id="s-D8">
   <div class="bar"><button class="back" type="button">←</button><div class="title" id="d8-title">Букет</div></div>
   <div class="body">
-    <div class="ill" style="height:186px" id="d8-photo">вариант букета · фото от флориста</div>
+    <!-- Фотография живёт в Telegram: показывать здесь серый прямоугольник
+         и звать «посмотреть букет» — обманывать. Ведём туда, где фото есть. -->
+    <button class="card lg" id="d8-photo"
+      style="border:0;width:100%;text-align:left;cursor:pointer;background:var(--calm);padding:16px">
+      <div class="between">
+        <span>
+          <span style="display:block;font:600 13px/1.25 var(--sans);color:var(--green)">Фото букета — в чате с ботом</span>
+          <span class="sub" style="display:block;margin-top:5px">Там же две кнопки: «нравится» и «поправить». Решать удобнее прямо там</span>
+        </span>
+        <span class="link" style="flex:none">открыть →</span>
+      </div>
+    </button>
     <div class="h1">Нравится?<br>Скажите слово</div>
     <p class="p" id="d8-text"></p>
+    <div class="card hidden" id="d8-note" style="padding:12px 14px"></div>
     <div class="note peach">Поменять букет можно только сейчас: после оплаты он уходит в сборку.</div>
     <div class="card" id="d8-rows"></div>
     <div class="foot pad">
@@ -1407,8 +1419,9 @@ textarea.field.ta{min-height:60px}
     <p class="p">Напишите пару слов — флорист учтёт и пришлёт новый вариант. Переделка бесплатна и на дату не влияет.</p>
     <textarea class="field" id="d9-text" placeholder="Слишком много белого, добавьте розового"></textarea>
     <div class="chips" id="d9-tags"></div>
-    <div class="note green">Новый вариант придёт в течение 3 часов</div>
+    <div class="note green" id="d9-eta"></div>
     <div class="foot pad">
+      <div class="hint" id="d9-hint"></div>
       <button class="btn" id="d9-send" disabled>Отправить пометки</button>
       <button class="btn ghost" id="d9-cancel">Отмена</button>
     </div>
@@ -1529,21 +1542,6 @@ textarea.field.ta{min-height:60px}
     <div class="foot pad">
       <button class="btn" id="d12-ok">Хорошо</button>
       <button class="btn ghost" id="d12-support">Что-то не так — написать в Telegram</button>
-    </div>
-  </div>
-</div>
-
-<!-- D13 · передали вам (заказ «подарю сам») -->
-<div class="screen" id="s-D13">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Букет у вас</div></div>
-  <div class="body">
-    <div class="lbl">Доставка завершена</div>
-    <div class="h1">Передали вам<br><span id="d13-time"></span></div>
-    <div class="card" id="d13-rows"></div>
-    <p class="p">Если захотите — отметьте, как всё прошло. Пара слов остаётся в её личном деле: так букеты для неё становятся точнее.</p>
-    <div class="foot pad">
-      <button class="btn" id="d13-rate">Подарил — оценить</button>
-      <button class="btn ghost" id="d13-later">Позже</button>
     </div>
   </div>
 </div>
@@ -1799,7 +1797,7 @@ textarea.field.ta{min-height:60px}
     <p class="p" id="d5p-why"></p>
 
     <div class="foot pad">
-      <div class="hint" id="d5p-hold">Слот держится 20 минут, пока вы оформляете заказ</div>
+      <div class="hint" id="d5p-hold"></div>
       <div class="err-text center hidden" id="d5p-err"></div>
       <button class="btn" id="d5p-next" disabled>Выберите слот</button>
     </div>
@@ -2026,11 +2024,18 @@ textarea.field.ta{min-height:60px}
 <div class="screen" id="s-E3a">
   <div class="bar"><button class="back" type="button">←</button><div class="title" id="e3a-title"></div></div>
   <div class="body">
-    <div class="ill" style="height:196px" id="e3a-photo">фото заказа</div>
+    <button class="card lg hidden" id="e3a-photo"
+      style="border:0;width:100%;text-align:left;cursor:pointer;background:var(--calm);padding:15px">
+      <div class="between">
+        <span style="font:600 13px/1.25 var(--sans);color:var(--green)">Фото букета</span>
+        <span class="link" style="flex:none">прислать в чат →</span>
+      </div>
+    </button>
     <div class="card" id="e3a-rows"></div>
     <div class="card hidden" id="e3a-rating">
       <div class="lbl">Ваша оценка</div>
       <div style="margin-top:7px" id="e3a-rating-text"></div>
+      <button class="btn secondary" id="e3a-rate" style="height:40px;font-size:13px;margin-top:11px">Оценить букет</button>
     </div>
     <button class="card hidden" id="e3a-receipt" style="border:0;width:100%;text-align:left;cursor:pointer">
       <div class="between"><span style="font:600 13px/1.2 var(--sans)">Чек</span><span class="link">открыть →</span></div>
@@ -2088,7 +2093,7 @@ textarea.field.ta{min-height:60px}
     <button class="card" id="e4-support" style="border:0;width:100%;text-align:left;cursor:pointer">
       <div class="between">
         <span><span style="display:block;font:600 13px/1.2 var(--sans)">Поддержка</span>
-        <span class="sub" style="display:block;margin-top:4px">Отвечаем в течение 15 минут</span></span>
+        <span class="sub" style="display:block;margin-top:4px" id="e4-support-eta"></span></span>
         <span style="color:var(--muted-3)">→</span>
       </div>
     </button>
@@ -2161,6 +2166,10 @@ textarea.field.ta{min-height:60px}
       <button class="link hidden" id="f2-social" style="margin-top:9px"></button>
     </div>
 
+    <!-- Переписка по заказу. Флориста могли назначить позже, и разговор
+         начался без него — он должен прочитать всё с начала. -->
+    <div class="card hidden" id="f2-chat"></div>
+
     <div class="card hidden" id="f2-past">
       <div class="between">
         <div class="lbl">Что ей уже возили</div>
@@ -2225,25 +2234,29 @@ textarea.field.ta{min-height:60px}
 <div class="screen" id="s-F5">
   <div class="bar"><button class="back" type="button">←</button><div class="title" id="f5-title">Сборка</div></div>
   <div class="body tight">
-    <div class="card">
-      <div class="lbl" style="margin-bottom:10px">Где заказ</div>
-      <div id="f5-steps"></div>
+    <!-- Что собирать — первым делом. Флорист открыл экран, чтобы работать,
+         а не читать статусы: они ушли строкой под заголовком. -->
+    <div class="sub" id="f5-when"></div>
+
+    <div class="card lg" style="padding:15px">
+      <div class="lbl">Собрать</div>
+      <div class="h2" id="f5-what" style="margin-top:6px"></div>
+      <div class="sub" id="f5-note" style="margin-top:7px"></div>
     </div>
+
+    <!-- Ещё рано: цветы должны быть свежими к дате -->
+    <div class="note peach hidden" id="f5-early"></div>
 
     <label class="ill" id="f5-drop" style="height:150px;cursor:pointer">
       <span id="f5-drop-text">ФОТО СОБРАННОГО БУКЕТА · свежие цветы, упаковка<br>нажмите, чтобы загрузить</span>
     </label>
     <input type="file" accept="image/*" capture="environment" id="f5-file" class="hidden">
 
-    <div class="card">
-      <div class="lbl">Сверьте с согласованным вариантом</div>
-      <div class="chips" style="margin-top:8px" id="f5-check"></div>
-    </div>
-
     <div class="card" id="f5-courier"></div>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="f5-err"></div>
+      <div class="hint" id="f5-hint"></div>
       <button class="btn" id="f5-send" disabled>Отправить фото букета</button>
       <button class="btn secondary" id="f5-handed" disabled>Передал курьеру</button>
       <button class="btn ghost" id="f5-nocourier">Курьера нет</button>
@@ -2448,6 +2461,10 @@ textarea.field.ta{min-height:60px}
     <button class="card hidden" id="o1-peak"
       style="border:0;width:100%;text-align:left;cursor:pointer;background:var(--calm)"></button>
 
+    <!-- Пока сервис не готов принимать заказы — список того, что осталось.
+         Исчезает сам, когда всё сделано: постоянного напоминания не нужно. -->
+    <div class="card lg hidden" id="o1-ready"></div>
+
     <div id="o1-attention-wrap">
       <div class="lbl" style="margin:6px 0 8px">Требует внимания</div>
       <div class="list" id="o1-attention"></div>
@@ -2484,6 +2501,7 @@ textarea.field.ta{min-height:60px}
     <div class="card" id="o3-people"></div>
     <div class="card" id="o3-team"></div>
     <div class="card" id="o3-money"></div>
+    <div class="card hidden" id="o3-chat"></div>
     <div class="card">
       <div class="lbl">Лог</div>
       <div style="margin-top:8px" id="o3-log"></div>
@@ -2726,6 +2744,7 @@ function errText(res) {
     payment_failed: 'Банк отклонил платёж',
     // Пока ЮKassa не подключена — говорим прямо, а не «что-то пошло не так».
     payment_not_configured: 'Оплата пока не подключена — скоро включим',
+    too_early: 'Ещё рано собирать — цветы должны быть свежими к дате',
     redo_limit: 'Переделок больше нет — давайте обсудим голосом',
     peak_rush_full: 'Сегодня срочные закончились — все руки заняты заказами, которые ждут с прошлой недели',
     already_taken: 'Заказ уже взяли',
@@ -3000,22 +3019,68 @@ function clearDraft() {
 function nameCase(name, form) {
   const n = String(name || '').trim();
   if (!n || n.length < 3) return n;
-  if (/\s/.test(n)) {                       // «Ирина Петровна» — склоняем первое слово
-    const parts = n.split(/\s+/);
-    return [nameCase(parts[0], form), ...parts.slice(1)].join(' ');
-  }
-  const low = n.toLowerCase();
-  const cut = k => n.slice(0, n.length - k);
 
-  if (/ия$/.test(low)) return cut(2) + (form === 'dat' ? 'ии' : 'ию');   // Мария, Ксения
-  if (/ья$/.test(low)) return cut(1) + (form === 'dat' ? 'е'  : 'ю');    // Софья, Наталья
-  if (/я$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'ю');    // Аня, Женя
-  if (/а$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'у');    // Ирина, Ольга, Даша
-  if (/ь$/.test(low))  return form === 'dat' ? cut(1) + 'и' : n;         // Любовь
-  return n;                                                             // Кэт, Мэри, Ким
+  /* Сколько тут слов. Дефис проверяем после: иначе «Александра-Виктория
+     Петрова» разъедется по дефису и первая половина уедет в падеж, а
+     фамилия останется. Половина в падеже хуже нетронутого имени — видно,
+     что склоняла машина и промахнулась.
+
+     Двойное имя через дефис — исключение: склоняем обе половины.
+     Хвост из эмодзи и знаков сохраняем как есть. */
+  const words = n.split(/\s+/).filter(x => /[А-Яа-яЁёA-Za-z]/.test(x));
+  if (words.length > 1) return n;
+  if (n.includes('-')) return n.split('-').map(x => nameCase(x, form)).join('-');
+
+  const m = n.match(/^([А-Яа-яЁёA-Za-z]+)([\s\S]*)$/);
+  if (!m) return n;
+  const word = m[1], tail = m[2];
+  if (word.length < 3) return n;
+
+  const low = word.toLowerCase();
+  const cut = k => word.slice(0, word.length - k);
+  if (/ия$/.test(low)) return cut(2) + (form === 'dat' ? 'ии' : 'ию') + tail;
+  if (/ья$/.test(low)) return cut(1) + (form === 'dat' ? 'е'  : 'ю')  + tail;
+  if (/я$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'ю')  + tail;
+  if (/а$/.test(low))  return cut(1) + (form === 'dat' ? 'е'  : 'у')  + tail;
+  if (/ь$/.test(low))  return (form === 'dat' ? cut(1) + 'и' : word) + tail;
+  return n;
 }
+
 const vin = n => nameCase(n, 'vin');   // кого? — «сохранить Ирину»
 const dat = n => nameCase(n, 'dat');   // кому? — «возить Ирине»
+
+/* Родительный: «букет для Сони», «у Ирины». Отдельно от nameCase,
+   потому что после г, к, х, ж, ч, ш, щ пишется «и», а не «ы». */
+function rodName(name) {
+  const n = String(name || '').trim();
+  if (!n || n.length < 3) return n;
+
+  /* Сколько тут слов. Дефис проверяем после: иначе «Александра-Виктория
+     Петрова» разъедется по дефису и первая половина уедет в падеж, а
+     фамилия останется. Половина в падеже хуже нетронутого имени — видно,
+     что склоняла машина и промахнулась.
+
+     Двойное имя через дефис — исключение: склоняем обе половины.
+     Хвост из эмодзи и знаков сохраняем как есть. */
+  const words = n.split(/\s+/).filter(x => /[А-Яа-яЁёA-Za-z]/.test(x));
+  if (words.length > 1) return n;
+  if (n.includes('-')) return n.split('-').map(x => rodName(x)).join('-');
+
+  const m = n.match(/^([А-Яа-яЁёA-Za-z]+)([\s\S]*)$/);
+  if (!m) return n;
+  const word = m[1], tail = m[2];
+  if (word.length < 3) return n;
+
+  const low = word.toLowerCase();
+  const cut = k => word.slice(0, word.length - k);
+  if (/ия$/.test(low)) return cut(1) + 'и' + tail;
+  if (/ья$/.test(low)) return cut(1) + 'и' + tail;
+  if (/я$/.test(low))  return cut(1) + 'и' + tail;
+  if (/а$/.test(low))  return cut(1) + (/[гкхжчшщ]$/.test(low.slice(-2, -1)) ? 'и' : 'ы') + tail;
+  if (/ь$/.test(low))  return cut(1) + 'и' + tail;
+  return n;
+}
+
 
 
 /* ---------- «не загрузилось» вместо белого экрана ----------
@@ -3056,6 +3121,35 @@ function screenLoaded(screenId) {
   box.classList.add('hidden');
   (box.__hidden || []).forEach(el => el.classList.remove('hidden'));
   box.__hidden = [];
+}
+
+/* ---------- заблокированная кнопка объясняет себя ----------
+   Правило брендбука: «заблокированная кнопка всегда объясняет причину
+   текстом на себе или строкой под собой — "Укажите дату годовщины",
+   а не серый прямоугольник молча».
+
+   Серая кнопка без объяснения — самая частая причина, по которой человек
+   уходит: он видит, что дальше нельзя, и не понимает, чего от него хотят.
+
+   gate(кнопка, готово?, «что сделать», «текст когда готово») */
+function gate(el, ready, reason, done) {
+  const b = typeof el === 'string' ? $(el) : el;
+  if (!b) return;
+  b.disabled = !ready;
+  b.textContent = ready ? (done || b.dataset.done || 'Дальше') : reason;
+  if (done) b.dataset.done = done;
+}
+
+/* За сколько дней напоминаем. Одно место на всё приложение: правило
+   живёт в настройках владельца, а не в тексте экрана. */
+function remindDays() {
+  return Number((S.settings || {}).reminder_days_default || 5);
+}
+
+/* За сколько минут отвечает поддержка. Обещание, за которое отвечают
+   люди, — значит и менять его должны люди, а не разработчик. */
+function supportEta() {
+  return Number((S.settings || {}).support_reply_minutes || 15);
 }
 
 
@@ -3237,7 +3331,10 @@ SCREENS.N1 = {
           </div>
         </div>
         <button class="btn" id="n1-act-go" style="margin-top:12px">${waiting ? 'Посмотреть букет' : 'Оплатить ' + money(live.total)}</button>`;
-      $('#n1-act-go').onclick = () => go(waiting ? 'D9' : 'D10', { id: live.id });
+      // D8 — экран с фотографией и двумя выходами: «нравится» и «поправить».
+      // Раньше вело сразу в D9 (правки), минуя фото: человеку предлагали
+      // исправить букет, которого он ещё не видел.
+      $('#n1-act-go').onclick = () => go(waiting ? 'D8' : 'D10', { id: live.id });
     }
 
     // ---- незавершённый заказ переживает закрытие приложения
@@ -3381,8 +3478,8 @@ SCREENS.N2 = {
       };
       $('#n2-list [data-new]').onclick = () => go('N2n');
 
-      $('#n2-next').disabled = !d.kind;
-      $('#n2-next').textContent = d.name ? `Дальше · ${d.name}` : 'Дальше';
+      gate('#n2-next', !!d.kind, 'Выберите, кому везём',
+           d.name ? `Дальше · ${d.name}` : 'Дальше');
     };
     paint();
 
@@ -3439,7 +3536,10 @@ SCREENS.N3 = {
     if (p && p.fromReminder) d.orderId = p.id;
 
     const prices = S.settings.prices || { S: 5000, M: 7000, L: 9500 };
-    $('#n3-title').innerHTML = d.name ? `Какой букет<br>${esc(d.name)}?` : 'Какой букет?';
+    // «Какой букет Соня?» звучало как обращение к Соне. Правильно — кому.
+    $('#n3-title').innerHTML = d.kind === 'self'
+      ? 'Какой букет<br>вам?'
+      : d.name ? `Какой букет<br>${esc(dat(d.name))}?` : 'Какой букет?';
 
     // шапка с поводом — когда пришли из напоминания
     $('#n3-eyebrow').classList.toggle('hidden', !(p && p.occasionTitle));
@@ -3613,15 +3713,26 @@ SCREENS.N5 = {
                    : d.when === 'today' ? 'Сегодня, 17:00–21:00'
                    : dateWords(d.date, false);
 
+    // Каждую строку можно нажать и поправить именно её. Так короче, чем
+    // общая кнопка «изменить заказ», которая возвращала в начало.
+    const row = (k, v, to) => v
+      ? `<div class="row" ${to ? `data-to="${to}" style="cursor:pointer"` : ''}>
+           <span class="k">${esc(k)}</span>
+           <span class="v">${esc(v)}${to ? ' <span class="link" style="margin-left:6px">✎</span>' : ''}</span>
+         </div>`
+      : '';
+
     $('#n5-rows').innerHTML = [
-      `<div class="row"><span class="k">Кому</span><span class="v">${esc(d.name || 'вам')}</span></div>`,
-      `<div class="row"><span class="k">Букет</span><span class="v">${esc(
-        ({ S: 'Небольшой', M: 'Средний', L: 'Большой' })[d.size] || '')}${d.mood ? ' · ' + esc(d.mood.toLowerCase()) : ''}</span></div>`,
-      d.occasionHint ? `<div class="row"><span class="k">Повод</span><span class="v">${esc(d.occasionHint)}</span></div>` : '',
-      `<div class="row"><span class="k">Когда</span><span class="v">${esc(whenText)}</span></div>`,
-      `<div class="row"><span class="k">Куда</span><span class="v">${esc(d.address || (d.addressByHer ? 'пришлёт сама' : ''))}</span></div>`,
-      rushFee ? `<div class="row"><span class="k">Срочность</span><span class="v">+ ${money(rushFee)}</span></div>` : '',
+      row('Кому', d.name || 'вам', 'N2'),
+      row('Букет', (({ S: 'Небольшой', M: 'Средний', L: 'Большой' })[d.size] || '') +
+                   (d.mood ? ' · ' + d.mood.toLowerCase() : ''), 'N3'),
+      row('Повод', d.occasionHint, 'N3'),
+      row('Когда', whenText, 'N4'),
+      row('Куда', d.address || (d.addressByHer ? 'пришлёт сама' : ''), 'N4'),
+      rushFee ? row('Срочность', '+ ' + money(rushFee)) : '',
     ].filter(Boolean).join('');
+
+    $$('#n5-rows [data-to]').forEach(el => el.onclick = () => go(el.dataset.to));
 
     $('#n5-total').textContent = money(total);
 
@@ -3631,12 +3742,17 @@ SCREENS.N5 = {
       : eta.text;
 
     bindDrop('n5-drop');
-    $('#n5-edit').onclick = () => go('N3');
 
     $('#n5-send').onclick = async () => {
       const btn = $('#n5-send'); btn.disabled = true;
       $('#n5-err').classList.add('hidden');
+      // Метка попытки. Живёт в черновике: если сеть оборвалась и человек
+      // нажал ещё раз, сервер узнает повтор и вернёт тот же заказ,
+      // а не создаст второй букет на те же деньги.
+      if (!d.token) { d.token = 'n' + Date.now() + Math.random().toString(36).slice(2, 8); saveDraft(); }
+
       const res = await api('createFastOrder', {
+        token: d.token,
         kind: d.kind, recipientId: d.recipientId || null,
         name: d.name, phone: d.phone || '',
         size: d.size, mood: d.mood || '', occasionHint: d.occasionHint || '',
@@ -3685,8 +3801,8 @@ SCREENS.N6 = {
 
     $('#n6-home').onclick = () => go('N1', {}, { replace: true });
 
-    // фото пришло, пока экран открыт — уводим на согласование
-    if (o.status === 'На согласовании') go('D9', { id: o.id }, { replace: true });
+    // Фото пришло, пока экран открыт — уводим смотреть его, а не править.
+    if (o.status === 'На согласовании') go('D8', { id: o.id }, { replace: true });
   },
 };
 
@@ -3710,6 +3826,13 @@ SCREENS.N7 = {
       o.size && 'размер', o.mood && 'настроение букета',
       o.florist_note && `«${o.florist_note}»`,
     ].filter(Boolean).join(', ') + '.';
+
+    // Срок напоминания — из настроек: владелец меняет правило, и обещание
+    // на самом важном экране меняется вместе с ним.
+    const days = Number(S.settings.reminder_days_default || 5);
+    $('#n7-promise').textContent =
+      `Напомним за ${days} ${plural(days, 'день', 'дня', 'дней')} до дня рождения и 8 марта. ` +
+      `Остальные поводы добавите в её карточке, когда захотите`;
 
     let birth = null;
     $('#n7-date').onclick = () => pickDate({
@@ -3746,6 +3869,10 @@ SCREENS.N8 = {
     $('#n8-price').textContent = `${money(sp.S)} за букет · на ${off}% дешевле разового`;
 
     $('#n8-go').parentElement.parentElement.onclick = () => startSubscription(p.id);
+    const rd = remindDays();
+    $('#n8-dates-sub').textContent =
+      `8 марта, годовщина, свой повод — напомним за ${rd} ${plural(rd, 'день', 'дня', 'дней')}`;
+
     $('#n8-dates').onclick = () => {
       const r = S.recipients.find(x => String(x.id) === String(p.id));
       if (r) go('C3', { recipientId: r.id });
@@ -3768,9 +3895,18 @@ function openDoc(kind) {
   if (TG && TG.openLink) TG.openLink(url); else window.open(url, '_blank');
 }
 
+/* Срок доставки на входе — из настроек. Владелец меняет правило на
+   экране «Правила», и первое обещание сервиса меняется вместе с ним. */
+function fastPromise() {
+  const h = Number((S.settings || {}).rush_window_hours || 3);
+  return `за ${h} ${plural(h, 'час', 'часа', 'часов')}`;
+}
+
 SCREENS.A1 = {
   back: false,
   enter() {
+    $('#a1-lead').textContent =
+      `Нужен букет — нажмите одну кнопку. Скажете, кому и с каким настроением — соберём сами и привезём ${fastPromise()}`;
     $('#a1-start').onclick = () => go('A2');
   },
 };
@@ -3808,7 +3944,10 @@ SCREENS.A2 = {
 };
 
 SCREENS.A3 = {
-  enter() { $('#a3-next').onclick = () => go('A4'); },
+  enter() {
+    $('#a3-fast').textContent = `Скажете, куда и когда — ${fastPromise()}`;
+    $('#a3-next').onclick = () => go('A4');
+  },
 };
 
 SCREENS.A4 = {
@@ -3925,7 +4064,7 @@ SCREENS.B1 = {
       else t.textContent = 'не выбрана';
       $('#b1-noyear').classList.toggle('on', !!d.noYear);
       $('#b1-nodate').classList.toggle('on', !!d.birthUnknown);
-      next.disabled = !name.value.trim();
+      gate(next, !!name.value.trim(), 'Как её зовут?', 'Далее');
     };
     paintDate();
 
@@ -3975,7 +4114,8 @@ SCREENS.B2 = {
     const paint = () => {
       $$('#b2-list .opt').forEach(b => b.classList.toggle('on', b.dataset.who === d.who));
       other.classList.toggle('hidden', d.who !== 'Другое');
-      next.disabled = !d.who || (d.who === 'Другое' && !other.value.trim());
+      gate(next, !!d.who && !(d.who === 'Другое' && !other.value.trim()),
+           d.who === 'Другое' ? 'Напишите, кто она вам' : 'Выберите, кто она вам', 'Далее');
     };
 
     other.value = d.whoOther || '';
@@ -4324,7 +4464,8 @@ function previewRhythm(c) {
   $('#ba-prev-days').innerHTML = html;
 
   $('#ba-prev-text').textContent = first
-    ? `Первый букет — ${dateWords(first)}. Напомним за 5 дней — можно перенести или пропустить.`
+    ? `Первый букет — ${dateWords(first)}. Напомним за ${remindDays()} ${
+        plural(remindDays(), 'день', 'дня', 'дней')} — можно перенести или пропустить.`
     : 'Не нашли подходящий день — поменяйте условия.';
 }
 
@@ -4429,7 +4570,7 @@ SCREENS.B3d = {
     const render = () => {
       $('#bd-month').textContent = MONTHS_N[vm].toLowerCase() + ' ' + vy + ' ▾';
       $('#bd-picked').textContent = picked ? dateWords(picked) : '—';
-      $('#bd-ok').disabled = !picked;
+      gate('#bd-ok', !!picked, 'Выберите день', 'Готово');
       $('#bd-dow').innerHTML = DOW_SHORT.slice(1).concat(DOW_SHORT[0])
         .map(d => `<div class="dow">${d.toUpperCase()}</div>`).join('');
 
@@ -4811,21 +4952,22 @@ function cardHtml(c) {
   }
 
   if (c.kind === 'approve') {
+    // Строкой, а не карточкой с кнопкой. Большой призыв «посмотреть букет»
+    // живёт на главном экране; в календаре это событие на своей дате,
+    // и два одинаковых блока в разных вкладках только путали.
     const o = c.order;
     return `
-      <div class="card lg" style="display:flex;flex-direction:column;gap:10px">
+      <div class="card" style="cursor:pointer;padding:13px 15px" data-draft="${o.id}">
         <div class="between">
-          <div class="lbl" style="color:var(--green)">Флорист прислал вариант</div>
-          <div class="sub">${esc(dateWords(o.delivery_date, false))}</div>
-        </div>
-        <div class="flexrow">
-          <div class="ava">${initial(o.recipientName)}</div>
-          <div class="grow">
-            <div class="h3">${esc(o.recipientName)} · ${esc(o.occasionTitle || '')}</div>
-            <div class="sub" style="margin-top:4px">Посмотрите — нравится или поправить</div>
+          <div class="flexrow">
+            <div class="ava">${initial(o.recipientName)}</div>
+            <div>
+              <div style="font:600 13px/1.25 var(--sans)">${esc(o.recipientName)} · ${esc(o.occasionTitle || 'букет')}</div>
+              <div class="sub" style="margin-top:4px;color:var(--green)">Вариант готов — посмотрите до ${esc(dateWords(o.delivery_date, false))}</div>
+            </div>
           </div>
+          <span style="color:var(--muted-3);flex:none">→</span>
         </div>
-        <button class="btn" style="height:44px;font-size:13px" data-draft="${o.id}">Посмотреть букет</button>
       </div>`;
   }
 
@@ -5110,6 +5252,43 @@ const MOODS = [
   { id: 'дикий',   label: 'Дикий' },
 ];
 
+/* Вопрос команде по заказу. Пишем из приложения, отвечают в чат —
+   дальше разговор идёт там, свайпом по сообщению. */
+function askTeam(orderId) {
+  sheet(`<div class="h2">Спросить по заказу</div>
+    <p class="p">Вопрос уйдёт тому, кто собирает букет. Ответ придёт в чат — там же и продолжите, ответив на сообщение.</p>
+    <textarea class="field ta" id="ask-text" rows="3" placeholder="Можно добавить открытку? Или поменять время?"></textarea>
+    <div class="err-text hidden" id="ask-err"></div>
+    <button class="btn" id="ask-send" disabled>Отправить</button>
+    <button class="btn ghost" id="ask-no">Отмена</button>`);
+  const ta = $('#ask-text');
+  ta.oninput = () => { $('#ask-send').disabled = !ta.value.trim(); };
+  $('#ask-no').onclick = closeSheet;
+  $('#ask-send').onclick = async () => {
+    $('#ask-send').disabled = true;
+    const r = await api('messageTeam', { orderId, text: ta.value.trim() });
+    if (!r.ok) {
+      $('#ask-send').disabled = false;
+      $('#ask-err').textContent = r.error === 'nobody'
+        ? 'Пока некому передать — напишите в поддержку' : errText(r);
+      $('#ask-err').classList.remove('hidden');
+      return;
+    }
+    closeSheet();
+    toast('Отправили — ответ придёт в чат');
+  };
+}
+
+/* Открыть чат с ботом: там живут фотографии и кнопки решения.
+   Закрываем окно приложения — иначе человек окажется в чате «под»
+   мини-приложением и не поймёт, куда смотреть. */
+function openBot() {
+  const u = 'https://t.me/' + (S.botUsername || 'Bloomind_bot');
+  if (TG && TG.openTelegramLink) TG.openTelegramLink(u);
+  else window.open(u, '_blank');
+  if (TG && TG.close) setTimeout(() => TG.close(), 400);
+}
+
 function openSupport() {
   const u = S.settings.support_username;
   if (!u) { toast('Поддержка скоро появится'); return; }
@@ -5169,7 +5348,7 @@ SCREENS.D1 = {
 
     const dl = daysUntil(o.delivery_date);
     $('#d1-sub').textContent = `Через ${dl} ${plural(dl, 'день', 'дня', 'дней')} — ${o.occasionTitle} ${o.recipientName}`;
-    $('#d1-for').textContent = 'букет для ' + o.recipientName;
+    $('#d1-for').textContent = 'букет для ' + rodName(o.recipientName);
 
     const last = res.lastOrder;
     $('#d1-rows').innerHTML = [
@@ -5211,7 +5390,8 @@ SCREENS.D2 = {
       $$('#d2-sizes [data-size]').forEach(b => b.classList.toggle('on', d.size === b.dataset.size && !d.customBudget));
       $('#d2-custom-sub').textContent = d.customBudget
         ? money(d.customBudget) : 'от ' + money(S.settings.custom_budget_min || 10000);
-      $('#d2-next').disabled = !(d.mood && (d.size || d.customBudget));
+      gate('#d2-next', !!(d.mood && (d.size || d.customBudget)),
+           !d.size && !d.customBudget ? 'Выберите размер букета' : 'Выберите настроение', 'Далее');
     };
 
     $('#d2-sizes').innerHTML = ['S', 'M', 'L'].map(s => `
@@ -5301,7 +5481,7 @@ SCREENS.D3 = {
 
     const paint = () => {
       $$('#s-D3 [data-mode]').forEach(b => b.classList.toggle('on', d.deliveryMode === b.dataset.mode));
-      $('#d3-next').disabled = !d.deliveryMode;
+      gate('#d3-next', !!d.deliveryMode, 'Кому вручить букет?', 'Далее');
     };
     $$('#s-D3 [data-mode]').forEach(b => b.onclick = () => {
       d.deliveryMode = b.dataset.mode; saveDraft(); paint();
@@ -5356,7 +5536,8 @@ SCREENS.D4 = {
         saveDraft(); paint();
       });
       renderWindows('#d4-windows', d.window, w => { d.window = w; saveDraft(); paint(); }, d.deliveryDate);
-      $('#d4-next').disabled = !(d.address && d.window);
+      gate('#d4-next', !!(d.address && d.window),
+           !d.address ? 'Укажите адрес' : 'Выберите окно доставки', 'К итогу');
     };
     paint();
 
@@ -5666,7 +5847,10 @@ SCREENS.D7 = {
       : 'Приложение можно закрыть: заказ виден на главной, а бот позовёт, когда придёт фото.';
 
     $('#d7-main').onclick = () => go('C1', {}, { replace: true });
-    $('#d7-support').onclick = openSupport;
+    // Вопрос по заказу уходит тому, кто его собирает, а не в общую
+    // поддержку: раньше сообщение приходило без контекста и без адресата.
+    $('#d7-support').textContent = 'Спросить по заказу';
+    $('#d7-support').onclick = () => askTeam(o.id);
 
     const extra = $('#d7-extra');
     if (o.status === 'Ждёт оплаты') {
@@ -5732,12 +5916,15 @@ SCREENS.D8 = {
     const o = res.order;
     S.screenParams.order = o;
 
-    $('#d8-title').textContent = 'Букет для ' + o.recipientName;
-    $('#d8-photo').innerHTML = o.draftPhotoUrl
-      ? `<img src="${esc(o.draftPhotoUrl)}" alt="вариант букета">`
-      : 'вариант букета · фото от флориста';
+    $('#d8-title').textContent = 'Букет для ' + rodName(o.recipientName);
+
+    // Фото приходит в Telegram и остаётся там. Отсюда — короткий путь
+    // к нему; те же две кнопки продублированы ниже, чтобы решение
+    // можно было принять и не выходя из приложения.
+    $('#d8-photo').onclick = openBot;
+
     $('#d8-text').textContent =
-      `Так букет будет выглядеть. Утром ${dateWords(o.delivery_date, false)} флорист соберёт такой же из свежих цветов. Не то — скажите, покажет другой.`;
+      `Флорист прислал фото в чат. Утром ${dateWords(o.delivery_date, false)} соберёт такой же из свежих цветов. Не то — скажите, покажет другой.`;
 
     const limit = S.settings.redo_limit || 2;
     const dl = daysUntil(o.delivery_date);
@@ -5746,8 +5933,13 @@ SCREENS.D8 = {
       `<div class="row"><span class="k">Передача</span><span class="v">${dl === 0 ? 'сегодня' : dl === 1 ? 'завтра' : 'через ' + dl + ' ' + plural(dl, 'день', 'дня', 'дней')}</span></div>`,
     ].join('');
 
+    // Слова флориста — это не продолжение нашего абзаца, а его реплика.
+    // Приклеенные в хвост, они читались как часть системного текста.
+    $('#d8-note').classList.toggle('hidden', !o.floristComment);
     if (o.floristComment) {
-      $('#d8-text').textContent += ' Флорист: «' + o.floristComment + '»';
+      $('#d8-note').innerHTML =
+        `<div class="lbl">Флорист о букете</div>
+         <div style="margin-top:6px">«${esc(o.floristComment)}»</div>`;
     }
 
     $('#d8-ok').onclick = async () => {
@@ -5755,31 +5947,64 @@ SCREENS.D8 = {
       if (!r.ok) { toast(errText(r)); return; }
       go('D10', { id: o.id }, { replace: true });
     };
-    $('#d8-redo').onclick = () => {
-      if (o.redo_count >= limit) go('D9a', { id: o.id });
-      else go('D9', { id: o.id });
-    };
+    // Когда переделки кончились, кнопка не должна звать «поправить»:
+    // за ней нет действия, есть только разговор с поддержкой.
+    const noMore = o.redo_count >= limit;
+    $('#d8-redo').textContent = noMore ? 'Что-то не так — обсудим' : 'Хочу поправить';
+    $('#d8-redo').onclick = () => go(noMore ? 'D9a' : 'D9', { id: o.id });
   },
 };
 
 const REDO_TAGS = ['другой цвет', 'пышнее', 'другие цветы', 'строже', 'меньше белого', 'ярче'];
 
 SCREENS.D9 = {
-  enter(p) {
+  async enter(p) {
+    // Сюда можно попасть по старой ссылке из бота или кнопкой «назад».
+    // Сколько переделок было, знает только сервер — спрашиваем его, а не
+    // кэш прошлого экрана: показать поле, которое ничего не отправит, — обман.
+    const cap = Number(S.settings.redo_limit || 2);
+    const res = await api('order', { orderId: p.id });
+    if (!res.ok) { toast(errText(res)); back(); return; }
+    if ((res.order.redo_count || 0) >= cap) {
+      go('D9a', { id: p.id }, { replace: true });
+      return;
+    }
+    S.screenParams.order = res.order;
+
     const ta = $('#d9-text'), send = $('#d9-send');
     ta.value = '';
     send.disabled = true;
+
+    // Брендбук: заблокированная кнопка объясняет причину, а не молчит серым.
+    $('#d9-hint').textContent = 'Напишите пару слов или выберите пометку';
+
+    // Срок нового варианта — из настроек: владелец меняет правило,
+    // и обещание меняется вместе с ним.
+    const h = Number(S.settings.rush_window_hours || 3);
+    $('#d9-eta').textContent =
+      `Новый вариант придёт в течение ${h} ${plural(h, 'часа', 'часов', 'часов')}`;
     $('#d9-tags').innerHTML = REDO_TAGS.map(t => `<button class="chip" data-t="${esc(t)}">${esc(t)}</button>`).join('');
+    const refresh = () => {
+      const empty = !ta.value.trim();
+      send.disabled = empty;
+      $('#d9-hint').classList.toggle('hidden', !empty);
+    };
     $$('#d9-tags [data-t]').forEach(b => b.onclick = () => {
       ta.value = ta.value.trim() ? ta.value.trim() + ', ' + b.dataset.t : b.dataset.t;
-      send.disabled = !ta.value.trim();
+      refresh();
     });
-    ta.oninput = () => { send.disabled = !ta.value.trim(); };
+    ta.oninput = refresh;
+    refresh();
     $('#d9-cancel').onclick = () => back();
     send.onclick = async () => {
       send.disabled = true;
       const r = await api('redoDraft', { orderId: p.id, comment: ta.value.trim() });
-      if (!r.ok) { send.disabled = false; toast(errText(r)); return; }
+      if (!r.ok) {
+        send.disabled = false;
+        // Лимит мог кончиться, пока экран был открыт — уводим к человеку.
+        if (r.error === 'redo_limit') { go('D9a', { id: p.id }, { replace: true }); return; }
+        toast(errText(r)); return;
+      }
       toast('Передали флористу');
       go('D7', { id: p.id }, { replace: true });
     };
@@ -5972,21 +6197,6 @@ SCREENS.D12 = {
 
 /* ---------- D13 / D14 · доставлено и оценка ---------- */
 
-SCREENS.D13 = {
-  async enter(p) {
-    const res = await api('order', { orderId: p.id });
-    if (!res.ok) { toast(errText(res)); back(); return; }
-    const o = res.order;
-    $('#d13-time').textContent = o.deliveredTime ? 'в ' + o.deliveredTime : '';
-    $('#d13-rows').innerHTML = [
-      `<div class="row"><span class="k">Куда</span><span class="v">${esc(o.delivery_address || '')}</span></div>`,
-      `<div class="row"><span class="k">Кому</span><span class="v">${esc(o.recipientName)}</span></div>`,
-    ].join('');
-    $('#d13-rate').onclick = () => go('D14', { id: o.id }, { replace: true });
-    $('#d13-later').onclick = () => go('C1', {}, { replace: true });
-  },
-};
-
 SCREENS.D14 = {
   async enter(p) {
     const res = await api('order', { orderId: p.id });
@@ -5999,10 +6209,11 @@ SCREENS.D14 = {
       <button class="opt grow" data-r="${r}" style="justify-content:center;font-size:30px;padding:14px">
         ${RATING_EMOJI[r]}
       </button>`).join('');
+    gate('#d14-send', false, 'Выберите смайлик', 'Отправить оценку');
     $$('#d14-rate [data-r]').forEach(b => b.onclick = () => {
       rating = b.dataset.r;
       $$('#d14-rate [data-r]').forEach(x => x.classList.toggle('on', x === b));
-      $('#d14-send').disabled = false;
+      gate('#d14-send', true, 'Выберите смайлик', 'Отправить оценку');
     });
 
     $('#d14-send').onclick = async () => {
@@ -6034,8 +6245,8 @@ SCREENS.D16 = {
           <span>${esc(dateWords(dt))}${i === 0 ? '<span class="sub" style="display:block;margin-top:4px">предлагаем</span>' : ''}</span>
           <span class="tick">✓</span></button>`).join('');
       $$('#d16-opts [data-d]').forEach(b => b.onclick = () => { picked = b.dataset.d; paint(); });
-      $('#d16-ok').disabled = !picked;
-      $('#d16-ok').textContent = picked ? 'Перенести на ' + dateWords(picked, false) : 'Перенести';
+      gate('#d16-ok', !!picked, 'Выберите новую дату',
+           picked ? 'Перенести на ' + dateWords(picked, false) : 'Перенести');
     };
     paint();
 
@@ -6234,7 +6445,8 @@ SCREENS.P2 = {
       const times = r.perMonth === 1 ? 'один букет' : r.id === 'twice_month' ? 'два букета' : 'букет раз в две недели';
       $('#p2-what').textContent = `${times} ${d.size} в месяц · доставка в цене`;
       $('#p2-sum').textContent = money(subMonthly(d));
-      $('#p2-next').disabled = !(d.rhythm && d.size && d.part);
+      gate('#p2-next', !!(d.rhythm && d.size && d.part),
+           !d.rhythm ? 'Как часто везём?' : !d.size ? 'Выберите размер букета' : 'Когда в месяце?', 'Далее');
     };
     paint();
 
@@ -7161,20 +7373,34 @@ SCREENS.E3a = {
     const o = res.order;
 
     $('#e3a-title').textContent = `${o.recipientName} · ${o.occasionTitle || 'букет'}`;
-    $('#e3a-photo').innerHTML = o.finalPhotoUrl
-      ? `<img src="${esc(o.finalPhotoUrl)}" alt="букет">` : 'фото заказа';
     $('#e3a-rows').innerHTML = [
       `<div class="row"><span class="k">Букет</span><span class="v">${esc(o.size || '')}, «${esc(o.mood || '')}»</span></div>`,
       `<div class="row"><span class="k">Оплачено</span><span class="v">${money(o.total)}</span></div>`,
       `<div class="row"><span class="k">Доставлено</span><span class="v">${esc(dateWords(o.delivery_date, false))}${o.deliveredTime ? ', ' + o.deliveredTime : ''}</span></div>`,
     ].join('');
 
-    $('#e3a-rating').classList.toggle('hidden', !o.rating);
+    // Оценка обычно ставится смайликом в чате, сразу после доставки.
+    // Здесь — для тех, кто хочет написать подробнее или вернуться позже.
+    $('#e3a-rating').classList.remove('hidden');
     if (o.rating) {
       $('#e3a-rating-text').innerHTML =
         `${RATING_EMOJI[o.rating]} ${o.rating_comment ? '«' + esc(o.rating_comment) + '»' : ''}
          <span class="sub" style="display:block;margin-top:5px">Видит только флорист.</span>`;
+      $('#e3a-rate').textContent = 'Изменить оценку';
+    } else {
+      $('#e3a-rating-text').innerHTML =
+        `<span class="sub">Ещё не оценён. Пара слов остаётся ${
+          o.recipient_id ? 'в её личном деле' : 'в истории заказа'} — так следующий букет будет точнее.</span>`;
+      $('#e3a-rate').textContent = 'Оценить букет';
     }
+    $('#e3a-rate').onclick = () => go('D14', { id: o.id });
+
+    // Фото живёт в Telegram — присылаем его в чат, а не тянем сюда.
+    $('#e3a-photo').classList.toggle('hidden', !o.hasPhoto);
+    $('#e3a-photo').onclick = async () => {
+      const r = await api('orderPhoto', { orderId: o.id });
+      toast(r.ok ? 'Прислали фото в чат' : errText(r));
+    };
 
     $('#e3a-receipt').classList.toggle('hidden', !o.receiptUrl);
     $('#e3a-receipt').onclick = () => {
@@ -7268,6 +7494,10 @@ SCREENS.E4 = {
         </button>`;
     }).join('');
     $$('#e4-subs [data-sub]').forEach(b => b.onclick = () => go('P5', { id: +b.dataset.sub }));
+
+    const eta = supportEta();
+    $('#e4-support-eta').textContent =
+      `Отвечаем в течение ${eta} ${plural(eta, 'минуты', 'минут', 'минут')}`;
 
     $('#e4-sub-new').onclick = () => startSubscription();
 
@@ -7365,6 +7595,13 @@ function floristAction(o) {
     return { what: 'Показать вариант букета', btn: 'Показать вариант', when: o.dueText };
   }
   if (o.status === 'Оплачено') {
+    // Раньше срока не собираем: цветы живут несколько дней, и букет,
+    // собранный за неделю, приедет вялым. Заказ показываем, но зовём
+    // не сейчас — и говорим, когда именно.
+    if (o.canAssemble === false) {
+      return { what: 'Собрать ' + (o.assemblyWhen || 'ближе к дате'),
+               when: 'ещё рано — цветы должны быть свежими', wait: true };
+    }
     return { what: 'Собрать и снять фото', btn: 'Собрать и снять фото', when: o.assembleText };
   }
   return null;
@@ -7455,6 +7692,24 @@ SCREENS.F2 = {
     S.screenParams.order = o;
 
     $('#f2-title').textContent = 'Заказ #' + o.id;
+
+    // Переписка целиком, включая то, что было до назначения: заказ мог
+    // переходить от флориста к флористу, а разговор один.
+    const chat = await team('orderChat', { orderId: o.id });
+    const msgs = (chat.ok && chat.messages) || [];
+    $('#f2-chat').classList.toggle('hidden', !msgs.length);
+    if (msgs.length) {
+      const WHO = { client: 'Клиент', florist: 'Флорист', courier: 'Курьер', owner: 'Поддержка' };
+      $('#f2-chat').innerHTML =
+        `<div class="between"><div class="lbl">Переписка · ${msgs.length}</div>
+         <div class="lbl" style="color:var(--muted-3)">имени клиента не видно</div></div>` +
+        msgs.map(m => `
+          <div style="margin-top:9px">
+            <div class="lbl" style="color:${m.role === 'client' ? 'var(--peach-text)' : 'var(--green)'}">${
+              esc(WHO[m.role] || m.role)} · ${esc(m.time)}</div>
+            <div class="sub" style="margin-top:3px;color:var(--ink)">${esc(m.text)}</div>
+          </div>`).join('');
+    }
     const a = floristAction(o) || { what: 'Ждём клиента', when: '' };
     $('#f2-turn-what').textContent = a.what;
     $('#f2-turn-when').textContent = a.when || '';
@@ -7622,27 +7877,34 @@ SCREENS.F5 = {
     let photo = null;
 
     $('#f5-title').textContent = 'Сборка · #' + o.id;
+    $('#f5-when').textContent =
+      `К ${dateWords(o.delivery_date, false)}${o.delivery_window ? ', ' + o.delivery_window : ''}`;
 
-    const steps = [
-      { label: 'Вариант согласован', done: true, when: o.approvedTime || '' },
-      { label: 'Сборка из свежих цветов и фото', done: !!o.final_photo, now: !o.final_photo },
-      { label: 'Передача курьеру', done: o.status !== 'Оплачено', now: !!o.final_photo && o.status === 'Оплачено' },
-    ];
-    $('#f5-steps').innerHTML = steps.map((s, i) => `
-      <div class="step ${i === steps.length - 1 ? 'last' : ''}">
-        <i style="background:${s.done ? 'var(--green)' : s.now ? 'var(--peach)' : 'var(--unselected)'};color:${s.done ? 'var(--bg)' : s.now ? 'var(--peach-text)' : 'var(--muted-4)'};font-size:13px">${s.done ? '✓' : ''}</i>
-        <div style="padding-bottom:${i === steps.length - 1 ? 0 : 9}px">
-          <b style="color:${s.done || s.now ? 'var(--text)' : 'var(--muted-4)'}">${esc(s.label)}</b>
-          ${s.when ? `<span>${esc(s.when)}</span>` : ''}
-        </div>
-      </div>`).join('');
+    // Что собирать — одной строкой, крупно. Три блока со статусами убрал:
+    // флорист открывает экран работать, а не читать, где заказ.
+    $('#f5-what').textContent = [
+      ({ S: 'Небольшой', M: 'Средний', L: 'Большой' })[o.size] || o.size || '',
+      o.mood && '«' + o.mood + '»',
+    ].filter(Boolean).join(', ');
+    $('#f5-note').textContent = o.recipientNote
+      ? o.recipientNote
+      : 'Личного дела нет — состав на ваше усмотрение';
+
+    /* Раньше срока не собираем. Цветы живут несколько дней: букет,
+       собранный за неделю, приедет к дате вялым. Кнопка не просто
+       заблокирована — сказано, когда можно и почему нельзя сейчас. */
+    const early = o.canAssemble === false;
+    $('#f5-early').classList.toggle('hidden', !early);
+    if (early) {
+      $('#f5-early').textContent =
+        `Собирать ${o.assemblyWhen || 'ближе к дате'} — не сегодня. ` +
+        `Цветы живут несколько дней, и к ${dateWords(o.delivery_date, false)} букет должен быть свежим.`;
+    }
+    $('#f5-drop').classList.toggle('hidden', early);
 
     $('#f5-drop').innerHTML = o.final_photo
       ? `<img src="${esc(o.finalPhotoUrl || '')}" alt="">`
       : `<span id="f5-drop-text">ФОТО СОБРАННОГО БУКЕТА · свежие цветы, упаковка<br>нажмите, чтобы загрузить</span>`;
-
-    $('#f5-check').innerHTML = [o.mood, o.size, o.recipientNote && 'учесть личное дело']
-      .filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('');
 
     $('#f5-courier').innerHTML = [
       o.courierName
@@ -7653,11 +7915,19 @@ SCREENS.F5 = {
         : '',
     ].join('');
 
-    $('#f5-send').disabled = !!o.final_photo;
+    // Фото уже отправлено — второй раз не шлём: у клиента будет два
+    // «готового букета» подряд, и он не поймёт, какой поедет.
+    gate('#f5-send', !early && !o.final_photo,
+         early ? `Собирать ${o.assemblyWhen || 'ближе к дате'}` : 'Фото уже отправлено',
+         'Отправить фото букета');
     $('#f5-handed').disabled = !o.final_photo;
+    $('#f5-hint').textContent = o.final_photo
+      ? 'Клиент увидел букет. Осталось передать курьеру'
+      : early ? '' : 'Клиент увидит это фото — оно последнее перед доставкой';
 
     bindPhoto('#f5-drop', '#f5-file', '#f5-drop-text', f => {
-      photo = f; $('#f5-send').disabled = false;
+      photo = f;
+      gate('#f5-send', !early, `Собирать ${o.assemblyWhen || 'ближе к дате'}`, 'Отправить фото букета');
     });
 
     $('#f5-send').onclick = async () => {
@@ -8100,8 +8370,40 @@ SCREENS.O1 = {
       peakBox.onclick = () => go('O6b', { date: pk.date });
     }
 
+    /* Готовность к первому заказу. «Всё спокойно» на пустой базе — вранье:
+       спокойно не потому, что хорошо, а потому, что работать некому. */
+    const rd = await team('readiness');
+    const steps = (rd.ok && rd.steps) || [];
+    const left = steps.filter(x => !x.done);
+    const showReady = rd.ok && left.length > 0 && (rd.firstDay || left.some(x => x.id === 'florist' || x.id === 'courier'));
+
+    $('#o1-ready').classList.toggle('hidden', !showReady);
+    if (showReady) {
+      $('#o1-ready').innerHTML = `
+        <div class="between" style="align-items:baseline">
+          <div class="lbl" style="color:var(--peach-text)">Чтобы принять первый заказ</div>
+          <div class="sub" style="flex:none">осталось ${left.length} из ${steps.length}</div>
+        </div>` +
+        steps.map(x => `
+          <div class="between" style="margin-top:11px;align-items:flex-start;${x.go ? 'cursor:pointer' : ''}"
+               ${x.go && !x.done ? `data-step="${x.go}"` : ''}>
+            <span style="display:flex;gap:10px;align-items:flex-start">
+              <span class="cbox ${x.done ? 'on' : ''}" style="margin-top:1px;flex:none"></span>
+              <span>
+                <span style="display:block;font:600 13px/1.25 var(--sans);${
+                  x.done ? 'color:var(--muted-2);text-decoration:line-through' : ''}">${esc(x.title)}</span>
+                ${x.done ? '' : `<span class="sub" style="display:block;margin-top:4px">${esc(x.why)}</span>`}
+              </span>
+            </span>
+            ${x.go && !x.done ? '<span class="link" style="flex:none">открыть</span>' : ''}
+          </div>`).join('');
+
+      $$('#o1-ready [data-step]').forEach(el => el.onclick = () => go(el.dataset.step));
+    }
+
     const items = res.attention || [];
-    $('#o1-calm').classList.toggle('hidden', items.length > 0);
+    // «Всё идёт само» показываем только когда действительно всё готово.
+    $('#o1-calm').classList.toggle('hidden', items.length > 0 || showReady);
     $('#o1-attention-wrap').classList.toggle('hidden', items.length === 0);
 
     $('#o1-attention').innerHTML = items.map(a => `
@@ -8233,6 +8535,22 @@ SCREENS.O3 = {
       cost ? `<div class="row"><span class="k">Себестоимость</span><span class="v">${money(cost)}</span></div>` : '',
       cost ? `<div class="row"><span class="k">Маржа</span><span class="v">${money(margin)} · ${Math.round(margin / o.total * 100)}%</span></div>` : '',
     ].filter(Boolean).join('');
+
+    // Переписка по заказу: владелец должен видеть разговор целиком,
+    // иначе он звонит клиенту, не зная, о чём тот уже спрашивал.
+    const chat = await team('orderChat', { orderId: o.id });
+    const msgs = (chat.ok && chat.messages) || [];
+    $('#o3-chat').classList.toggle('hidden', !msgs.length);
+    if (msgs.length) {
+      const WHO = { client: 'Клиент', florist: 'Флорист', courier: 'Курьер', owner: 'Поддержка' };
+      $('#o3-chat').innerHTML = `<div class="lbl">Переписка · ${msgs.length}</div>` +
+        msgs.map(m => `
+          <div style="margin-top:9px">
+            <div class="lbl" style="color:${m.role === 'client' ? 'var(--peach-text)' : 'var(--green)'}">${
+              esc(WHO[m.role] || m.role)} · ${esc(m.time)}</div>
+            <div class="sub" style="margin-top:3px;color:var(--ink)">${esc(m.text)}</div>
+          </div>`).join('');
+    }
 
     $('#o3-log').innerHTML = (res.log || []).map(e => `
       <div class="row"><span class="k">${esc(e.time)}</span><span class="v" style="font-weight:500;text-align:right">${esc(e.event)}</span></div>`).join('')
@@ -8767,6 +9085,7 @@ async function boot() {
   S.recipients = res.recipients || [];
   S.orders     = res.orders || [];
   S.notifyOff  = !!res.notifyOff;
+  S.botUsername = res.botUsername || S.botUsername || '';
 
   renderTabs();
 
