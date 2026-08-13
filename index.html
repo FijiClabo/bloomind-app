@@ -2521,6 +2521,9 @@ function errText(res) {
     too_soon: 'Заявку уже приняли — посмотрим и ответим',
     no_contact: 'Как к вам обращаться?',
     no_phone: 'Нужен телефон — по нему и позвоним',
+    // Тайминг: окно закрылось, пока человек думал
+    window_late: 'В это окно сегодня уже не успеем — выберите другое или завтра',
+    today_late: 'На сегодня уже поздно — соберём завтра с утра',
   };
   if (typeof res.error === 'string' && map[res.error]) return map[res.error];
   /* Отказ Телеграма показываем его же словами. «Что-то пошло не так»
@@ -2985,7 +2988,8 @@ function rushWords() {
 }
 
 /* ---------- время суток решает, что мы обещаем ----------
-   «сегодня за 3 часа» в 23:40 — ложь. После отсечки обещаем утро. */
+   «привезём сегодня» в 23:40 — ложь. После отсечки обещаем утро.
+   Само число часов лежит в правилах владельца, не здесь. */
 function rushInfo() {
   const st = S.settings;
   const until = parseInt(String(st.rush_available_until || '18:00'), 10);
@@ -3001,7 +3005,7 @@ function rushInfo() {
     return { open: false, label: `завтра с ${st.florist_start || '10:00'}`,
              why: `Сегодня срочный уже не успеем: принимаем до ${st.rush_available_until || '18:00'}` };
   }
-  // 17 · Часы открыты, но собирать некому. Обещать три часа в такой день
+  // 17 · Часы открыты, но собирать некому. Обещать доставку в такой день
   // значит подвести человека уже после того, как он заплатил.
   if (S.floristsToday === 0) {
     return { open: false, label: 'завтра',
@@ -3166,7 +3170,7 @@ SCREENS.N1 = {
     };
 
     // Подпись под кнопкой. Срочность здесь — предложение, а не обещание:
-    // день человек ещё не выбрал, и «привезём за 3 часа» под заказом
+    // день человек ещё не выбрал, и обещание срочной доставки под заказом
     // на следующую неделю читалось бы враньём. Когда срочная доставка
     // закрыта, про неё вообще молчим — остаётся то, что верно всегда.
     const rush = rushInfo();
@@ -3484,12 +3488,34 @@ SCREENS.N3 = {
   },
 };
 
+/* Вечернее окно сегодняшнего дня — последнее из правил мастерской.
+   Пусто, если оно уже кончилось: обещать доставку в окно, которое
+   прошло час назад, хуже, чем честно сказать «уже поздно».
+
+   Окна лежат в настройках владельца одной строкой: он их и меняет.
+   Раньше «17:00–21:00» было вписано в код в двух местах, и правка
+   в «Правилах» на экран не влияла. */
+function todayWindow() {
+  const all = String(S.settings.delivery_windows || '09:00–13:00,13:00–17:00,17:00–21:00')
+    .split(',').map(x => x.trim()).filter(Boolean);
+  // Позднее из тех, в которые ещё успеваем. Просто последнее брать
+  // нельзя: в половину девятого вечернее окно формально идёт, но
+  // собрать, согласовать и доехать за полчаса некому.
+  const fit = all.filter(w => windowFitsNow(w));
+  return fit[fit.length - 1] || '';
+}
+
 /* ---------- N4 · когда и куда ---------- */
 
 SCREENS.N4 = {
   async enter() {
     const d = fastDraft();
     const rush = rushInfo();
+    /* Вечернее окно берём из правил мастерской, а не пишем числом.
+       Раньше «17:00–21:00» стояло текстом в двух местах, а в заказ
+       окно не записывалось вовсе — и сервер подставлял первое утреннее.
+       Клиент видел вечер, флорист получал утро. */
+    const evening = todayWindow();
 
     // ---- красный 4: без бота срочный заказ уходит в тишину
     const botOff = !!S.notifyOff;
@@ -3512,7 +3538,8 @@ SCREENS.N4 = {
            <span class="tick">✓</span></button>`,
         `<button class="opt ${d.when === 'today' ? 'on' : ''}" data-w="today">
            <span>Сегодня, к вечеру<span class="sub" style="display:block;margin-top:4px;color:${
-             d.when === 'today' ? 'var(--on-green)' : 'var(--muted-2)'}">окно 17:00–21:00</span></span>
+             d.when === 'today' ? 'var(--on-green)' : 'var(--muted-2)'}">${
+             evening ? 'окно ' + esc(evening) : 'на сегодня уже поздно'}</span></span>
            <span class="tick">✓</span></button>`,
         `<button class="opt ${d.when === 'later' ? 'on' : ''}" data-w="later">
            <span>В другой день<span class="sub" style="display:block;margin-top:4px;color:${
@@ -3528,6 +3555,8 @@ SCREENS.N4 = {
                      onPick(v) { S.draft.fast.date = v; saveDraft(); } });
         } else {
           d.date = iso(new Date());
+          // Вот чего не хватало: выбор записывается, а не остаётся надписью.
+          d.window = d.when === 'today' ? (evening || '') : '';
         }
         saveDraft(); paint();
       });
@@ -3669,8 +3698,8 @@ SCREENS.N5 = {
     const total = base + rushFee + farFee;
 
     const whenText = d.when === 'now' ? `Сегодня, ${rushWords()}`
-                   : d.when === 'today' ? 'Сегодня, 17:00–21:00'
-                   : dateWords(d.date, false);
+                   : d.when === 'today' ? `Сегодня, ${d.window || todayWindow() || ''}`.trim()
+                   : dateWords(d.date, false) + (d.window ? ', ' + d.window : '');
 
     // Каждую строку можно нажать и поправить именно её. Так короче, чем
     // общая кнопка «изменить заказ», которая возвращала в начало.
@@ -5282,14 +5311,48 @@ function windowsList() {
 function windowName(w, i) {
   return ['Утро', 'День', 'Вечер'][i] || w;
 }
-function renderWindows(host, selected, onPick, dateIso) {
+
+/* Конец окна в минутах от полуночи. */
+function winEndMinutes(w) {
+  const m = /(\d{1,2}):(\d{2})\s*$/.exec(String(w || ''));
+  return m ? (+m[1]) * 60 + (+m[2]) : null;
+}
+
+/* Сколько минут нам нужно от «оформил» до «вручили». У срочного
+   своё число — оно же и обещание клиенту. */
+function leadMinutesNow(kind) {
+  const st = S.settings || {};
+  if (kind === 'rush') return (parseInt(st.rush_window_hours, 10) || 2) * 60;
+  return parseInt(st.today_lead_minutes, 10) || 180;
+}
+
+/* Успеваем ли в это окно, если оформить прямо сейчас. Считаем от конца
+   окна: курьер не обязан приехать к его началу, ему хватит успеть
+   до конца — так остаётся больше живых окон, и ни одно обещание
+   не даётся впустую. */
+function windowFitsNow(w, kind) {
+  const end = winEndMinutes(w);
+  if (end == null) return true;
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes() + leadMinutesNow(kind) <= end;
+}
+function renderWindows(host, selected, onPick, dateIso, kind) {
   const now = new Date();
   const isToday = dateIso === iso(now);
   $(host).innerHTML = windowsList().map((w, i) => {
-    const endHour = parseInt(String(w).split('–')[1], 10);
-    const passed = isToday && now.getHours() >= endHour;
-    return `<button class="opt ${selected === w ? 'on' : ''}" data-w="${esc(w)}" ${passed ? 'disabled style="opacity:.45"' : ''}>
-      <span>${windowName(w, i)}<span class="sub" style="display:block;margin-top:4px;color:${selected === w ? 'var(--on-green)' : 'var(--muted-2)'}">${passed ? 'уже прошло' : esc(w)}</span></span>
+    /* Окно закрывается не когда кончилось, а когда мы перестали в него
+       успевать. Раньше в 20:30 можно было выбрать 17:00–21:00: собрать,
+       согласовать фото, получить оплату и доехать за полчаса нельзя.
+       Причину называем разную — «уже прошло» и «сегодня не успеем» —
+       потому что это разные вещи и человек по ним решает по-разному. */
+    const endMin = winEndMinutes(w);
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const over = isToday && endMin != null && nowMin >= endMin;
+    const late = isToday && !over && !windowFitsNow(w, kind);
+    const off = over || late;
+    return `<button class="opt ${selected === w ? 'on' : ''}" data-w="${esc(w)}" ${off ? 'disabled style="opacity:.45"' : ''}>
+      <span>${windowName(w, i)}<span class="sub" style="display:block;margin-top:4px;color:${selected === w ? 'var(--on-green)' : 'var(--muted-2)'}">${
+        over ? 'уже прошло' : late ? 'сегодня не успеем' : esc(w)}</span></span>
       <span class="tick">✓</span></button>`;
   }).join('');
   $$(host + ' [data-w]').forEach(b => {
@@ -7031,7 +7094,12 @@ SCREENS.F2 = {
     $('#f2-rows').innerHTML = [
       `<div class="row"><span class="k">Букет</span><span class="v">${esc(o.size || 'свой бюджет')} · «${esc(o.mood || '')}»</span></div>`,
       `<div class="row"><span class="k">Бюджет на цветы</span><span class="v">${money(o.florist_budget || o.bouquet_price)}</span></div>`,
-      `<div class="row"><span class="k">Сборка</span><span class="v">${esc(dateWords(o.delivery_date, false))}, до 11:00</span></div>`,
+      /* Срок сборки считает сервер из окна доставки: курьер забирает
+         к началу окна, флористу полчаса запаса. Раньше здесь стояло
+         «до 11:00» числом — и у вечернего заказа срок оказывался
+         в прошлом ещё до того, как заказ оформили. */
+      `<div class="row"><span class="k">Сборка</span><span class="v">${
+        esc(dateWords(o.delivery_date, false))}${o.assembleBy ? ', до ' + esc(o.assembleBy) : ''}</span></div>`,
       o.delivery_window ? `<div class="row"><span class="k">Окно</span><span class="v">${esc(o.delivery_window)}</span></div>` : '',
     ].filter(Boolean).join('');
 
@@ -8281,6 +8349,17 @@ function inviteSheet() {
 }
 
 
+/* Как назвать посчитанное число в сообщении «пересчитано: …».
+   Ключами базы владельцу говорить нельзя. */
+const WHAT_CHANGED = {
+  delivery_windows: 'окна доставки',
+  rush_available_until: 'приём срочных',
+  quiet_from: 'тихие часы',
+  quiet_to: 'тихие часы',
+  pay_deadline_time: 'дедлайн оплаты',
+  pay_hold_until: 'утреннее ожидание',
+};
+
 /* ---------- O5 · правила ---------- */
 
 SCREENS.V5 = {
@@ -8289,6 +8368,8 @@ SCREENS.V5 = {
     if (!res.ok) { toast(errText(res)); back(); return; }
     const s = { ...res.settings };
     let prices = { ...res.prices };
+    // Что владелец решил вернуть под расчёт — уходит вместе с сохранением.
+    const unpin = new Set();
     let windows = String(s.delivery_windows || '').split(',').filter(Boolean);
 
     const numRow = (key, label, sub, suffix) => `
@@ -8296,6 +8377,26 @@ SCREENS.V5 = {
         <span class="k">${esc(label)}${sub ? `<span style="display:block;font-size:11px;color:var(--muted-3)">${esc(sub)}</span>` : ''}</span>
         <span class="v">${esc(s[key] || '')}${suffix || ''}</span>
       </div>`;
+
+    /* Посчитанное число. Показываем не «пустое поле, которое забыли
+       заполнить», а результат с причиной: владелец либо соглашается,
+       либо правит осознанно. Поправил — число закрепляется, и часы
+       работы его больше не трогают. Открепить можно тут же. */
+    const calcRow = (key, label, suffix) => {
+      const d = (res.derived || []).find(x => x.key === key);
+      const pinned = (res.pinned || []).includes(key);
+      const why = pinned ? 'вы задали своё · ' + (d ? 'считалось бы ' + d.value : '')
+                         : (d ? d.why : '');
+      return `
+        <div class="row" data-edit="${key}" style="cursor:pointer">
+          <span class="k">${esc(label)}
+            ${why ? `<span style="display:block;font-size:11px;color:${
+              pinned ? 'var(--peach-text)' : 'var(--muted-3)'}">${esc(why)}</span>` : ''}
+          </span>
+          <span class="v">${esc(s[key] || '')}${suffix || ''}${
+            pinned ? ` <span class="link" data-unpin="${key}" style="margin-left:8px">вернуть</span>` : ''}</span>
+        </div>`;
+    };
 
     /* Тумблер: значение хранится строкой 'on' / 'off', как и остальные
        настройки, — отдельного типа в app_settings нет. */
@@ -8404,12 +8505,17 @@ SCREENS.V5 = {
       $('#o5-rows').innerHTML = [
         numRow('reminder_days_default', 'Напоминать за', '', ' дн.'),
         numRow('draft_due_days', 'Вариант за', 'до даты доставки', ' дн.'),
-        numRow('pay_deadline_time', 'Дедлайн оплаты', 'накануне'),
-        numRow('pay_hold_until', 'Держим букет до', 'утром в день доставки'),
+        calcRow('pay_deadline_time', 'Дедлайн оплаты'),
+        calcRow('pay_hold_until', 'Держим букет до'),
         numRow('redo_limit', 'Переделок варианта'),
         numRow('rush_fee', 'Доплата за срочность', '', ' ₽'),
         numRow('rush_window_hours', 'Срочный привозим за', 'это обещание видит клиент', ' ч.'),
-        numRow('rush_available_until', 'Срочный принимаем до'),
+        calcRow('rush_available_until', 'Срочный принимаем до'),
+        // Сколько нам нужно от «клиент оформил» до «букет вручён».
+        // По этому числу закрываются окна, в которые мы уже не успеваем:
+        // поставите мало — пообещаете невыполнимое, много — потеряете
+        // вечерние заказы, которые на самом деле собрали бы.
+        numRow('today_lead_minutes', 'На заказ сегодня нужно', 'от оформления до вручения', ' мин.'),
         // Сколько срочных берём в обычный день. Их непредсказуемость и
         // ломает график: обещание в три часа держится, только пока их мало.
         numRow('rush_daily_limit', 'Срочных в день', 'больше не примем', ' шт.'),
@@ -8418,8 +8524,8 @@ SCREENS.V5 = {
         numRow('rush_wait_minutes', 'Ждём ответа на фото', 'потом напомним', ' мин.'),
         numRow('rush_final_minutes', 'После напоминания ждём', 'потом заказ в черновик', ' мин.'),
         // Тихие часы: ночью не пишем никому — ни клиенту, ни команде.
-        numRow('quiet_from', 'Не пишем с', 'ночью бот молчит', ':00'),
-        numRow('quiet_to', 'Пишем снова с', '', ':00'),
+        calcRow('quiet_from', 'Не пишем с', ':00'),
+        calcRow('quiet_to', 'Пишем снова с', ':00'),
         // Куда ведёт «написать нам» на всех экранах.
         numRow('support_username', 'Поддержка', 'telegram без собаки'),
         numRow('subscription_warn_days', 'Письмо перед списанием за', 'по подписке', ' дн.'),
@@ -8452,6 +8558,17 @@ SCREENS.V5 = {
       $$('#o5-stop [data-toggle]').forEach(el => el.onclick = () => {
         const k = el.dataset.toggle;
         s[k] = String(s[k] || 'off') === 'on' ? 'off' : 'on';
+        paint();
+      });
+
+      // «Вернуть» снимает закрепление: число снова начнёт считаться
+      // из часов работы при следующем сохранении.
+      $$('#o5-rows [data-unpin]').forEach(b => b.onclick = e => {
+        e.stopPropagation();
+        unpin.add(b.dataset.unpin);
+        const d = (res.derived || []).find(x => x.key === b.dataset.unpin);
+        if (d) s[d.key] = d.value;
+        res.pinned = (res.pinned || []).filter(k => k !== b.dataset.unpin);
         paint();
       });
 
@@ -8512,13 +8629,20 @@ SCREENS.V5 = {
 
     $('#o5-save').onclick = async () => {
       s.delivery_windows = windows.join(',');
-      const r = await team('saveRules', { settings: s, prices });
+      const r = await team('saveRules', { settings: s, prices, unpin: [...unpin] });
       if (!r.ok) {
         $('#o5-err').textContent = errText(r);
         $('#o5-err').classList.remove('hidden'); return;
       }
+      /* Сервер пересчитал то, что зависит от часов работы. Говорим,
+         что именно поехало: молча сдвинуть окна доставки — значит
+         однажды услышать «я такого не ставил». */
+      const app = r.applied || [];
+      app.forEach(a => { s[a.key] = a.value; });
       S.settings = numericSettings({ ...S.settings, ...s, prices });
-      toast('Правила сохранены');
+      toast(app.length
+        ? `Сохранено · пересчитано: ${app.map(a => WHAT_CHANGED[a.key] || a.key).join(', ')}`
+        : 'Правила сохранены');
       back();
     };
   },
