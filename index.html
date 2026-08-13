@@ -1534,176 +1534,166 @@ textarea.field.ta{min-height:60px}
 </div>
 
 
-<!-- ===== 47-M ===== -->
-<!-- M · РЕЖИМ КОМПАНИИ
-     Не второе приложение, а другой способ оформить и оплатить.
-     Меняются четыре вещи: реквизиты вместо согласия, список получательниц
-     вместо одного близкого, несколько адресов и слотов в одном заказе,
-     счёт и закрывающие вместо карты. Всё остальное работает как есть. -->
+<!-- ===== 47-G ===== -->
+<!-- G · КОМПАНИИ
 
-<!-- M1 · переключатель в профиле -->
-<div class="screen" id="s-M1">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Профиль</div></div>
+     Компания заводит заявку сама и сразу получает кабинет — но
+     в состоянии «Заявка»: экраны видны, цен нет, кнопок нет.
+     Владелец говорит голосом, называет цену и одобряет.
+
+     Короткая форма остаётся короткой: компания рассказывает только
+     то, что знает про себя. Цена и условия рождаются в разговоре. -->
+
+<!-- G1 · витрина. Её отправляют эйчару ссылкой, и он читает без вас -->
+<div class="screen" id="s-G1">
+  <div class="bar"><button class="back" type="button">←</button><div class="title">Для компаний</div></div>
+  <div class="body">
+    <div class="h1">Цветы<br>для компании</div>
+    <p class="p">Не каталог с корзиной. Мы держим у себя даты и списки, помним про них сами и привозим вовремя — вам остаётся подтвердить раз в месяц.</p>
+
+    <div class="lbl" style="margin-top:4px">ТРИ СПОСОБА РАБОТАТЬ</div>
+
+    <div class="card">
+      <div style="font:700 13px/1.25 var(--sans)">Даты сотрудников</div>
+      <div class="sub" style="margin-top:6px">Отдаёте список имён и дат один раз. Дальше мы считаем сами: 25-го присылаем, кто в следующем месяце и на какую сумму. Всё как обычно — отвечать не нужно.</div>
+      <div class="sub" style="margin-top:7px;color:var(--green)">Букеты привозим одной точкой вам, вручаете сами</div>
+    </div>
+
+    <div class="card">
+      <div style="font:700 13px/1.25 var(--sans)">Обслуживание пространства</div>
+      <div class="sub" style="margin-top:6px">Салон, кофейня, шоурум. Композиции по расписанию — день недели и окно выбираете вы, меняете когда угодно. Вазы наши, старые забираем и моем у себя.</div>
+      <div class="sub" style="margin-top:7px;color:var(--green)">Закрыты на праздники — жмёте «пропустить», счёт уменьшается</div>
+    </div>
+
+    <div class="card">
+      <div style="font:700 13px/1.25 var(--sans)">Подарки клиентам и партнёрам</div>
+      <div class="sub" style="margin-top:6px">Покупаете пакет букетов, гостям уходят именные ссылки. Каждый сам выбирает день и настроение — вы видите, кто воспользовался, а кто ещё нет.</div>
+      <div class="sub" style="margin-top:7px;color:var(--green)">Цен гость не видит. Открытка от вашего бренда</div>
+    </div>
+
+    <div class="note">Режимов может быть несколько. Салон возит цветы себе и дарит клиентам — получает оба раздела и один счёт.</div>
+
+    <div class="lbl" style="margin-top:4px">КАК НАЧИНАЕМ</div>
+    <div class="card" style="padding:14px 15px">
+      <div class="sub">1 · Вы оставляете заявку — минута, без ИНН и договора</div>
+      <div class="sub" style="margin-top:8px">2 · Мы отвечаем в течение часа в рабочее время и договариваемся голосом</div>
+      <div class="sub" style="margin-top:8px">3 · Вы подтверждаете условия одной кнопкой, и всё начинает работать</div>
+    </div>
+
+    <div class="foot pad">
+      <button class="btn" id="g1-start">Оставить заявку</button>
+      <div class="hint">Счёт и закрывающие — как положено. ИП, без НДС</div>
+    </div>
+  </div>
+</div>
+
+<!-- G2 · заявка. Б1 из «механики»: разговор, а не оформление -->
+<div class="screen" id="s-G2">
+  <div class="bar"><button class="back" type="button">←</button><div class="title">Заявка</div></div>
+  <div class="body">
+    <div class="h1">Расскажите<br>о компании</div>
+    <p class="p">Ответим в течение часа в рабочее время и соберём под ваш бюджет.</p>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Компания</div>
+      <input class="field" id="g2-name" placeholder="Контур" autocomplete="organization">
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Что вам нужно · можно несколько</div>
+      <div class="chips" id="g2-modes"></div>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px" id="g2-scale-lbl">Масштаб</div>
+      <input class="field" id="g2-scale" placeholder="40 сотрудников" autocomplete="off">
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <div class="grow">
+        <div class="lbl" style="margin-bottom:7px">Когда</div>
+        <input class="field" id="g2-date" placeholder="8 марта" autocomplete="off">
+      </div>
+      <div class="grow">
+        <div class="lbl" style="margin-bottom:7px">Бюджет на букет</div>
+        <input class="field" id="g2-budget" placeholder="3 000 ₽" inputmode="numeric" autocomplete="off">
+      </div>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Что нужно, куда везти, нужен ли счёт</div>
+      <textarea class="field" id="g2-note" placeholder="Два офиса на Гагарина и Ленина. Нужен счёт на юрлицо и закрывающие."></textarea>
+    </div>
+
+    <!-- Без этого блока заявка приходит, а позвонить некому: имя
+         в Телеграме бывает «Вова 🌸», а логин закрыт настройками.
+         Имя и телефон подставляем из профиля, если уже знаем. -->
+    <div>
+      <!-- Заголовка секции и ярлыка поля хватило бы по отдельности,
+           но рядом они читаются как одна двухстрочная надпись.
+           Имя понятно по подсказке в самом поле. -->
+      <div class="lbl" style="margin-bottom:7px">С кем связаться</div>
+      <input class="field" id="g2-cname" placeholder="Ольга Петрова" autocomplete="name">
+    </div>
+    <!-- Два поля в ряд: ярлыки короткие, иначе «должность · если хотите»
+         переносится на вторую строку и сбивает выравнивание полей. -->
+    <div style="display:flex;gap:8px">
+      <div class="grow">
+        <div class="lbl" style="margin-bottom:7px">Телефон</div>
+        <input class="field" id="g2-cphone" inputmode="tel" placeholder="+7 903 111-22-33" autocomplete="tel">
+      </div>
+      <div class="grow">
+        <div class="lbl" style="margin-bottom:7px">Должность</div>
+        <input class="field" id="g2-cpost" placeholder="HR, необязательно" autocomplete="organization-title">
+      </div>
+    </div>
+
+    <div class="note green">Ни ИНН, ни договора здесь нет — это разговор, а не оформление</div>
+
+    <div class="foot pad">
+      <div class="err-text center hidden" id="g2-err"></div>
+      <button class="btn" id="g2-send">Отправить заявку</button>
+    </div>
+  </div>
+</div>
+
+<!-- G3 · главная компании. До одобрения — то же самое, но с полосой
+     сверху и без кнопок: человеку есть что показать начальнику
+     в тот же день, и это продаёт лучше любого рассказа -->
+<div class="screen" id="s-G3">
+  <div class="bar">
+    <button class="back" type="button">←</button>
+    <div class="title">Кабинет</div>
+  </div>
   <div class="body tight">
-    <div class="h1">Заказываете<br>для компании?</div>
-
-    <button class="card lg" id="m1-toggle" style="border:0;width:100%;text-align:left;cursor:pointer;padding:16px">
+    <button class="card" id="g3-switch" style="border:0;width:100%;text-align:left;cursor:pointer;padding:11px 14px">
       <div class="between">
-        <span>
-          <span style="display:block;font:700 14px/1.25 var(--sans)">Режим компании</span>
-          <span class="sub" style="display:block;margin-top:5px">счёт вместо карты, договор, много адресов</span>
-        </span>
-        <span class="cbox" id="m1-cbox" style="flex:none"></span>
+        <span class="lbl" id="g3-switch-name">КОМПАНИЯ</span>
+        <span class="link" style="flex:none">переключить →</span>
       </div>
     </button>
 
-    <div class="card" style="padding:13px 15px">
-      <div style="font:700 13px/1.25 var(--sans)">Один счёт на всех</div>
-      <div class="sub" style="margin-top:6px">24 букета на 8 марта — одна оплата, один акт.</div>
-    </div>
-    <div class="card" style="padding:13px 15px">
-      <div style="font:700 13px/1.25 var(--sans)">Несколько офисов</div>
-      <div class="sub" style="margin-top:6px">Разные адреса и слоты внутри одного заказа.</div>
-    </div>
-    <div class="card" style="padding:13px 15px">
-      <div style="font:700 13px/1.25 var(--sans)">Закрывающие сами</div>
-      <div class="sub" style="margin-top:6px">УПД и акт приходят в бот, реестр выгружается в таблицу.</div>
+    <div class="note peach hidden" id="g3-pending">
+      <div style="font:700 13px/1.25 var(--sans)">Заявка у нас</div>
+      <div style="margin-top:6px;font-weight:500" id="g3-pending-sub"></div>
     </div>
 
-    <div class="note green">Личные заказы никуда не денутся: переключатель меняет только оформление и оплату, близкие остаются вашими</div>
+    <div class="h1" id="g3-h1">Контур</div>
+    <div class="sub" id="g3-sub" style="margin-top:-6px"></div>
 
-    <div class="foot pad">
-      <button class="btn" id="m1-next">Заполнить реквизиты</button>
+    <div class="list" id="g3-blocks"></div>
+
+    <div class="card hidden" id="g3-terms">
+      <div class="lbl">Условия</div>
+      <div style="margin-top:9px" id="g3-terms-rows"></div>
+      <button class="btn hidden" id="g3-confirm" style="height:44px;font-size:13px;margin-top:12px">Всё верно, подтверждаю</button>
     </div>
-  </div>
-</div>
 
-<!-- M2 · реквизиты и договор -->
-<div class="screen" id="s-M2">
-  <div class="bar">
-    <button class="back" type="button">←</button>
-    <div class="prog"><i class="on"></i><i></i><i></i></div>
-    <div class="sub">1/3</div>
-  </div>
-  <div class="body tight">
-    <div class="h1">Реквизиты<br>и договор</div>
-
-    <div><div class="lbl" style="margin-bottom:7px">ИНН</div>
-      <input class="field" id="m2-inn" inputmode="numeric" placeholder="7736207543" autocomplete="off"></div>
-    <div class="note green hidden" id="m2-found"></div>
-
-    <div><div class="lbl" style="margin-bottom:7px">Контактное лицо</div>
-      <input class="field" id="m2-contact" placeholder="Мария, HR" autocomplete="off"></div>
-    <div><div class="lbl" style="margin-bottom:7px">Почта для документов</div>
-      <input class="field" id="m2-email" inputmode="email" placeholder="buh@company.ru" autocomplete="off"></div>
-
-    <button class="card" id="m2-contract" style="border:0;width:100%;text-align:left;cursor:pointer">
-      <div class="between">
-        <span><span style="display:block;font:600 13px/1.2 var(--sans)">Договор на год</span>
-        <span class="sub" style="display:block;margin-top:4px">рамочный, заказы — по счетам</span></span>
-        <span class="link">открыть</span>
-      </div>
+    <button class="card" id="g3-support" style="border:0;width:100%;text-align:left;cursor:pointer">
+      <div class="between"><span style="font:600 13px/1.2 var(--sans)">Написать нам</span><span class="link">открыть →</span></div>
     </button>
 
-    <div class="hint" style="text-align:left">Подписать можно через ЭДО или скан на почту. Без подписи заказ оформить всё равно можно — по счёту-оферте</div>
-
-    <div class="foot pad">
-      <div class="err-text center hidden" id="m2-err"></div>
-      <button class="btn" id="m2-next" disabled>Далее · получатели</button>
-    </div>
-  </div>
-</div>
-
-<!-- M3 · список получательниц -->
-<div class="screen" id="s-M3">
-  <div class="bar">
-    <button class="back" type="button">←</button>
-    <div class="prog"><i class="on"></i><i class="on"></i><i></i></div>
-    <div class="sub">2/3</div>
-  </div>
-  <div class="body tight">
-    <div class="between" style="align-items:baseline">
-      <div class="h1">Кому везём</div>
-      <span class="sub" id="m3-count"></span>
-    </div>
-
-    <button class="link hidden" id="m3-past" style="align-self:flex-start">Прошлые заказы и документы</button>
-
-    <label class="btn secondary" for="m3-file" style="cursor:pointer">Загрузить файл</label>
-    <input type="file" id="m3-file" accept=".csv,.txt,.tsv" class="hidden">
-    <div class="hint" style="text-align:left">Принимаем как есть: имя, адрес, дата, размер — по одной строке на человека</div>
-
-    <div class="list" id="m3-list"></div>
-
-    <div class="foot pad">
-      <div class="err-text center hidden" id="m3-err"></div>
-      <button class="btn" id="m3-next" disabled>Далее</button>
-      <button class="btn ghost" id="m3-add">Добавить вручную</button>
-    </div>
-  </div>
-</div>
-
-<!-- M4 · когда и куда, счёт -->
-<div class="screen" id="s-M4">
-  <div class="bar">
-    <button class="back" type="button">←</button>
-    <div class="prog"><i class="on"></i><i class="on"></i><i class="on"></i></div>
-    <div class="sub">3/3</div>
-  </div>
-  <div class="body tight">
-    <div class="sub" id="m4-sub"></div>
-    <div class="h1">Когда и куда</div>
-
-    <div class="stack" style="gap:9px" id="m4-groups"></div>
-
-    <div class="card" id="m4-sum"></div>
-
-    <div class="foot pad">
-      <div class="err-text center hidden" id="m4-err"></div>
-      <button class="btn" id="m4-next" disabled>Выставить счёт</button>
-    </div>
-  </div>
-</div>
-
-<!-- M5 · счёт -->
-<div class="screen" id="s-M5">
-  <div class="bar"><button class="back" type="button">←</button><div class="title" id="m5-title">Счёт</div></div>
-  <div class="body tight">
-    <div class="sub" id="m5-sub"></div>
-    <div class="h1">Счёт готов</div>
-
-    <div class="card" id="m5-rows"></div>
-
-    <div class="stack" style="gap:8px">
-      <button class="btn secondary" id="m5-pdf">Скачать PDF</button>
-      <button class="btn secondary" id="m5-send">Отправить на почту</button>
-    </div>
-
-    <div class="note green" id="m5-note"></div>
-
-    <div class="foot pad">
-      <button class="btn ghost" id="m5-card">Оплатить картой вместо счёта</button>
-    </div>
-  </div>
-</div>
-
-<!-- M6 · закрывающие и реестр вручений -->
-<div class="screen" id="s-M6">
-  <div class="bar"><button class="back" type="button">←</button><div class="title">Документы</div></div>
-  <div class="body tight">
-    <div class="sub" id="m6-sub"></div>
-
-    <div><div class="lbl" style="margin:8px 0">Закрывающие</div>
-      <div class="list" id="m6-docs"></div></div>
-
-    <div class="card" id="m6-stats"></div>
-
-    <div class="note green">Реестр вручений закрывает главный вопрос бухгалтерии: подтверждение, что букеты дошли до людей</div>
-
-    <div class="foot pad">
-      <button class="btn" id="m6-repeat">Повторить заказ</button>
-      <button class="btn secondary" id="m6-export">Выгрузить всё в таблицу</button>
-    </div>
+    <div class="hint" style="margin-top:auto" id="g3-foot"></div>
   </div>
 </div>
 
@@ -2525,6 +2515,12 @@ function errText(res) {
     slot_full: 'Это окно занято — выберите другое',
     save_failed: 'Не смогли сохранить — попробуйте ещё раз',
     photo_too_big: 'Фото слишком тяжёлое — снимите ещё раз, оно ужмётся',
+    // Заявка от компании
+    no_company: 'Как называется компания?',
+    no_modes: 'Отметьте, что вам нужно',
+    too_soon: 'Заявку уже приняли — посмотрим и ответим',
+    no_contact: 'Как к вам обращаться?',
+    no_phone: 'Нужен телефон — по нему и позвоним',
   };
   if (typeof res.error === 'string' && map[res.error]) return map[res.error];
   /* Отказ Телеграма показываем его же словами. «Что-то пошло не так»
@@ -3692,6 +3688,11 @@ SCREENS.N5 = {
       row('Повод', d.occasionHint, 'N3'),
       row('Когда', whenText, 'N4'),
       row('Куда', d.address || (d.addressByHer ? 'пришлёт сама' : ''), 'N4'),
+      /* То, что человек только что ввёл, он должен здесь и увидеть.
+         Иначе непонятно, дошло ли: домофон вводили, а на проверке
+         его нет — значит потеряли. */
+      row('Курьеру', (d.addressParts && d.addressParts.address_note) || '', 'N4'),
+      row('Телефон', (d.addressParts && d.addressParts.phone) || d.phone || '', 'N4'),
       rushFee ? row('Срочность', '+ ' + money(rushFee)) : '',
       farFee ? row('Доставка за МКАД', '+ ' + money(farFee)) : '',
     ].filter(Boolean).join('');
@@ -5311,6 +5312,19 @@ function renderWindows(host, selected, onPick, dateIso) {
    зависит от того, кому везём: своей карточке, её карточке или «сохраним её
    вместе с адресом», если человека в списке ещё нет.
 */
+/* Адрес одной строкой. Тот же порядок, что и на сервере: человек
+   должен видеть ровно то, что увидит курьер. */
+function addressText(p) {
+  if (!p) return '';
+  return [
+    p.street,
+    p.apartment && 'кв. ' + p.apartment,
+    p.entrance && 'подъезд ' + p.entrance,
+    p.floor && 'этаж ' + p.floor,
+    p.intercom && 'домофон ' + p.intercom,
+  ].filter(Boolean).join(', ');
+}
+
 function askAddress(onDone, preset, opts) {
   const o = opts || {};
   const v = k => esc((preset && preset[k]) || '');
@@ -5340,6 +5354,10 @@ function askAddress(onDone, preset, opts) {
     <textarea class="field ta" id="ad-note" rows="2"
       placeholder="Что курьеру знать: код на калитке, вход со двора">${v('address_note')}</textarea>
 
+    <input class="field" id="ad-phone" inputmode="tel"
+      placeholder="${esc(o.mode === 'self' ? 'Ваш телефон' : 'Её телефон — курьеру у двери')}"
+      value="${v('phone')}">
+
     ${save ? `
     <button class="card" id="ad-save" style="border:0;width:100%;text-align:left;cursor:pointer;padding:12px 14px">
       <div style="display:flex;gap:11px;align-items:flex-start">
@@ -5353,6 +5371,8 @@ function askAddress(onDone, preset, opts) {
 
     <div class="err-text hidden" id="ad-err"></div>
     <button class="btn" id="ad-ok">Сохранить</button>`);
+
+  bindPhone($('#ad-phone'));
 
   let keep = false;
   if (save) {
@@ -5375,10 +5395,14 @@ function askAddress(onDone, preset, opts) {
       floor: $('#ad-fl').value.trim(),
       intercom: $('#ad-int').value.trim(),
       address_note: $('#ad-note').value.trim(),
+      phone: $('#ad-phone').value.trim(),
       save: keep,                       // что делать с адресом после заказа
       saveMode: keep && save ? save.key : null,
     };
-    const text = [parts.street, parts.apartment && 'кв. ' + parts.apartment].filter(Boolean).join(', ');
+    /* Строка собирается из всех полей, а не из двух. Раньше подъезд,
+       этаж и домофон в неё не попадали — и курьер, который читает
+       именно её, звонил узнавать, куда идти. */
+    const text = addressText(parts);
     closeSheet();
     onDone(text, parts);
   };
@@ -6284,459 +6308,291 @@ SCREENS.V6b = {
 };
 
 
-/* ======== 47-M.js ======== */
+/* ======== 47-G.js ======== */
 /* ============================================================
-   M · РЕЖИМ КОМПАНИИ
+   G · КОМПАНИИ
 
-   Не второе приложение, а режим оформления. Меняются четыре вещи:
-   реквизиты вместо согласия, список получательниц вместо одного
-   близкого, несколько адресов и слотов внутри одного заказа,
-   счёт и закрывающие вместо карты.
+   Порядок сознательно разрезан пополам. Компания рассказывает то,
+   что знает про себя: название, что ей нужно, сколько людей, когда
+   и какой бюджет. Это минута. Цену и условия называет владелец —
+   после разговора, у себя в панели.
 
-   Фото до отправки, слоты, трекер и боты работают как есть.
-   Личные близкие и заказы остаются рядом и не смешиваются.
+   «Бизнес» отговаривает от самообслуживания, но отговаривает
+   от длинной формы: «форма, которая всё это учитывает, окажется
+   длиннее договора, и её никто не заполнит». Разрезанная пополам
+   форма короткая, а компания получает кабинет в тот же день —
+   и может показать его начальнику, пока владелец думает.
    ============================================================ */
 
-function companyDraft() {
-  if (!S.draft.company) S.draft.company = { people: [], groups: {} };
-  return S.draft.company;
-}
+/* Режимы. Порядок — от самого частого к самому редкому: список дат
+   спрашивают чаще всего, пространство реже всех. */
+const BIZ_MODES = [
+  { id: 'hr',    label: 'Даты сотрудников', scale: 'Сколько сотрудников',
+    hint: 'Список храним мы, 25-го присылаем сверку' },
+  { id: 'pool',  label: 'Подарки клиентам', scale: 'Сколько букетов',
+    hint: 'Именные ссылки гостям, цен они не видят' },
+  { id: 'space', label: 'Обслуживание офиса', scale: 'Сколько точек',
+    hint: 'Расписание выездов, вазы наши' },
+  { id: 'once',  label: 'Разовый заказ', scale: 'Сколько букетов',
+    hint: 'Без обязательств, по счёту' },
+];
 
-/* ---------- M1 · переключатель ---------- */
+const MODE_WORD = Object.fromEntries(BIZ_MODES.map(m => [m.id, m.label]));
 
-SCREENS.M1 = {
+/* ---------- G1 · витрина ---------- */
+
+SCREENS.G1 = {
   async enter() {
-    const res = await api('company');
-    const has = res.ok && res.company;
-    $('#m1-cbox').classList.toggle('on', !!has);
-    $('#m1-next').textContent = has ? 'Открыть заказы компании' : 'Заполнить реквизиты';
+    $('#g1-start').onclick = () => go('G2');
 
-    $('#m1-toggle').onclick = () => $('#m1-next').click();
-    $('#m1-next').onclick = () => {
-      if (has) { S.screenParams.company = res.company; go('M3'); }
-      else go('M2');
-    };
+    /* Кто уже оставил заявку, витрину второй раз читать не должен:
+       и кнопка в /start, и строка в профиле ведут сюда, а человеку
+       нужен его кабинет, а не рассказ о том, что он уже выбрал. */
+    const res = await api('bizContexts');
+    const mine = (res.ok && res.contexts) || [];
+    if (mine.length) {
+      S.companyId = mine[0].id;
+      go('G3', { id: mine[0].id }, { replace: true });
+    }
   },
 };
 
-/* ---------- M2 · реквизиты по ИНН ---------- */
+/* ---------- G2 · заявка ---------- */
 
-SCREENS.M2 = {
+SCREENS.G2 = {
   async enter() {
-    const c = companyDraft();
-    const res = await api('company');
-    if (res.ok && res.company) Object.assign(c, res.company);
+    const chosen = new Set();
 
-    const inn = $('#m2-inn'), contact = $('#m2-contact'), email = $('#m2-email');
-    inn.value = c.inn || '';
-    contact.value = c.contact_name || '';
-    email.value = c.contact_email || '';
+    const paintModes = () => {
+      $('#g2-modes').innerHTML = BIZ_MODES.map(m =>
+        `<button class="chip ${chosen.has(m.id) ? 'on' : ''}" data-m="${m.id}">${esc(m.label)}</button>`
+      ).join('');
+      $$('#g2-modes [data-m]').forEach(b => b.onclick = () => {
+        const id = b.dataset.m;
+        chosen.has(id) ? chosen.delete(id) : chosen.add(id);
+        paintModes();
+      });
 
-    const paint = () => {
-      const okInn = String(inn.value).replace(/\D/g, '').length >= 10;
-      $('#m2-found').classList.toggle('hidden', !c.name);
-      if (c.name) {
-        $('#m2-found').textContent =
-          `Нашли: ${c.name}${c.kpp ? ' · КПП ' + c.kpp : ''}${c.legal_address ? ' · ' + c.legal_address : ''}. Остальное подставим сами.`;
+      /* Подпись у «масштаба» идёт за выбором: у эйчара это сотрудники,
+         у пространства точки, у пула букеты. Спрашивать «масштаб»
+         вообще — значит получить пустое поле. */
+      const first = BIZ_MODES.find(m => chosen.has(m.id));
+      $('#g2-scale-lbl').textContent = first ? first.scale : 'Масштаб';
+      $('#g2-scale').placeholder = first
+        ? ({ hr: '40 сотрудников', pool: '50 букетов', space: '2 точки', once: '12 букетов' })[first.id]
+        : '40 сотрудников';
+    };
+    paintModes();
+
+    $('#g2-name').value = '';
+    $('#g2-scale').value = '';
+    $('#g2-date').value = '';
+    $('#g2-budget').value = '';
+    $('#g2-note').value = '';
+    $('#g2-cpost').value = '';
+    $('#g2-err').classList.add('hidden');
+
+    /* Имя и телефон подставляем из профиля: человек мог заказывать
+       у нас букеты и уже всё это оставлял. Заполненные поля читаются
+       как «мы про вас помним», а не как ещё одна анкета. */
+    const pr = S.profile || {};
+    $('#g2-cname').value = pr.name || (TG && TG.initDataUnsafe
+      && TG.initDataUnsafe.user
+      && [TG.initDataUnsafe.user.first_name, TG.initDataUnsafe.user.last_name]
+         .filter(Boolean).join(' ')) || '';
+    $('#g2-cphone').value = pr.phone || '';
+    bindPhone($('#g2-cphone'));
+
+    $('#g2-send').onclick = async () => {
+      const name = $('#g2-name').value.trim();
+      const err = (t) => {
+        $('#g2-err').textContent = t;
+        $('#g2-err').classList.remove('hidden');
+      };
+      // Обязательны четыре: название, что нужно, имя и телефон.
+      // Остальное выясним голосом — лишняя обязательность здесь
+      // стоит нам заявки.
+      const cname = $('#g2-cname').value.trim();
+      const cphone = $('#g2-cphone').value.trim();
+      if (!name) return err('Как называется компания?');
+      if (!chosen.size) return err('Отметьте, что вам нужно');
+      /* Телефон обязателен, и это единственное поле, где мы настойчивы.
+         Заявка без связи — не заявка: логин в Телеграме бывает скрыт,
+         и тогда владелец видит запрос, на который нечем ответить. */
+      if (!cname) return err('Как к вам обращаться?');
+      if (!phoneValid(cphone) || !phoneDigits(cphone).length) {
+        return err('Нужен телефон — по нему и позвоним');
       }
-      $('#m2-next').disabled = !(okInn && contact.value.trim() && email.value.trim());
-    };
 
-    // ИНН ищем на сервере, как только он дописан до нужной длины.
-    let lookupTimer = null;
-    inn.oninput = () => {
-      c.inn = String(inn.value).replace(/\D/g, '').slice(0, 12);
-      inn.value = c.inn;
-      c.name = ''; paint();
-      clearTimeout(lookupTimer);
-      if (c.inn.length < 10) return;
-      lookupTimer = setTimeout(async () => {
-        const r = await api('companyByInn', { inn: c.inn });
-        if (r.ok && r.company) Object.assign(c, r.company);
-        saveDraft(); paint();
-      }, 400);
-    };
-    contact.oninput = () => { c.contact_name = contact.value; saveDraft(); paint(); };
-    email.oninput = () => { c.contact_email = email.value; saveDraft(); paint(); };
-    paint();
+      const btn = $('#g2-send');
+      btn.disabled = true; btn.textContent = 'Отправляем…';
+      $('#g2-err').classList.add('hidden');
 
-    $('#m2-contract').onclick = () => openDoc('offer');
-
-    $('#m2-next').onclick = async () => {
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value.trim())) {
-        $('#m2-err').textContent = 'Проверьте почту — документы придут туда';
-        $('#m2-err').classList.remove('hidden'); return;
-      }
-      $('#m2-err').classList.add('hidden');
-      const r = await api('saveCompany', {
-        inn: c.inn, name: c.name || ('ИНН ' + c.inn), kpp: c.kpp || '',
-        legal_address: c.legal_address || '',
-        contact_name: c.contact_name, contact_email: c.contact_email,
+      const r = await api('bizRequest', {
+        company: name,
+        modes: [...chosen],
+        scale: $('#g2-scale').value.trim(),
+        dateText: $('#g2-date').value.trim(),
+        budget: $('#g2-budget').value.trim(),
+        note: $('#g2-note').value.trim(),
+        contactName: cname,
+        contactPhone: cphone,
+        contactPost: $('#g2-cpost').value.trim(),
       });
-      if (!r.ok) { $('#m2-err').textContent = errText(r); $('#m2-err').classList.remove('hidden'); return; }
-      c.id = r.companyId;
-      saveDraft();
-      go('M3');
+
+      btn.disabled = false; btn.textContent = 'Отправить заявку';
+      if (!r.ok) { err(errText(r)); return; }
+
+      S.companyId = r.companyId;
+      go('G3', { id: r.companyId }, { replace: true });
     };
   },
 };
 
-/* ---------- M3 · список получательниц ---------- */
+/* ---------- G3 · кабинет компании ----------
 
-/* Файл принимаем как есть: имя, адрес, дата, размер — через запятую,
-   точку с запятой или таб. Строки без адреса не выбрасываем, а помечаем. */
-function parsePeople(text) {
-  return String(text).split(/\r?\n/).map(line => line.trim()).filter(Boolean)
-    .map(line => {
-      const c = line.split(/[;\t]|,(?![^(]*\))/).map(x => x.trim());
-      const size = (c.find(x => /^[SML]$/i.test(x)) || 'M').toUpperCase();
-      const date = c.find(x => /\d{1,2}[.\-/ ]\d{1,2}/.test(x)) || '';
-      const rest = c.filter(x => x !== size && x !== date);
-      return {
-        name: rest[0] || '',
-        address: rest[1] || '',
-        note: rest.slice(2).join(', '),
-        birth: date, size,
-      };
-    })
-    .filter(p => p.name && !/^(имя|фио|name)$/i.test(p.name));   // шапку таблицы пропускаем
-}
+   До одобрения тот же экран, но с полосой сверху, без цен и без
+   кнопок. Смысл в том, чтобы человеку было что открыть и показать,
+   пока владелец думает: пустой экран «ожидайте» закрывают и забывают. */
 
-SCREENS.M3 = {
-  enter() {
-    const c = companyDraft();
-
-    const paint = () => {
-      const ok = c.people.filter(p => p.address);
-      $('#m3-count').textContent = c.people.length ? `Список · ${c.people.length}` : '';
-      $('#m3-list').innerHTML = c.people.length
-        ? c.people.map((p, i) => `
-            <div class="card" style="padding:12px 14px">
-              <div class="between">
-                <span style="display:flex;gap:10px;align-items:flex-start">
-                  <span class="cbox ${p.address ? 'on' : ''}" style="margin-top:1px"></span>
-                  <span>
-                    <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(p.name)}</span>
-                    <span class="sub" style="display:block;margin-top:4px;${p.address ? '' : 'color:var(--alarm)'}">${
-                      p.address ? esc([p.address, p.birth].filter(Boolean).join(' · ')) : 'нет адреса — уточните'}</span>
-                  </span>
-                </span>
-                <span style="display:flex;gap:8px;align-items:center;flex:none">
-                  <button class="chip on" data-size="${i}">${esc(p.size)}</button>
-                  <button class="link" data-del="${i}">убрать</button>
-                </span>
-              </div>
-            </div>`).join('')
-        : `<div class="card lg center" style="padding:22px">
-             <div class="h3">Список пуст</div>
-             <p class="p" style="text-align:center;margin-top:6px">Загрузите файл или добавьте людей вручную. Строки без адреса подсветим — заказ соберётся и без них.</p>
-           </div>`;
-
-      $$('#m3-list [data-del]').forEach(b => b.onclick = () => {
-        c.people.splice(+b.dataset.del, 1); saveDraft(); paint();
-      });
-      $$('#m3-list [data-size]').forEach(b => b.onclick = () => {
-        const p = c.people[+b.dataset.size];
-        p.size = { S: 'M', M: 'L', L: 'S' }[p.size] || 'M';
-        saveDraft(); paint();
-      });
-
-      $('#m3-next').disabled = !ok.length;
-      $('#m3-next').textContent = ok.length
-        ? `Далее · ${ok.length} ${plural(ok.length, 'получательница', 'получательницы', 'получательниц')}`
-        : 'Нужен хотя бы один адрес';
-    };
-    paint();
-
-    $('#m3-file').onchange = e => {
-      const f = e.target.files && e.target.files[0];
-      if (!f) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const rows = parsePeople(reader.result);
-        if (!rows.length) {
-          $('#m3-err').textContent = 'В файле не нашлось строк — нужны имя и адрес';
-          $('#m3-err').classList.remove('hidden'); return;
-        }
-        $('#m3-err').classList.add('hidden');
-        c.people = c.people.concat(rows);
-        saveDraft(); paint();
-      };
-      reader.readAsText(f);
-      e.target.value = '';
-    };
-
-    $('#m3-add').onclick = () => {
-      sheet(`<div class="h2">Добавить вручную</div>
-        <input class="field" id="ma-name" placeholder="Имя">
-        <input class="field" id="ma-addr" placeholder="Адрес с офисом или кабинетом">
-        <div class="chips" id="ma-size">
-          ${['S','M','L'].map(s => `<button class="chip ${s === 'M' ? 'on' : ''}" data-s="${s}">${s}</button>`).join('')}
-        </div>
-        <button class="btn" id="ma-ok">Добавить</button>`);
-      let size = 'M';
-      $$('#ma-size [data-s]').forEach(b => b.onclick = () => {
-        size = b.dataset.s;
-        $$('#ma-size [data-s]').forEach(x => x.classList.toggle('on', x.dataset.s === size));
-      });
-      $('#ma-ok').onclick = () => {
-        const name = $('#ma-name').value.trim();
-        if (name) c.people.push({ name, address: $('#ma-addr').value.trim(), size, note: '', birth: '' });
-        closeSheet(); saveDraft(); paint();
-      };
-    };
-
-    $('#m3-next').onclick = () => go('M4');
-
-    // Закрывающие лежат в прошлых заказах — без этой ссылки бухгалтерия
-    // не могла до них добраться: экран документов существовал, а входа не было.
-    api('groupList').then(res => {
-      const list = (res.groups || []).filter(g => g.status !== 'Черновик');
-      $('#m3-past').classList.toggle('hidden', !list.length);
-      $('#m3-past').textContent = `Прошлые заказы и документы · ${list.length}`;
-      $('#m3-past').onclick = () => {
-        sheet(`<div class="h2">Заказы компании</div>` + list.map(g => `
-          <button class="card" data-g="${g.id}" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px">
-            <div class="between">
-              <span>
-                <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(dateWords(g.event_date, false))} · ${g.count} ${plural(g.count, 'букет', 'букета', 'букетов')}</span>
-                <span class="sub" style="display:block;margin-top:4px">${
-                  g.status === 'Закрыт' ? 'вручены все · документы готовы'
-                  : g.status === 'В работе' ? `вручено ${g.delivered} из ${g.count}`
-                  : 'ждёт оплату'}</span>
-              </span>
-              <span class="v" style="flex:none">${money(g.total)}</span>
-            </div>
-          </button>`).join(''));
-        $$('#sheet [data-g]').forEach(b => b.onclick = () => {
-          closeSheet(); go('M6', { id: b.dataset.g });
-        });
-      };
-    });
-  },
-};
-
-/* ---------- M4 · когда и куда, один заказ на много адресов ---------- */
-
-SCREENS.M4 = {
-  async enter() {
-    const c = companyDraft();
-    const people = c.people.filter(p => p.address);
-
-    if (!c.date) { c.date = null; }
-
-    // Группируем по адресу: у каждого адреса свой слот.
-    const byAddr = {};
-    people.forEach(p => { (byAddr[p.address] = byAddr[p.address] || []).push(p); });
-    const addrs = Object.keys(byAddr);
-
-    const prices = S.settings.prices || { S: 4900, M: 7000, L: 11000 };
-    const total = people.reduce((sum, p) => sum + (prices[p.size] || 0), 0);
-
-    let slotsByDate = [];
-    const loadSlots = async () => {
-      if (!c.date || !isPeakDate(c.date)) { slotsByDate = []; return; }
-      const r = await api('slots', { date: c.date });
-      slotsByDate = (r.ok && r.slots) || [];
-    };
-
-    const paint = () => {
-      $('#m4-sub').textContent = c.date
-        ? `${dateWords(c.date, false)} · ${people.length} ${plural(people.length, 'букет', 'букета', 'букетов')} на ${addrs.length} ${plural(addrs.length, 'адрес', 'адреса', 'адресов')}`
-        : 'Выберите дату доставки';
-
-      $('#m4-groups').innerHTML = [
-        `<button class="card" id="m4-date" style="border:0;width:100%;text-align:left;cursor:pointer">
-           <div class="between">
-             <span><span class="sub" style="display:block">Дата доставки</span>
-             <span style="display:block;font:600 13px/1.2 var(--sans);margin-top:4px">${c.date ? esc(dateWords(c.date)) : 'не выбрана'}</span></span>
-             <span class="link">выбрать</span>
-           </div>
-         </button>`,
-        ...addrs.map((a, i) => {
-          const n = byAddr[a].length;
-          const chosen = (c.groups[a] || {}).slotId;
-          const slotHtml = !c.date ? ''
-            : slotsByDate.length
-              ? `<div class="chips" style="margin-top:9px">${slotsByDate.map(s => {
-                    const left = Math.max(s.capacity - s.taken, 0);
-                    return `<button class="chip ${chosen === s.id ? 'on' : ''}" data-slot="${i}:${s.id}" ${left <= 0 && chosen !== s.id ? 'disabled style="opacity:.4"' : ''}>${esc(s.time_from)}–${esc(s.time_to)}</button>`;
-                  }).join('')}</div>`
-              : `<div class="chips" style="margin-top:9px">${windowsList().map(w =>
-                    `<button class="chip ${(c.groups[a] || {}).window === w ? 'on' : ''}" data-win="${i}:${esc(w)}">${esc(w)}</button>`).join('')}</div>`;
-          return `
-            <div class="card">
-              <div class="between">
-                <span style="font:600 13px/1.2 var(--sans)">${esc(a)}</span>
-                <span class="sub" style="flex:none">${n} ${plural(n, 'букет', 'букета', 'букетов')}</span>
-              </div>
-              ${slotHtml}
-              <input class="field" data-note="${i}" placeholder="Кто встретит, куда занести" value="${esc((c.groups[a] || {}).note || '')}" style="margin-top:9px;height:40px">
-            </div>`;
-        }),
-      ].join('');
-
-      $('#m4-date').onclick = () => pickDate({
-        value: c.date, title: 'Дата доставки', min: iso(new Date()), back: 'M4',
-        onPick(v) { S.draft.company.date = v; saveDraft(); },
-      });
-
-      $$('#m4-groups [data-slot]').forEach(b => b.onclick = () => {
-        if (b.disabled) return;
-        const [i, id] = b.dataset.slot.split(':');
-        const a = addrs[+i];
-        c.groups[a] = { ...(c.groups[a] || {}), slotId: +id };
-        saveDraft(); paint();
-      });
-      $$('#m4-groups [data-win]').forEach(b => b.onclick = () => {
-        const i = b.dataset.win.split(':')[0];
-        const w = b.dataset.win.slice(String(i).length + 1);
-        const a = addrs[+i];
-        c.groups[a] = { ...(c.groups[a] || {}), window: w };
-        saveDraft(); paint();
-      });
-      $$('#m4-groups [data-note]').forEach(el => el.oninput = () => {
-        const a = addrs[+el.dataset.note];
-        c.groups[a] = { ...(c.groups[a] || {}), note: el.value };
-        saveDraft();
-      });
-
-      const vat = String(S.settings.vat_mode || 'none') === 'none';
-      $('#m4-sum').innerHTML = [
-        `<div class="row"><span class="k">${people.length} × букет</span><span class="v">${money(total)}</span></div>`,
-        `<div class="row"><span class="k">Доставка</span><span class="v" style="color:var(--green)">в цене</span></div>`,
-        `<div class="row"><span class="k">Итого${vat ? ', НДС не облагается' : ' с НДС'}</span><span class="v" style="font-size:16px">${money(total)}</span></div>`,
-      ].join('');
-
-      const timed = addrs.every(a => (c.groups[a] || {}).slotId || (c.groups[a] || {}).window);
-      $('#m4-next').disabled = !(c.date && timed);
-    };
-
-    await loadSlots();
-    paint();
-
-    $('#m4-next').onclick = async () => {
-      const btn = $('#m4-next'); btn.disabled = true;
-      const r = await api('createGroupOrder', {
-        date: c.date,
-        people: people.map(p => ({
-          ...p,
-          slotId: (c.groups[p.address] || {}).slotId || null,
-          window: (c.groups[p.address] || {}).window || null,
-          note: [(c.groups[p.address] || {}).note, p.note].filter(Boolean).join(' · '),
-        })),
-      });
-      btn.disabled = false;
-      if (!r.ok) { $('#m4-err').textContent = errText(r); $('#m4-err').classList.remove('hidden'); return; }
-      delete S.draft.company; saveDraft();
-      go('M5', { id: r.invoiceId }, { replace: true });
-    };
-  },
-};
-
-/* ---------- M5 · счёт ---------- */
-
-SCREENS.M5 = {
+SCREENS.G3 = {
+  back: false,
+  tab: 'home',
   async enter(p) {
-    const res = await api('invoice', { id: p.id });
-    if (!res.ok) { toast(errText(res)); back(); return; }
-    const inv = res.invoice;
+    const res = await api('bizCard', { companyId: p.id || S.companyId });
+    /* Компании нет — человек попал сюда по старой ссылке или ещё
+       не оставлял заявку. Это не поломка: показываем витрину. */
+    if (!res.ok || !res.company) { go('G1', {}, { replace: true }); return; }
 
-    $('#m5-title').textContent = 'Счёт №' + inv.number;
-    $('#m5-sub').textContent = inv.status === 'Оплачен'
-      ? `Оплачен ${dateWords(inv.paid_at, false)}`
-      : `Ждём оплату · до ${dateWords(inv.due_date, false)}`;
+    const c = res.company;
+    S.companyId = c.id;
+    const pending = c.status === 'Заявка';
 
-    const vat = String(S.settings.vat_mode || 'none') === 'none';
-    $('#m5-rows').innerHTML = [
-      `<div class="row"><span class="k">Плательщик</span><span class="v">${esc(inv.company_name || '')}</span></div>`,
-      `<div class="row"><span class="k">Заказ</span><span class="v">${inv.count} ${plural(inv.count, 'букет', 'букета', 'букетов')} · ${esc(dateWords(inv.event_date, false))}</span></div>`,
-      `<div class="row"><span class="k">Оплатить до</span><span class="v">${esc(dateWords(inv.due_date, false))}</span></div>`,
-      `<div class="row"><span class="k">К оплате${vat ? ', НДС не облагается' : ''}</span><span class="v" style="font-size:16px">${money(inv.amount)}</span></div>`,
-    ].join('');
+    $('#g3-h1').textContent = c.name;
+    $('#g3-switch-name').textContent = c.name.toUpperCase();
+    $('#g3-switch').onclick = () => switchContext();
 
-    const remind = S.settings.invoice_remind_days || 3;
-    $('#m5-note').textContent =
-      `Слоты держим до ${dateWords(inv.due_date, false)}. Если оплата не пришла — за ${remind} ` +
-      `${plural(remind, 'рабочий день', 'рабочих дня', 'рабочих дней')} бот напишет контактному лицу и владельцу, и только потом слоты уходят другим.`;
+    // Вкладки внизу зависят от режимов компании — они нужны renderTabs.
+    S.companyModes = c.modes || [];
+    renderTabs();
 
-    $('#m5-pdf').onclick = async () => {
-      const r = await api('invoicePdf', { id: inv.id });
-      if (!r.ok) { toast(errText(r)); return; }
-      if (r.url) { TG && TG.openLink ? TG.openLink(r.url) : window.open(r.url, '_blank'); }
-      else toast('Счёт отправлен в бот');
+    $('#g3-pending').classList.toggle('hidden', !pending);
+    if (pending) {
+      $('#g3-pending-sub').textContent = res.answerBy
+        ? `Посмотрим и ответим до ${res.answerBy}. Пока можно осмотреться — здесь будет всё то же самое, только с ценами и кнопками.`
+        : 'Посмотрим и ответим в течение часа в рабочее время. Пока можно осмотреться.';
+    }
+
+    $('#g3-sub').textContent = (c.modes || []).map(m => MODE_WORD[m] || m).join(' · ');
+
+    /* Блоки под режимы. Пока заявка на рассмотрении, они рассказывают,
+       что здесь появится, — теми же словами, что и в самом режиме. */
+    const BLOCK = {
+      hr: {
+        title: 'Сотрудники',
+        ready: (d) => `${d.people || 0} ${plural(d.people || 0, 'человек', 'человека', 'человек')} в списке · сверка 25-го`,
+        soon: 'Отдадите список имён и дат — дальше считаем мы. 25-го придёт сверка: кто в следующем месяце и на какую сумму.',
+      },
+      space: {
+        title: 'График',
+        ready: (d) => d.schedule || 'Расписание не задано',
+        soon: 'Выберете день недели и окно — утро до открытия или вечер после закрытия. Меняется в один тап, пропуск уменьшает счёт.',
+      },
+      pool: {
+        title: 'Пул',
+        ready: (d) => `${d.poolLeft || 0} из ${d.poolTotal || 0} осталось`,
+        soon: 'Оплатите пакет — гостям уйдут именные ссылки. Будет видно, кто воспользовался, а кто ещё нет.',
+      },
+      once: {
+        title: 'Заказы',
+        ready: (d) => `${d.orders || 0} ${plural(d.orders || 0, 'заказ', 'заказа', 'заказов')}`,
+        soon: 'Заказы по счёту, без обязательств. Оформляем мы, вы подтверждаете.',
+      },
     };
 
-    $('#m5-send').textContent = 'Отправить на ' + (inv.sent_to || 'почту');
-    $('#m5-send').onclick = async () => {
-      const r = await api('invoiceSend', { id: inv.id });
-      toast(r.ok ? 'Счёт отправлен' : errText(r));
-    };
-
-    $('#m5-card').classList.toggle('hidden', inv.status === 'Оплачен');
-    $('#m5-card').onclick = async () => {
-      const r = await api('invoicePayCard', { id: inv.id });
-      if (!r.ok && r.error === 'payment_not_configured') {
-        // Счёт при этом рабочий: по нему платят переводом, а картой пока нет.
-        sheet(`<div class="h2">Картой пока нельзя</div>
-          <p class="p">Оплата картой ещё подключается. Счёт рабочий — оплатите переводом по реквизитам из PDF, и мы поставим заказ в работу в тот же день.</p>
-          <button class="btn" id="pnc-pdf">Скачать счёт</button>
-          <button class="btn ghost" id="pnc-ok">Понятно</button>`);
-        $('#pnc-ok').onclick = closeSheet;
-        $('#pnc-pdf').onclick = () => { closeSheet(); $('#m5-pdf').click(); };
-        return;
-      }
-      if (!r.ok) { toast(errText(r)); return; }
-      if (r.url) { TG && TG.openLink ? TG.openLink(r.url) : window.open(r.url, '_blank'); }
-    };
-  },
-};
-
-/* ---------- M6 · закрывающие и реестр вручений ---------- */
-
-SCREENS.M6 = {
-  async enter(p) {
-    const res = await api('groupDocs', { id: p.id });
-    if (!res.ok) { toast(errText(res)); back(); return; }
-    const g = res.group;
-
-    $('#m6-sub').textContent =
-      `Заказ закрыт · ${g.delivered} из ${g.total} ${plural(g.total, 'доставлен', 'доставлены', 'доставлены')} ${dateWords(g.event_date, false)}`;
-
-    $('#m6-docs').innerHTML = (res.docs || []).map(d => `
-      <button class="card" data-doc="${esc(d.kind)}" style="border:0;width:100%;text-align:left;cursor:pointer;padding:13px 15px">
+    $('#g3-blocks').innerHTML = (c.modes || []).map(m => {
+      const b = BLOCK[m];
+      if (!b) return '';
+      return `
+        <div class="card">
+          <div class="between">
+            <span style="font:700 13px/1.25 var(--sans)">${esc(b.title)}</span>
+            ${pending ? '<span class="lbl" style="color:var(--muted-3)">СКОРО</span>' : ''}
+          </div>
+          <div class="sub" style="margin-top:7px">${esc(pending ? b.soon : b.ready(res.data || {}))}</div>
+        </div>`;
+    }).join('') + `
+      <div class="card">
         <div class="between">
-          <span><span style="display:block;font:600 13px/1.2 var(--sans)">${esc(d.title)}</span>
-          <span class="sub" style="display:block;margin-top:4px">${esc(d.sub)}</span></span>
-          <span class="link">скачать</span>
+          <span style="font:700 13px/1.25 var(--sans)">Счета</span>
+          ${pending ? '<span class="lbl" style="color:var(--muted-3)">СКОРО</span>' : ''}
         </div>
-      </button>`).join('') || '<div class="hint" style="text-align:left">Документы появятся, когда все букеты будут вручены</div>';
+        <div class="sub" style="margin-top:7px">${
+          pending
+            ? 'Счёт и закрывающие приходят сюда же и в бот. ИП, без НДС.'
+            : esc(res.invoiceLine || 'Пока счетов нет')}</div>
+      </div>`;
 
-    $$('#m6-docs [data-doc]').forEach(b => b.onclick = async () => {
-      const r = await api('groupDoc', { id: g.id, kind: b.dataset.doc });
-      if (!r.ok) { toast(errText(r)); return; }
-      if (r.url) { TG && TG.openLink ? TG.openLink(r.url) : window.open(r.url, '_blank'); }
-      else toast('Отправили в бот');
-    });
+    /* Условия появляются, когда владелец их назначил. Подтверждение —
+       одна кнопка: договорились голосом, здесь только фиксируем. */
+    const terms = res.terms || [];
+    $('#g3-terms').classList.toggle('hidden', !terms.length);
+    if (terms.length) {
+      $('#g3-terms-rows').innerHTML = terms.map(t =>
+        `<div class="row"><span class="k">${esc(t.k)}</span><span class="v">${esc(t.v)}</span></div>`).join('');
+      const needConfirm = c.status === 'Активна' && !c.terms_confirmed_at && res.iDecide;
+      $('#g3-confirm').classList.toggle('hidden', !needConfirm);
+      $('#g3-confirm').onclick = async () => {
+        const r = await api('bizConfirm', { companyId: c.id });
+        if (!r.ok) { toast(errText(r)); return; }
+        toast('Спасибо, зафиксировали');
+        SCREENS.G3.enter({ id: c.id });
+      };
+    }
 
-    $('#m6-stats').innerHTML = [
-      `<div class="row"><span class="k">Заказов за год</span><span class="v">${res.yearCount || 0} · ${money(res.yearSum || 0)}</span></div>`,
-      res.nextDate ? `<div class="row"><span class="k">Ближайшая дата</span><span class="v">${esc(dateWords(res.nextDate, false))}</span></div>` : '',
-    ].filter(Boolean).join('');
-
-    $('#m6-repeat').onclick = () => {
-      S.draft.company = { people: res.people || [], groups: {}, date: null };
-      saveDraft();
-      go('M4');
-    };
-
-    $('#m6-export').onclick = async () => {
-      const r = await api('groupExport', { id: g.id });
-      if (!r.ok) { toast(errText(r)); return; }
-      downloadCsv(`bloomind-${g.id}.csv`, r.csv);
-    };
+    $('#g3-support').onclick = openSupport;
+    $('#g3-foot').textContent = pending
+      ? 'Заявка ничего не резервирует и ни к чему не обязывает'
+      : 'Всё, о чём договорились, — здесь. Что-то поменялось — напишите нам';
   },
 };
+
+/* Переключение между личным и компаниями. Один аккаунт, разные
+   контексты: человек из «Контура» остаётся нашим клиентом и может
+   заказать маме — это не два приложения. */
+async function switchContext() {
+  const res = await api('bizContexts');
+  const list = (res.ok && res.contexts) || [];
+  sheet(`<div class="h2">Куда переключиться</div>
+    <div class="list" style="margin-top:12px">
+      <button class="card" data-ctx="personal" style="border:0;width:100%;text-align:left;cursor:pointer">
+        <div style="font:600 13px/1.2 var(--sans)">Личное</div>
+        <div class="sub" style="margin-top:4px">Близкие, даты, свои букеты</div>
+      </button>
+      ${list.map(c => `
+        <button class="card" data-ctx="${c.id}" style="border:0;width:100%;text-align:left;cursor:pointer">
+          <div class="between">
+            <span>
+              <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(c.name)}</span>
+              <span class="sub" style="display:block;margin-top:4px">${esc((c.modes || []).map(m => MODE_WORD[m] || m).join(' · '))}</span>
+            </span>
+            ${c.status === 'Заявка' ? '<span class="lbl" style="flex:none;color:var(--peach-text)">ЗАЯВКА</span>' : ''}
+          </div>
+        </button>`).join('')}
+    </div>`);
+  $$('[data-ctx]').forEach(b => b.onclick = () => {
+    closeSheet();
+    if (b.dataset.ctx === 'personal') {
+      S.companyId = null;
+      renderTabs();
+      go('N1', {}, { replace: true });
+    } else {
+      // Вкладки перерисует сам G3, когда узнает режимы компании.
+      S.companyId = b.dataset.ctx;
+      go('G3', { id: b.dataset.ctx }, { replace: true });
+    }
+  });
+}
 
 
 /* ======== 50-E.js ======== */
@@ -6950,7 +6806,7 @@ SCREENS.E4 = {
     $('#e4-company-sub').textContent = res.company
       ? res.company.name + ' · счёт вместо карты'
       : 'счёт вместо карты, много адресов';
-    $('#e4-company').onclick = () => go('M1');
+    $('#e4-company').onclick = () => go('G1');
 
     // мои адреса
     const addrs = S.myAddresses || [];
@@ -7771,6 +7627,19 @@ SCREENS.K2 = {
       `<div class="row"><span class="k">Куда</span><span class="v">${esc(d.address || '')}${
         d.addressExact === false ? ' <span style="color:var(--muted-4)">· точный адрес в день доставки</span>' : ''}</span></div>`,
       `<div class="row"><span class="k">Окно</span><span class="v">${esc(d.window || 'как готов')}</span></div>`,
+      (() => {
+        // Подъезд, этаж и домофон — отдельной строкой и крупно.
+        // Внутри длинного адреса их у подъезда не выхватить глазами.
+        const a = d.addressParts || {};
+        const bits = [
+          a.entrance && 'подъезд ' + a.entrance,
+          a.floor && 'этаж ' + a.floor,
+          a.intercom && 'домофон ' + a.intercom,
+        ].filter(Boolean);
+        return bits.length
+          ? `<div class="row"><span class="k">Подъезд</span><span class="v">${esc(bits.join(' · '))}</span></div>`
+          : '';
+      })(),
       d.addressNote ? `<div class="row"><span class="k">Про адрес</span><span class="v">${esc(d.addressNote)}</span></div>` : '',
       d.callBefore ? `<div class="row"><span class="k">Просил позвонить</span><span class="v">за 30 минут</span></div>` : '',
     ].filter(Boolean).join('');
@@ -8864,6 +8733,18 @@ function renderTabs() {
   } else if (S.role === 'owner') {
     items = [['V1', 'day', 'Сводка'], ['V2', 'funnel', 'Заказы'],
              ['V4', 'team', 'Команда'], ['V7', 'money', 'Деньги']];
+  } else if (S.companyId) {
+    /* Режим компании. Один аккаунт, разные контексты: человек
+       из «Контура» остаётся нашим клиентом и переключается обратно
+       в личное сверху. Второй пункт зависит от режима компании —
+       у эйчара это сотрудники, у пространства график, у пула пул. */
+    const M = S.companyModes || [];
+    const second = M.includes('hr')    ? ['G3', 'list', 'Сотрудники']
+                 : M.includes('space') ? ['G3', 'list', 'График']
+                 : M.includes('pool')  ? ['G3', 'list', 'Пул']
+                 : ['G3', 'list', 'Заказы'];
+    items = [['G3', 'home', 'Главная'], second,
+             ['G3', 'money', 'Счета'], ['G3', 'profile', 'Профиль']];
   } else {
     // «Букет» — первая вкладка и экран по умолчанию: приложение теперь
     // начинается с букета, а не с учёта дат. Пятую вкладку не добавлять
@@ -8889,8 +8770,12 @@ function linkParams() {
   if (raw) {
     const m = raw.match(/^([a-z]+)_?(\d+)?$/i);
     if (m) {
+      // «invoice» ведёт в кабинет компании: отдельного экрана счёта
+      // пока нет, он второй этап бизнеса. Ссылка не должна упираться
+      // в пустоту — из кабинета человек найдёт всё остальное сам.
       const map = { order: 'D7', pay: 'D10', draft: 'D7', rush: 'D7',
-                    saved: 'N7', sub: 'P5', charge: 'P6', invoice: 'M5',
+                    saved: 'N7', sub: 'P5', charge: 'P6', invoice: 'G3',
+                    biz: 'G1', company: 'G3',
                     team: null, day: null, sum: 'V1' };
       if (map[m[1]] !== undefined) p = { screen: map[m[1]], id: m[2] };
     }
