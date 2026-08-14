@@ -37,6 +37,12 @@
   --alarm-bg:#F7E4DE;
   --unselected:#F4EDE2;
 
+  /* Компания. Синий выбран потому, что во всей палитре его больше
+     нет: зелёный означает «наше и нажимаемое», персиковый — тревогу,
+     а корпоративный заказ не то и не другое. Он просто другой,
+     и это должно читаться боковым зрением. */
+  --biz:#3B5B8C;
+
   /* серые и линии */
   --muted:#5F675F;
   --muted-2:#646C64;
@@ -146,8 +152,13 @@ body{
   border-bottom:1px solid var(--line);
 }
 .row:last-child{border-bottom:0}
-.row .k{color:var(--muted-2)}
-.row .v{font-weight:700;text-align:right}
+/* Подпись ужимается, значение — нет. Иначе длинное значение
+   переносится по слогам: телефон ломался на «+7 999 111-22-» и «33»,
+   а курьеру его набирать с экрана. */
+.row .k{color:var(--muted-2);min-width:0;flex:1 1 auto}
+.row .v{font-weight:700;text-align:right;flex:0 0 auto}
+/* Телефон не переносим никогда: он читается как одно число. */
+.row a.link[href^="tel:"]{white-space:nowrap;flex:0 0 auto}
 
 /* Строку, которую можно поправить, надо отличать от строки-сообщения.
    Раньше «Телефон · не указан» и «Оплачено · 7 000 ₽» выглядели
@@ -176,6 +187,25 @@ body{
 .row[data-price]:active,
 .row[data-term]:active,
 .row[data-to]:active{opacity:.55}
+
+/* Корпоративный заказ невозможно спутать с розничным — главное
+   требование страницы «бизнес». Полоса слева видна боковым зрением,
+   раньше, чем человек прочитал карточку: у такого заказа другие
+   правила, и тот, кто их не заметит, их и нарушит. */
+.card.biz{
+  position:relative;
+  padding-left:22px;
+}
+.card.biz::before{
+  content:'';
+  position:absolute;left:9px;top:14px;bottom:14px;width:3px;
+  border-radius:2px;background:var(--biz);
+}
+.biz-tag{
+  display:inline-block;
+  font:800 10px/1 var(--sans);letter-spacing:.08em;
+  color:var(--biz);text-transform:uppercase;
+}
 
 /* ---------- варианты выбора ---------- */
 .opt{
@@ -1733,6 +1763,49 @@ textarea.field.ta{min-height:60px}
   </div>
 </div>
 
+<!-- G4 · сотрудники. Экран нужен редко: то же самое делается в чате
+     одной строкой. Сюда заходят, когда хотят увидеть список целиком. -->
+<div class="screen" id="s-G4">
+  <div class="bar"><button class="back" type="button">←</button><div class="title">Сотрудники</div></div>
+  <div class="body tight">
+    <div class="lbl" id="g4-count">СПИСОК</div>
+    <div class="card" id="g4-list"></div>
+
+    <button class="btn ghost" id="g4-add">+ Добавить · можно списком</button>
+
+    <div class="note green">Храним только имя и дату. Ни телефонов, ни должностей, ни кабинетов — согласие сотрудников остаётся вашей зоной, так и записано в оферте</div>
+    <div class="hint" style="margin-top:auto">Ушедшего отметьте — букет ему не привезём и в счёт не поставим</div>
+  </div>
+</div>
+
+<!-- G5 · ответ про праздник. Сколько человек и какой бюджет решается
+     каждый год заново — заранее это не выпытать, поэтому спрашиваем
+     перед каждым. -->
+<div class="screen" id="s-G5">
+  <div class="bar"><button class="back" type="button">←</button><div class="title" id="g5-title">Праздник</div></div>
+  <div class="body">
+    <div class="h1" id="g5-h1"></div>
+    <p class="p" id="g5-sub"></p>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">На сколько человек</div>
+      <input class="field" id="g5-count" inputmode="numeric" placeholder="40">
+    </div>
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Бюджет на букет</div>
+      <input class="field" id="g5-budget" inputmode="numeric" placeholder="3 000 ₽">
+    </div>
+
+    <div class="note">Точный список получателей не нужен: привезём одной точкой вам, дальше вручите сами</div>
+
+    <div class="foot pad">
+      <div class="err-text center hidden" id="g5-err"></div>
+      <button class="btn" id="g5-ok">Да, нужны</button>
+      <button class="btn ghost" id="g5-skip">В этот раз не нужно</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ===== 50-E ===== -->
 <!-- E · ИСТОРИЯ И ПРОФИЛЬ
@@ -2107,6 +2180,7 @@ textarea.field.ta{min-height:60px}
     </div>
 
     <div class="note peach hidden" id="k2-legend">Букет — сюрприз. Если открывает не адресат, не говорите, что это за букет и от кого.</div>
+    <div class="note hidden" id="k2-biznote" style="background:#E7ECF4;color:#2B3F5E"></div>
     <p class="p" id="k2-hint"></p>
 
     <div class="foot pad">
@@ -2388,6 +2462,14 @@ textarea.field.ta{min-height:60px}
       <div class="big" id="o7-revenue" style="margin:6px 0 10px">—</div>
       <div id="o7-rows"></div>
     </div>
+    <!-- Розница и бизнес разделены: у бизнеса чек выше, платят
+         по счёту и часто после доставки, а маржа другая. Одна общая
+         цифра растёт, и по ней не понять, что именно выросло. -->
+    <div class="card hidden" id="o7-split">
+      <div class="lbl">Откуда деньги</div>
+      <div style="margin-top:9px" id="o7-split-rows"></div>
+    </div>
+
     <div class="card" id="o7-payouts"></div>
     <div class="card hidden" id="o7-invoices"></div>
     <div class="card hidden" id="o7-refunds"></div>
@@ -6524,7 +6606,7 @@ SCREENS.V6b = {
    про букет, когда человек имел в виду месяц обслуживания. */
 const BIZ_MODES = [
   { id: 'hr', label: 'Даты сотрудников',
-    scale: 'Сколько сотрудников', scaleHint: '50',
+    scale: 'Сколько сотрудников', scaleHint: '50', scaleWord: 'сотрудников',
     budget: 'Бюджет на букет', budgetHint: '3 000 ₽', budgetUnit: 'на букет',
     /* Дни рождения и праздники — два разных ритма. Дни рождения идут
        сами: список у нас, 25-го присылаем сверку. Праздники требуют
@@ -6545,19 +6627,19 @@ const BIZ_MODES = [
     pickHint: 'Дни рождения идут весь год. Праздники — когда подойдут: напомним заранее и спросим, сколько человек и какой бюджет' },
 
   { id: 'pool', label: 'Подарки клиентам',
-    scale: 'Сколько букетов', scaleHint: '50',
+    scale: 'Сколько букетов', scaleHint: '50', scaleWord: 'букетов',
     budget: 'Потолок на букет', budgetHint: '5 000 ₽', budgetUnit: 'потолок на гостя',
     // У пула есть срок: неиспользованное переносится, но не бесконечно.
     free: { label: 'До какой даты', hint: '31 марта' } },
 
   { id: 'space', label: 'Обслуживание офиса',
-    scale: 'Сколько точек', scaleHint: '2 точки',
+    scale: 'Сколько точек', scaleHint: '2 точки', scaleWord: 'точек',
     budget: 'Бюджет в месяц', budgetHint: '9 000 ₽', budgetUnit: 'в месяц',
     pick: { label: 'Как часто приезжать', multi: false,
             options: ['Раз в неделю', 'Раз в две недели', 'Раз в месяц'] } },
 
   { id: 'once', label: 'Разовый заказ',
-    scale: 'Сколько букетов', scaleHint: '12',
+    scale: 'Сколько букетов', scaleHint: '12', scaleWord: 'букетов',
     budget: 'Бюджет на букет', budgetHint: '3 000 ₽', budgetUnit: 'на букет',
     free: { label: 'Когда', hint: '8 марта' } },
 ];
@@ -6684,6 +6766,7 @@ SCREENS.G2 = {
         dateText: $('#g2-date').value.trim(),
         occasions: [...picked],
         budgetUnit: (BIZ_MODES.find(x => chosen.has(x.id)) || {}).budgetUnit || '',
+        scaleWord: (BIZ_MODES.find(x => chosen.has(x.id)) || {}).scaleWord || '',
         budget: $('#g2-budget').value.trim(),
         note: $('#g2-note').value.trim(),
         contactName: cname,
@@ -6761,14 +6844,24 @@ SCREENS.G3 = {
       },
     };
 
-    $('#g3-blocks').innerHTML = (c.modes || []).map(m => {
+    /* Открытый вопрос про праздник — первым и заметным. Это
+       единственное место в кабинете, где от компании ждут ответа:
+       остальное идёт само. */
+    const events = (res.events || []).map(e => `
+      <div class="note peach" style="cursor:pointer" data-ev="${e.id}">
+        <div style="font:700 13px/1.25 var(--sans)">${esc(e.title)} · ${esc(e.whenText)}</div>
+        <div style="margin-top:6px;font-weight:500">Цветы нужны? Скажите, на сколько человек и какой бюджет →</div>
+      </div>`).join('');
+
+    $('#g3-blocks').innerHTML = events + (c.modes || []).map(m => {
       const b = BLOCK[m];
       if (!b) return '';
       return `
-        <div class="card">
+        <div class="card" ${!pending && m === 'hr' ? 'data-go="G4" style="cursor:pointer"' : ''}>
           <div class="between">
             <span style="font:700 13px/1.25 var(--sans)">${esc(b.title)}</span>
-            ${pending ? '<span class="lbl" style="color:var(--muted-3)">СКОРО</span>' : ''}
+            ${pending ? '<span class="lbl" style="color:var(--muted-3)">СКОРО</span>'
+                      : (m === 'hr' ? '<span style="color:var(--muted-3)">→</span>' : '')}
           </div>
           <div class="sub" style="margin-top:7px">${esc(pending ? b.soon : b.ready(res.data || {}))}</div>
         </div>`;
@@ -6800,6 +6893,12 @@ SCREENS.G3 = {
         SCREENS.G3.enter({ id: c.id });
       };
     }
+
+    $$('#g3-blocks [data-go]').forEach(el =>
+      el.onclick = () => go(el.dataset.go, { id: c.id }));
+
+    $$('#g3-blocks [data-ev]').forEach(el =>
+      el.onclick = () => go('G5', { id: el.dataset.ev }));
 
     $('#g3-support').onclick = openSupport;
     $('#g3-foot').textContent = pending
@@ -6844,6 +6943,122 @@ async function switchContext() {
     }
   });
 }
+
+/* ---------- G4 · сотрудники ----------
+
+   Список храним мы — в этом вся услуга. Эйчар отдаёт его один раз
+   и забывает: дальше считаем, привозим и напоминаем сами.
+
+   Экран нужен редко: то же самое делается в чате одной строкой.
+   Сюда заходят, когда хотят увидеть список целиком. */
+
+SCREENS.G4 = {
+  tab: 'list',
+  async enter(p) {
+    const id = p.id || S.companyId;
+    const res = await api('hrList', { companyId: id });
+    if (!res.ok) { toast(errText(res)); back(); return; }
+    S.companyId = id;
+
+    const list = res.employees || [];
+    const active = list.filter(e => !e.left);
+    $('#g4-count').textContent = active.length
+      ? `СПИСОК · ${active.length} ${plural(active.length, 'человек', 'человека', 'человек')}`
+      : 'СПИСОК ПОКА ПУСТ';
+
+    $('#g4-list').innerHTML = list.length ? list.map(e => `
+      <div class="row" data-emp="${e.id}" style="cursor:pointer;${e.left ? 'opacity:.45' : ''}">
+        <span class="k" style="color:var(--ink)">${esc(e.name)}${
+          e.left ? '<span style="display:block;font-size:11px;color:var(--muted-3)">ушёл — не везём и не считаем</span>' : ''}</span>
+        <span class="v" style="font-weight:600;color:${
+          e.thisMonth ? 'var(--green)' : 'var(--muted-2)'}">${esc(e.when)}${
+          e.thisMonth ? ' · в этом месяце' : ''}</span>
+      </div>`).join('')
+      : `<div class="sub">Пришлите список — имя и дату, каждого с новой строки</div>`;
+
+    $$('#g4-list [data-emp]').forEach(el => el.onclick = async () => {
+      const e = list.find(x => String(x.id) === el.dataset.emp);
+      const ok = await confirmSheet({
+        title: e.left ? 'Вернуть в список?' : 'Ушёл из компании?',
+        text: e.left
+          ? `${e.name} снова будет в списке, и букет ко дню рождения привезём.`
+          : `${e.name} останется в списке серым. Букет не привезём и в счёт не поставим.`,
+        yes: e.left ? 'Вернуть' : 'Отметить',
+      });
+      if (!ok) return;
+      const r = await api('hrLeft', { companyId: id, employeeId: e.id, back: e.left });
+      if (!r.ok) { toast(errText(r)); return; }
+      SCREENS.G4.enter({ id });
+    });
+
+    /* Свободный текст, разбираем мы. Заставить эйчара писать
+       по шаблону значит вернуть ему работу, за которую он платит. */
+    $('#g4-add').onclick = () => {
+      sheet(`<div class="h2">Кого добавить</div>
+        <p class="p">Имя и дату, каждого с новой строки. Год не нужен.</p>
+        <textarea class="field ta" id="hr-add" rows="5"
+          placeholder="Соколова Вера 14.04&#10;Гущин Илья 2 мая"></textarea>
+        <div class="err-text hidden" id="hr-err"></div>
+        <button class="btn" id="hr-ok">Добавить</button>`);
+      $('#hr-ok').onclick = async () => {
+        const r = await api('hrAdd', { companyId: id, text: $('#hr-add').value });
+        if (!r.ok) {
+          $('#hr-err').textContent = errText(r);
+          $('#hr-err').classList.remove('hidden'); return;
+        }
+        closeSheet();
+        /* Не поняли строку — переспрашиваем именно её. Просить
+           переписать весь список значит наказать за одну опечатку. */
+        if ((r.bad || []).length) {
+          toast(`Добавили ${r.added.length}. Не разобрали: «${r.bad[0]}»`);
+        } else {
+          toast(`Добавили ${r.added.length} ${plural(r.added.length, 'человека', 'человек', 'человек')}`);
+        }
+        SCREENS.G4.enter({ id });
+      };
+    };
+  },
+};
+
+/* ---------- G5 · ответ про праздник ---------- */
+
+SCREENS.G5 = {
+  async enter(p) {
+    const res = await api('bizCard', { companyId: S.companyId });
+    const ev = (res.ok && (res.events || []).find(e => String(e.id) === String(p.id))) || null;
+    if (!ev) { toast('Этот вопрос уже закрыт'); back(); return; }
+
+    $('#g5-title').textContent = ev.title;
+    $('#g5-h1').textContent = ev.title;
+    $('#g5-sub').textContent =
+      `${ev.whenText}. Скажите, на сколько человек и какой бюджет на букет — остальное сделаем сами.`;
+    $('#g5-count').value = ev.headcount || '';
+    $('#g5-budget').value = ev.budget || '';
+    $('#g5-err').classList.add('hidden');
+
+    $('#g5-ok').onclick = async () => {
+      const n = $('#g5-count').value.trim();
+      if (!n.replace(/\D/g, '')) {
+        $('#g5-err').textContent = 'На сколько человек?';
+        $('#g5-err').classList.remove('hidden'); return;
+      }
+      const r = await api('hrEvent', {
+        companyId: S.companyId, eventId: ev.id,
+        headcount: n, budget: $('#g5-budget').value.trim(),
+      });
+      if (!r.ok) { $('#g5-err').textContent = errText(r); $('#g5-err').classList.remove('hidden'); return; }
+      toast('Записали — посчитаем и вернёмся с суммой');
+      go('G3', { id: S.companyId }, { replace: true });
+    };
+
+    $('#g5-skip').onclick = async () => {
+      const r = await api('hrEvent', { companyId: S.companyId, eventId: ev.id, skip: true });
+      if (!r.ok) { toast(errText(r)); return; }
+      toast('Хорошо, в этот раз пропускаем');
+      go('G3', { id: S.companyId }, { replace: true });
+    };
+  },
+};
 
 
 /* ======== 50-E.js ======== */
@@ -7213,18 +7428,23 @@ SCREENS.F1 = {
     $('#f1-mine').innerHTML = mine.map(o => {
       const a = floristAction(o) || {};
       return `
-        <div class="card" style="cursor:pointer;${a.urgent ? 'background:var(--alarm-bg)' : ''}" data-o="${o.id}">
+        <div class="card ${o.company ? 'biz' : ''}" style="cursor:pointer;${a.urgent ? 'background:var(--alarm-bg)' : ''}" data-o="${o.id}">
           <div class="between">
             <div class="grow">
-              <div style="font:600 13px/1.3 var(--sans)">
+              ${o.company ? `<div class="biz-tag">${esc(o.company.name)} · компания</div>` : ''}
+              <div style="font:600 13px/1.3 var(--sans);${o.company ? 'margin-top:5px' : ''}">
                 ${o.kind === 'rush' ? '<span style="color:var(--alarm);font-weight:800">СРОЧНО · </span>' : ''}
-                #${o.id} · ${esc(o.recipientName || '')}, к ${esc(dateWords(o.delivery_date, false))}
+                #${o.id} · ${esc(o.company ? (o.guest_name || 'сотруднику') : (o.recipientName || ''))}, к ${esc(dateWords(o.delivery_date, false))}
               </div>
               <div class="sub" style="margin-top:4px">
                 ${esc(o.size || '')}, «${esc(o.mood || '')}» · бюджет ${money(o.bouquet_price)}
                 ${o.redo_count ? ` · правка ${o.redo_count} из ${S.settings.redo_limit || 2}` : ''}
               </div>
               ${a.redo && o.lastRedoComment ? `<div class="sub" style="margin-top:6px;color:var(--peach-text)">«${esc(o.lastRedoComment)}»</div>` : ''}
+              ${o.company ? `<div class="sub" style="margin-top:6px;color:var(--biz)">${
+                o.company.rules.needsApproval
+                  ? 'Согласование обязательно — на кону чужая репутация'
+                  : 'Букет по шаблону. Согласование не требуется, открытка не нужна'}</div>` : ''}
             </div>
           </div>
           <div class="between" style="margin-top:10px">
@@ -7786,9 +8006,10 @@ SCREENS.K1 = {
     $('#k1-list').innerHTML = list.map(d => {
       const s = K_STAGE[d.stage] || K_STAGE.active;
       return `
-        <div class="card" style="cursor:pointer" data-d="${d.id}" data-stage="${d.stage}">
+        <div class="card ${d.company ? 'biz' : ''}" style="cursor:pointer" data-d="${d.id}" data-stage="${d.stage}">
           <div class="between">
             <div class="grow">
+              ${d.company ? `<div class="biz-tag" style="margin-bottom:5px">${esc(d.company.name)} · компания</div>` : ''}
               <div style="font:700 13px/1.2 var(--sans)">
                 ${d.rush ? '<span style="color:var(--alarm);font-weight:800">СРОЧНО · </span>' : ''}${
                 d.stage === 'pickup' ? esc(d.pickupTime || '') : esc(d.window || '')}
@@ -7875,10 +8096,33 @@ SCREENS.K2 = {
     const toSelf = d.delivery_mode === 'self';
 
     $('#k2-selfnote').classList.toggle('hidden', !toSelf);
-    $('#k2-legend').classList.toggle('hidden', toSelf);
+    /* У корпоративной доставки другое правило, и оно важнее «сюрприза»:
+       курьер, позвонивший сотруднику «вам букет от компании», портит
+       и сюрприз, и репутацию заказчика. Общаемся только с контактным
+       лицом. */
+    $('#k2-legend').classList.toggle('hidden', toSelf || !!d.company);
+    const bizNote = $('#k2-biznote');
+    if (bizNote) {
+      bizNote.classList.toggle('hidden', !d.company);
+      if (d.company) {
+        /* Имя ставим через двоеточие, а не в падеже: склонять фамилии
+           на клиенте нечем, а «отдать Ольга Петрова» читается как
+           машинный перевод. И про род не гадаем — «вручает сам»
+           вместо «она сама». */
+        bizNote.innerHTML =
+          `<div style="font:700 13px/1.25 var(--sans)">${esc(d.company.name)}</div>` +
+          `<div style="margin-top:6px;font-weight:500">Отдать в руки: ${
+            esc(d.company.contactName || 'контактному лицу')}.</div>` +
+          `<div style="margin-top:4px;font-weight:500">Сотрудникам не звонить — вручают сами.</div>`;
+      }
+    }
 
     $('#k2-rows').innerHTML = [
-      `<div class="row"><span class="k">Кому</span><span class="v">${esc(toSelf ? d.clientName + ' · заказчик' : d.recipientName + ' · получатель')}</span></div>`,
+      d.company
+        ? `<div class="row"><span class="k">Кому отдать</span><span class="v">${
+            esc(d.company.contactName || 'контактному лицу')}${
+            d.recipientName ? '<span style="display:block;font-size:11px;color:var(--muted-3)">букет: ' + esc(d.recipientName) + '</span>' : ''}</span></div>`
+        : `<div class="row"><span class="k">Кому</span><span class="v">${esc(toSelf ? d.clientName + ' · заказчик' : d.recipientName + ' · получатель')}</span></div>`,
       // До дня доставки показываем район, а не точный адрес. Курьеру
       // важно понимать географию заранее, но дом и квартира ему в этот
       // момент не нужны — и объясняем это, чтобы он не решил, что баг.
@@ -7905,6 +8149,10 @@ SCREENS.K2 = {
     // Ей — основной телефон, заказчику — запасной, звонить только если она не берёт.
     const phones = toSelf
       ? [{ name: d.clientName, role: 'заказчик', phone: d.clientPhone }]
+      : d.company
+      ? [{ name: d.company.contactName || d.company.name, role: 'контактное лицо',
+           phone: d.company.contactPhone,
+           note: 'сотрудникам не звоним вовсе' }]
       : [
           { name: d.recipientName, role: 'получатель', phone: d.recipientPhone },
           { name: d.clientName, role: 'заказчик', phone: d.clientPhone, note: 'только если она не берёт' },
@@ -7915,7 +8163,9 @@ SCREENS.K2 = {
         <a class="link" href="tel:${esc(String(x.phone).replace(/\s/g, ''))}">${esc(x.phone)}</a>
       </div>`).join('') || '<div class="sub">Телефона нет — звоните заказчику через поддержку</div>';
 
-    $('#k2-hint').textContent = toSelf
+    $('#k2-hint').textContent = d.company
+      ? 'Отдайте контактному лицу и снимите фото — им закрывается доставка.'
+      : toSelf
       ? 'Фото вручения не делаем — букет он подарит позже.'
       : 'У двери звоните ей. Заказчику — только если она не отвечает.';
 
@@ -8260,10 +8510,13 @@ async function showStageList(status, period) {
   if (!res.ok) { toast(errText(res)); return; }
   sheet(`<div class="h2">${esc(status)}</div>` +
     ((res.orders || []).map(o => `
-      <button class="card" style="border:0;width:100%;text-align:left;cursor:pointer" data-o="${o.id}">
+      <button class="card ${o.company ? 'biz' : ''}" style="border:0;width:100%;text-align:left;cursor:pointer" data-o="${o.id}">
         <div class="between">
-          <span><span style="display:block;font:600 13px/1.2 var(--sans)">#${o.id} · ${esc(o.recipientName || '')}</span>
-          <span class="sub" style="display:block;margin-top:4px">${esc(dateWords(o.delivery_date, false))} · ${money(o.total)}</span></span>
+          <span>
+            ${o.company ? `<span class="biz-tag" style="display:block;margin-bottom:4px">${esc(o.company.name)}</span>` : ''}
+            <span style="display:block;font:600 13px/1.2 var(--sans)">#${o.id} · ${esc(o.company ? (o.guest_name || 'сотруднику') : (o.recipientName || ''))}</span>
+            <span class="sub" style="display:block;margin-top:4px">${esc(dateWords(o.delivery_date, false))} · ${money(o.total)}${
+              o.company ? ' · по счёту' : ''}</span></span>
           <span style="color:var(--muted-3)">→</span>
         </div>
       </button>`).join('') || `<p class="p">Пусто</p>`) +
@@ -8748,6 +9001,9 @@ SCREENS.V5 = {
         // Куда ведёт «написать нам» на всех экранах.
         numRow('support_username', 'Поддержка', 'telegram без собаки'),
         numRow('subscription_warn_days', 'Письмо перед списанием за', 'по подписке', ' дн.'),
+        // За сколько дней спрашиваем компанию про праздник. Раньше —
+        // не помнят, позже — не успеем закупить.
+        numRow('event_ask_days', 'Спросить про праздник за', 'компанию, у которой он есть', ' дн.'),
       ].join('');
 
       $('#o5-peak').innerHTML = [
@@ -8975,6 +9231,28 @@ SCREENS.V7 = {
       m.cost ? `<div class="row"><span class="k">Маржа</span><span class="v">${money(m.revenue - m.cost)} · ${Math.round((m.revenue - m.cost) / m.revenue * 100)}%</span></div>` : '',
       `<div class="row"><span class="k">Средний чек</span><span class="v">${money(m.orders ? m.revenue / m.orders : 0)}</span></div>`,
     ].filter(Boolean).join('');
+
+    /* Розница и бизнес — разные экономики. Показываем обе строки
+       только когда бизнес есть: пустая строка «Компании · 0 ₽»
+       на первом месяце выглядит упрёком, а не сводкой. */
+    const hasBiz = (m.bizOrders || 0) > 0 || (m.bizCompanies || 0) > 0;
+    $('#o7-split').classList.toggle('hidden', !hasBiz);
+    if (hasBiz) {
+      const share = m.revenue ? Math.round((m.bizRevenue || 0) / m.revenue * 100) : 0;
+      $('#o7-split-rows').innerHTML = [
+        `<div class="row"><span class="k">Розница<span style="display:block;font-size:11px;color:var(--muted-3)">${
+          m.retailOrders || 0} ${plural(m.retailOrders || 0, 'заказ', 'заказа', 'заказов')} · картой сразу</span></span>` +
+        `<span class="v">${money(m.retailRevenue || 0)}</span></div>`,
+
+        `<div class="row"><span class="k" style="color:var(--biz)">Компании<span style="display:block;font-size:11px;color:var(--muted-3)">${
+          m.bizOrders || 0} ${plural(m.bizOrders || 0, 'букет', 'букета', 'букетов')} · по счёту, часто после доставки</span></span>` +
+        `<span class="v" style="color:var(--biz)">${money(m.bizRevenue || 0)}${
+          share ? ` · ${share}%` : ''}</span></div>`,
+
+        `<div class="row"><span class="k">Средний чек компании</span><span class="v">${
+          money(m.bizOrders ? (m.bizRevenue || 0) / m.bizOrders : 0)}</span></div>`,
+      ].join('');
+    }
 
     $('#o7-payouts').innerHTML = [
       `<div class="row"><span class="k">Флористам</span><span class="v">${money(m.floristPayout || 0)}${m.floristWhen ? ' · ' + esc(m.floristWhen) : ''}</span></div>`,
@@ -9325,7 +9603,7 @@ function renderTabs() {
        в личное сверху. Второй пункт зависит от режима компании —
        у эйчара это сотрудники, у пространства график, у пула пул. */
     const M = S.companyModes || [];
-    const second = M.includes('hr')    ? ['G3', 'list', 'Сотрудники']
+    const second = M.includes('hr')    ? ['G4', 'list', 'Сотрудники']
                  : M.includes('space') ? ['G3', 'list', 'График']
                  : M.includes('pool')  ? ['G3', 'list', 'Пул']
                  : ['G3', 'list', 'Заказы'];
