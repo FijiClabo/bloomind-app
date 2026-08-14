@@ -149,6 +149,31 @@ body{
 .row .k{color:var(--muted-2)}
 .row .v{font-weight:700;text-align:right}
 
+/* Строку, которую можно поправить, надо отличать от строки-сообщения.
+   Раньше «Телефон · не указан» и «Оплачено · 7 000 ₽» выглядели
+   одинаково, и человек не понимал, что первую можно нажать. Карандаш
+   ставим не в разметку каждой строки, а сюда: он появляется сам
+   у всего, что нажимается. */
+.row[data-edit],
+.row[data-toggle],
+.row[data-price],
+.row[data-to]{cursor:pointer}
+
+.row[data-edit] .v::after,
+.row[data-toggle] .v::after,
+.row[data-price] .v::after,
+.row[data-to] .v::after{
+  content:'✎';
+  margin-left:7px;font-weight:500;
+  color:var(--muted-3);
+}
+/* Нажатие видно: на телефоне нет наведения, и без отклика человек
+   жмёт второй раз. */
+.row[data-edit]:active,
+.row[data-toggle]:active,
+.row[data-price]:active,
+.row[data-to]:active{opacity:.55}
+
 /* ---------- варианты выбора ---------- */
 .opt{
   width:100%;text-align:left;border:0;cursor:pointer;
@@ -2181,7 +2206,7 @@ textarea.field.ta{min-height:60px}
 
     <div class="foot pad">
       <button class="btn" id="o1-funnel">Открыть воронку</button>
-      <button class="btn ghost" id="o1-client">Открыть как клиент</button>
+      <button class="btn ghost" id="o1-look">Посмотреть глазами другого</button>
     </div>
   </div>
 </div>
@@ -3543,6 +3568,10 @@ SCREENS.N4 = {
        окно не записывалось вовсе — и сервер подставлял первое утреннее.
        Клиент видел вечер, флорист получал утро. */
     const evening = todayWindow();
+    /* Черновик переживает закрытие приложения. Человек выбрал «сегодня»
+       в шесть вечера, вернулся в полночь — выбор надо снять, иначе он
+       уйдёт в заказ вместе с датой, которой уже нет. */
+    if (d.when === 'today' && !evening) { d.when = null; d.window = ''; saveDraft(); }
 
     // ---- красный 4: без бота срочный заказ уходит в тишину
     const botOff = !!S.notifyOff;
@@ -3563,10 +3592,15 @@ SCREENS.N4 = {
              d.when === 'now' ? 'var(--on-green)' : 'var(--muted-2)'}">${
              botOff ? 'нужны уведомления бота' : rush.open ? 'привезём ' + rushWords() : esc(rush.why)}</span></span>
            <span class="tick">✓</span></button>`,
-        `<button class="opt ${d.when === 'today' ? 'on' : ''}" data-w="today">
+        /* Нет живого окна — кнопка гаснет, а не подписывается «поздно»,
+           оставаясь нажимаемой. Выбранной она тем более быть не может:
+           «Сегодня, к вечеру · на сегодня уже поздно» — это обещание
+           и его опровержение в одной строке. */
+        `<button class="opt ${evening && d.when === 'today' ? 'on' : ''}" data-w="today"
+                 ${evening ? '' : 'disabled style="opacity:.45"'}>
            <span>Сегодня, к вечеру<span class="sub" style="display:block;margin-top:4px;color:${
-             d.when === 'today' ? 'var(--on-green)' : 'var(--muted-2)'}">${
-             evening ? 'окно ' + esc(evening) : 'на сегодня уже поздно'}</span></span>
+             evening && d.when === 'today' ? 'var(--on-green)' : 'var(--muted-2)'}">${
+             evening ? 'окно ' + esc(evening) : 'сегодня уже не успеем — соберём завтра'}</span></span>
            <span class="tick">✓</span></button>`,
         `<button class="opt ${d.when === 'later' ? 'on' : ''}" data-w="later">
            <span>В другой день<span class="sub" style="display:block;margin-top:4px;color:${
@@ -3733,7 +3767,7 @@ SCREENS.N5 = {
     const row = (k, v, to) => v
       ? `<div class="row" ${to ? `data-to="${to}" style="cursor:pointer"` : ''}>
            <span class="k">${esc(k)}</span>
-           <span class="v">${esc(v)}${to ? ' <span class="link" style="margin-left:6px">✎</span>' : ''}</span>
+           <span class="v">${esc(v)}</span>
          </div>`
       : '';
 
@@ -6818,10 +6852,12 @@ SCREENS.E4 = {
 
     const quiet = !!pr.quiet_mode;
     $('#e4-rows').innerHTML = [
-      `<div class="row"><span class="k">Телефон</span><span class="v" id="e4-phone-v">${esc(pr.phone || 'не указан')}</span></div>`,
-      `<div class="row"><span class="k">Напоминать</span><span class="v" id="e4-days-v">за ${pr.reminder_days || 5} ${plural(pr.reminder_days || 5, 'день', 'дня', 'дней')}</span></div>`,
+      // data-edit не только вешает обработчик, но и рисует карандаш
+      // со стилем нажатия: строку, которую можно поправить, видно.
+      `<div class="row" data-edit><span class="k">Телефон</span><span class="v" id="e4-phone-v">${esc(pr.phone || 'не указан')}</span></div>`,
+      `<div class="row" data-edit><span class="k">Напоминать</span><span class="v" id="e4-days-v">за ${pr.reminder_days || 5} ${plural(pr.reminder_days || 5, 'день', 'дня', 'дней')}</span></div>`,
       `<div class="row"><span class="k">Уведомления</span><span class="v" style="color:${S.notifyOff ? 'var(--alarm)' : 'var(--green)'}">${S.notifyOff ? 'выключены' : 'бот в Telegram'}</span></div>`,
-      `<div class="row"><span class="k">Тихий режим</span><span class="v" id="e4-quiet-v" style="color:${quiet ? 'var(--peach-text)' : ''}">${quiet ? 'включён' : 'выключен'}</span></div>`,
+      `<div class="row" data-toggle><span class="k">Тихий режим</span><span class="v" id="e4-quiet-v" style="color:${quiet ? 'var(--peach-text)' : ''}">${quiet ? 'включён' : 'выключен'}</span></div>`,
     ].join('');
 
     $('#e4-phone-v').parentElement.onclick = () => {
@@ -8015,7 +8051,44 @@ SCREENS.V1 = {
     });
 
     $('#o1-funnel').onclick = () => go('V2', {}, { replace: true });
-    $('#o1-client').onclick = switchToClient;
+    /* Один вход во все чужие экраны вместо пяти разных.
+
+       Владельцу нужно уметь проверить всё: и что видит клиент,
+       и доску флориста, и день курьера, и кабинет компании. Раньше
+       клиентский режим жил здесь, доски — в «Команде», кабинет
+       компании — нигде, а возврат — в клиентском профиле. Пять мест
+       под одно действие: «покажи, как это выглядит у него».
+
+       Смотреть — не то же, что действовать. Подмена («действую как»)
+       остаётся в боте и пишется в журнал: там владелец нажимает кнопки
+       за человека, и это надо знать. Здесь он только смотрит. */
+    $('#o1-look').onclick = () => {
+      const row = (id, title, sub) => `
+        <button class="card" data-look="${id}" style="border:0;width:100%;text-align:left;cursor:pointer">
+          <div style="font:600 13px/1.2 var(--sans)">${title}</div>
+          <div class="sub" style="margin-top:4px">${sub}</div>
+        </button>`;
+      sheet(`<div class="h2">Посмотреть глазами</div>
+        <p class="p">Вы только смотрите. Кнопки нажимаются по-настоящему, поэтому на живых заказах будьте осторожны.</p>
+        <div class="list" style="margin-top:12px">
+          ${row('client',  'Клиента',   'как выглядит заказ букета')}
+          ${row('florist', 'Флориста',  'доска дня и карточка заказа')}
+          ${row('courier', 'Курьера',   'маршрут, адреса и телефоны')}
+          ${row('biz',     'Компании',  'витрина, заявка и кабинет')}
+        </div>`);
+      $$('[data-look]').forEach(b => b.onclick = () => {
+        closeSheet();
+        const to = b.dataset.look;
+        if (to === 'florist' || to === 'courier') {
+          // Роль не меняем: доски и так открыты владельцу, и плашка
+          // «ВЛАДЕЛЕЦ» на них честно говорит, кто смотрит.
+          go(to === 'florist' ? 'F1' : 'K1');
+          return;
+        }
+        switchToClient();
+        if (to === 'biz') go('G1');
+      });
+    };
   },
 };
 
@@ -8973,6 +9046,16 @@ function renderTabs() {
   });
 }
 
+/* Рабочие экраны: доска флориста, день курьера, панель владельца.
+   Всё остальное — клиентское, включая кабинет компании: человек
+   из «Контура» такой же наш клиент, просто в другом контексте.
+
+   Проверяем по букве, а не по списку: списки экранов расходятся
+   с жизнью через месяц, а буква держится — она и так означает роль. */
+function isClientScreen(code) {
+  return !/^[FKV]\d/.test(String(code || ''));
+}
+
 /* Разбор ссылки, по которой открыли приложение (кнопка из бота). */
 function linkParams() {
   const q = new URLSearchParams(location.search);
@@ -9044,15 +9127,14 @@ async function boot() {
 
   renderTabs();
 
-  // Сотрудник попадает сразу в свой рабочий раздел.
-  if (S.role) { go(homeScreen(), {}, { replace: true }); return; }
+  /* Ссылка сильнее роли.
 
-  /* Новый человек: два экрана и сразу за букетом. Согласие принимается
-     нажатием «Начать» на O1, отдельного экрана-блокера больше нет. */
-  if (!S.profile.consented_at) { go('O1', {}, { replace: true }); return; }
-  if (!S.profile.onboarding_seen_at) { go('O2', {}, { replace: true }); return; }
-
-  // Открыли по кнопке из бота — ведём на нужный экран.
+     Раньше сотрудник попадал на свой рабочий раздел раньше, чем
+     читалась ссылка, — и любая кнопка бота, ведущая на конкретный
+     экран, для него не работала. Владелец жал «Цветы для компании»
+     и попадал на сводку, жал «Открыть заказ» — снова на сводку.
+     Человек нажал определённую кнопку; роль не повод показать ему
+     что-то другое. */
   const p = linkParams();
 
   /* «Собрать букет» из напоминания — не экран, а вход в общий поток
@@ -9060,7 +9142,26 @@ async function boot() {
      больше нет, поэтому и отдельного экрана здесь быть не может. */
   if (p.screen === 'Z2' && p.id) { orderFromOccasion(p.id); return; }
 
-  if (p.screen && SCREENS[p.screen]) { go(p.screen, { id: p.id }, { replace: true }); return; }
+  if (p.screen && SCREENS[p.screen]) {
+    /* Клиентская кнопка включает клиентский режим, даже если человек
+       в команде. Флорист, который сам заказал букет, жмёт «Оплатить»
+       и должен попасть на оплату с клиентскими вкладками — а не на свою
+       доску и не на клиентский экран с рабочим низом.
+
+       Роль настоящая (realRole) при этом цела: «Вернуться в режим
+       флориста» в профиле работает, и одно нажатие возвращает всё. */
+    if (S.role && isClientScreen(p.screen)) { S.role = null; renderTabs(); }
+    go(p.screen, { id: p.id }, { replace: true });
+    return;
+  }
+
+  // Ссылки не было — сотрудник идёт в свой рабочий раздел.
+  if (S.role) { go(homeScreen(), {}, { replace: true }); return; }
+
+  /* Новый человек: два экрана и сразу за букетом. Согласие принимается
+     нажатием «Начать» на O1, отдельного экрана-блокера больше нет. */
+  if (!S.profile.consented_at) { go('O1', {}, { replace: true }); return; }
+  if (!S.profile.onboarding_seen_at) { go('O2', {}, { replace: true }); return; }
 
   go('N1', {}, { replace: true });
 }
