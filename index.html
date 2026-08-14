@@ -2284,6 +2284,7 @@ textarea.field.ta{min-height:60px}
     <div>
       <div class="lbl" style="margin-bottom:8px">Окна доставки</div>
       <div class="chips" id="o5-windows"></div>
+      <div class="hint" id="o5-win-why" style="text-align:left;margin-top:8px"></div>
     </div>
     <div>
       <div class="lbl" style="margin-bottom:8px">Назначение флориста</div>
@@ -2492,7 +2493,11 @@ function errText(res) {
     wrong_status: 'Этот шаг уже пройден',
     no_address: 'Нужен адрес доставки',
     forbidden: 'Нет доступа',
-    rush_closed: 'Срочный заказ можно оформить до 18:00',
+    // Время берём из правил: оно считается из часов работы и меняется
+    // вместе с ними. Вписанное числом «до 18:00» врало бы каждому,
+    // кто сдвинул закрытие мастерской.
+    rush_closed: `Срочный заказ можно оформить до ${
+      (S.settings && S.settings.rush_available_until) || '19:00'}`,
     rush_no_florist: 'Сегодня все флористы заняты — срочный не возьмём. Обычный заказ на завтра соберём с утра',
     payment_failed: 'Банк отклонил платёж',
     // Пока ЮKassa не подключена — говорим прямо, а не «что-то пошло не так».
@@ -2695,6 +2700,28 @@ function phoneFormat(v) {
 }
 
 /* Номер введён полностью? Пустой считаем допустимым — телефон необязателен. */
+/* Время в поле: маска и проверка. На телефоне двоеточие и длинное тире
+   набрать трудно, поэтому двоеточие ставим сами, а тире человек
+   не вводит вовсе — оно между двумя полями. */
+function bindTime(el) {
+  if (!el || el.__timeBound) return el;
+  el.__timeBound = true;
+  el.oninput = () => {
+    const d = el.value.replace(/\D/g, '').slice(0, 4);
+    el.value = d.length > 2 ? d.slice(0, 2) + ':' + d.slice(2) : d;
+  };
+  return el;
+}
+
+/* «9:5» → пусто, «0930» → 09:30. Возвращает нормальное время или пусто. */
+function timeOk(v) {
+  const d = String(v || '').replace(/\D/g, '');
+  if (d.length < 3) return '';
+  const h = +d.slice(0, d.length - 2), m = +d.slice(-2);
+  if (h > 23 || m > 59) return '';
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 function phoneValid(v) {
   const d = phoneDigits(v);
   return d.length === 0 || d.length === 11;
@@ -8349,6 +8376,14 @@ function inviteSheet() {
 }
 
 
+/* Настройки, которые задаются временем. Их правка проверяется:
+   часы работы кормят собой окна доставки, приём срочных, тихие часы
+   и оба дедлайна — мусор в них выключает расчёт целиком. */
+const TIME_KEYS = [
+  'work_hours_from', 'work_hours_to', 'florist_start', 'florist_end',
+  'pay_deadline_time', 'pay_hold_until', 'rush_available_until',
+];
+
 /* Как назвать посчитанное число в сообщении «пересчитано: …».
    Ключами базы владельцу говорить нельзя. */
 const WHAT_CHANGED = {
@@ -8575,25 +8610,78 @@ SCREENS.V5 = {
       $$('#o5-main [data-edit], #o5-stop [data-edit], #o5-rows [data-edit], #o5-peak [data-edit]')
         .forEach(el => el.onclick = () => {
         const k = el.dataset.edit;
+        const isTime = TIME_KEYS.includes(k);
         sheet(`<div class="h2">${esc(el.querySelector('.k').childNodes[0].textContent.trim())}</div>
-          <input class="field" id="ed" value="${esc(s[k] || '')}">
+          ${isTime ? '<p class="p">Часами и минутами, например 09:00.</p>' : ''}
+          <input class="field" id="ed" ${isTime ? 'inputmode="numeric"' : ''} value="${esc(s[k] || '')}">
+          <div class="err-text hidden" id="ed-err"></div>
           <button class="btn" id="ed-ok">Сохранить</button>`);
-        $('#ed-ok').onclick = () => { s[k] = $('#ed').value.trim(); closeSheet(); paint(); };
+        if (isTime) bindTime($('#ed'));
+        $('#ed-ok').onclick = () => {
+          const v = $('#ed').value.trim();
+          /* Часы работы кормят собой шесть других чисел. Пустят сюда
+             «ой» — расчёт молча выключится, и владелец узнает об этом
+             от клиента, которому пообещали закрытую мастерскую. */
+          if (isTime && v && !timeOk(v)) {
+            $('#ed-err').textContent = 'Нужно время, например 09:00';
+            $('#ed-err').classList.remove('hidden'); return;
+          }
+          s[k] = isTime && v ? timeOk(v) : v;
+          closeSheet(); paint();
+        };
       });
+
+      /* Окна считаются из часов работы и длины окна. Руками их править
+         можно — тогда набор закрепляется и расчёт его не трогает, — но
+         начинать с ручной правки незачем: обычно достаточно сдвинуть
+         закрытие, и окна встанут сами. */
+      const winPinned = (res.pinned || []).includes('delivery_windows');
+      const winCalc = (res.derived || []).find(d => d.key === 'delivery_windows');
 
       $('#o5-windows').innerHTML = windows.map((w, i) =>
         `<button class="chip on" data-w="${i}">${esc(w)} ✕</button>`).join('') +
-        `<button class="chip" id="o5-win-add">+ окно</button>`;
+        `<button class="chip" id="o5-win-add">+ окно</button>` +
+        (winPinned ? `<button class="chip" id="o5-win-back">вернуть расчёт</button>` : '');
+
+      $('#o5-win-why').textContent = winPinned
+        ? 'Вы задали свои окна. Часы работы их больше не меняют'
+        : (winCalc ? winCalc.why : '');
+
       $$('#o5-windows [data-w]').forEach(b => b.onclick = () => {
         windows.splice(+b.dataset.w, 1); paint();
       });
+
+      // Кнопка есть только когда окна закреплены — иначе возвращать нечего.
+      const winBack = $('#o5-win-back');
+      if (winBack) winBack.onclick = () => {
+        unpin.add('delivery_windows');
+        res.pinned = (res.pinned || []).filter(k => k !== 'delivery_windows');
+        if (winCalc) windows = winCalc.value.split(',').filter(Boolean);
+        paint();
+      };
+
+      /* Два поля времени вместо строки «09:00–13:00». Тире там длинное,
+         и на телефоне его не набрать: человек вводил дефис, окно уходило
+         в базу сломанным, а разбор по тире его дальше не находил. */
       $('#o5-win-add').onclick = () => {
         sheet(`<div class="h2">Новое окно</div>
-          <input class="field" id="nw" placeholder="09:00–13:00">
+          <p class="p">Во сколько курьер может приехать.</p>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input class="field grow" id="nw-a" inputmode="numeric" placeholder="09:00">
+            <span style="flex:none;color:var(--muted-2)">—</span>
+            <input class="field grow" id="nw-b" inputmode="numeric" placeholder="13:00">
+          </div>
+          <div class="err-text hidden" id="nw-err"></div>
           <button class="btn" id="nw-ok">Добавить</button>`);
+        bindTime($('#nw-a')); bindTime($('#nw-b'));
         $('#nw-ok').onclick = () => {
-          const v = $('#nw').value.trim();
-          if (v) windows.push(v);
+          const a = timeOk($('#nw-a').value), b = timeOk($('#nw-b').value);
+          if (!a || !b || a >= b) {
+            $('#nw-err').textContent = 'Начало и конец, например 09:00 и 13:00';
+            $('#nw-err').classList.remove('hidden'); return;
+          }
+          windows.push(`${a}–${b}`);          // тире ставим сами, правильное
+          windows.sort();
           closeSheet(); paint();
         };
       };
