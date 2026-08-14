@@ -157,11 +157,13 @@ body{
 .row[data-edit],
 .row[data-toggle],
 .row[data-price],
+.row[data-term],
 .row[data-to]{cursor:pointer}
 
 .row[data-edit] .v::after,
 .row[data-toggle] .v::after,
 .row[data-price] .v::after,
+.row[data-term] .v::after,
 .row[data-to] .v::after{
   content:'✎';
   margin-left:7px;font-weight:500;
@@ -172,6 +174,7 @@ body{
 .row[data-edit]:active,
 .row[data-toggle]:active,
 .row[data-price]:active,
+.row[data-term]:active,
 .row[data-to]:active{opacity:.55}
 
 /* ---------- варианты выбора ---------- */
@@ -1634,15 +1637,23 @@ textarea.field.ta{min-height:60px}
       <input class="field" id="g2-scale" placeholder="40 сотрудников" autocomplete="off">
     </div>
 
-    <div style="display:flex;gap:8px">
-      <div class="grow">
-        <div class="lbl" style="margin-bottom:7px">Когда</div>
-        <input class="field" id="g2-date" placeholder="8 марта" autocomplete="off">
-      </div>
-      <div class="grow">
-        <div class="lbl" style="margin-bottom:7px">Бюджет на букет</div>
-        <input class="field" id="g2-budget" placeholder="3 000 ₽" inputmode="numeric" autocomplete="off">
-      </div>
+    <!-- Второй вопрос зависит от режима: у эйчара и пространства это
+         выбор из готовых ответов, у пула и разового — свободная дата.
+         Показываем что-то одно. -->
+    <div class="hidden" id="g2-pick-wrap">
+      <div class="lbl" style="margin-bottom:7px" id="g2-pick-lbl">Что отмечаем</div>
+      <div class="chips" id="g2-pick"></div>
+      <div class="hint hidden" id="g2-pick-hint" style="text-align:left;margin-top:8px"></div>
+    </div>
+
+    <div id="g2-free-wrap">
+      <div class="lbl" style="margin-bottom:7px" id="g2-free-lbl">Когда</div>
+      <input class="field" id="g2-date" placeholder="8 марта" autocomplete="off">
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px" id="g2-budget-lbl">Бюджет на букет</div>
+      <input class="field" id="g2-budget" placeholder="3 000 ₽" inputmode="numeric" autocomplete="off">
     </div>
 
     <div>
@@ -2204,9 +2215,17 @@ textarea.field.ta{min-height:60px}
       <p class="p center">Ничего не требует вмешательства. Система работает, вы отдыхаете.</p>
     </div>
 
+    <button class="card hidden" id="o1-biz" style="border:0;width:100%;text-align:left;cursor:pointer">
+      <div class="between">
+        <span><span style="display:block;font:600 13px/1.2 var(--sans)">Компании</span>
+        <span class="sub" style="display:block;margin-top:4px"></span></span>
+        <span style="color:var(--muted-3)">→</span>
+      </div>
+    </button>
+
     <div class="foot pad">
       <button class="btn" id="o1-funnel">Открыть воронку</button>
-      <button class="btn ghost" id="o1-look">Посмотреть глазами другого</button>
+      <button class="btn ghost" id="o1-client">Открыть как клиент</button>
     </div>
   </div>
 </div>
@@ -2386,6 +2405,52 @@ textarea.field.ta{min-height:60px}
     </button>
     <div class="foot pad">
       <button class="btn secondary" id="o7-export">Выгрузить в таблицу</button>
+    </div>
+  </div>
+</div>
+
+<!-- V8 · компании у владельца. Один список на все режимы: режим это
+     поле в карточке, а не отдельный раздел — иначе через год будет
+     три разные админки. -->
+<div class="screen" id="s-V8">
+  <div class="bar"><button class="back" type="button">←</button><div class="title">Компании</div></div>
+  <div class="body tight">
+    <div class="lbl" id="v8-count">КОМПАНИИ</div>
+    <div class="list" id="v8-list"></div>
+    <div class="hint" style="margin-top:auto">Заявки приходят в бот. Здесь они становятся компаниями</div>
+  </div>
+</div>
+
+<!-- V9 · завести компанию. Поля подставлены из заявки: остаётся
+     выбрать режим и назвать цену — тридцать секунд вместо десяти
+     минут, и это правильная автоматизация. -->
+<div class="screen" id="s-V9">
+  <div class="bar"><button class="back" type="button">←</button><div class="title" id="v9-title">Компания</div></div>
+  <div class="body tight">
+    <div class="note" id="v9-from"></div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Название</div>
+      <input class="field" id="v9-name" autocomplete="off">
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:7px">Режим · определяет её экраны</div>
+      <div class="chips" id="v9-modes"></div>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Условия</div>
+      <div class="card" id="v9-terms"></div>
+      <div class="hint" style="text-align:left;margin-top:8px">Их компания подтвердит одной кнопкой у себя</div>
+    </div>
+
+    <div class="card" id="v9-contact"></div>
+
+    <div class="foot pad">
+      <div class="err-text center hidden" id="v9-err"></div>
+      <button class="btn" id="v9-save">Одобрить и открыть кабинет</button>
+      <button class="btn ghost hidden" id="v9-pause">Поставить на паузу</button>
     </div>
   </div>
 </div>
@@ -6450,15 +6515,51 @@ SCREENS.V6b = {
 
 /* Режимы. Порядок — от самого частого к самому редкому: список дат
    спрашивают чаще всего, пространство реже всех. */
+/* У каждого режима свой второй вопрос, и подставить общий «Когда»
+   нельзя: у эйчара дни рождения идут весь год, у пространства это
+   расписание, а не дата.
+
+   Бюджет тоже называется по-разному. У пространства он помесячный —
+   спросить «бюджет на букет» значит услышать три тысячи и подумать
+   про букет, когда человек имел в виду месяц обслуживания. */
 const BIZ_MODES = [
-  { id: 'hr',    label: 'Даты сотрудников', scale: 'Сколько сотрудников',
-    hint: 'Список храним мы, 25-го присылаем сверку' },
-  { id: 'pool',  label: 'Подарки клиентам', scale: 'Сколько букетов',
-    hint: 'Именные ссылки гостям, цен они не видят' },
-  { id: 'space', label: 'Обслуживание офиса', scale: 'Сколько точек',
-    hint: 'Расписание выездов, вазы наши' },
-  { id: 'once',  label: 'Разовый заказ', scale: 'Сколько букетов',
-    hint: 'Без обязательств, по счёту' },
+  { id: 'hr', label: 'Даты сотрудников',
+    scale: 'Сколько сотрудников', scaleHint: '50',
+    budget: 'Бюджет на букет', budgetHint: '3 000 ₽', budgetUnit: 'на букет',
+    /* Дни рождения и праздники — два разных ритма. Дни рождения идут
+       сами: список у нас, 25-го присылаем сверку. Праздники требуют
+       решения каждый год заново — сколько человек, какой бюджет, —
+       и заранее его не выпытать. Здесь мы только узнаём, что компания
+       их отмечает; спрашивать будем перед каждым. */
+    pick: { label: 'Что отмечаем · можно несколько', multi: true,
+            /* Дни рождения первыми и не случайно: они идут весь год
+               и работают с первого дня. Праздники подойдут когда
+               подойдут — в августе до 8 марта полгода, и обещать
+               по ним что-то сейчас нечестно.
+
+               «Другое событие» здесь потому, что список праздников
+               не закрыт: у кого-то юбилей компании, у кого-то день
+               медика. Что именно — напишут ниже своими словами. */
+            options: ['Дни рождения', '8 марта', '23 февраля',
+                      'Новый год', 'Другое событие'] },
+    pickHint: 'Дни рождения идут весь год. Праздники — когда подойдут: напомним заранее и спросим, сколько человек и какой бюджет' },
+
+  { id: 'pool', label: 'Подарки клиентам',
+    scale: 'Сколько букетов', scaleHint: '50',
+    budget: 'Потолок на букет', budgetHint: '5 000 ₽', budgetUnit: 'потолок на гостя',
+    // У пула есть срок: неиспользованное переносится, но не бесконечно.
+    free: { label: 'До какой даты', hint: '31 марта' } },
+
+  { id: 'space', label: 'Обслуживание офиса',
+    scale: 'Сколько точек', scaleHint: '2 точки',
+    budget: 'Бюджет в месяц', budgetHint: '9 000 ₽', budgetUnit: 'в месяц',
+    pick: { label: 'Как часто приезжать', multi: false,
+            options: ['Раз в неделю', 'Раз в две недели', 'Раз в месяц'] } },
+
+  { id: 'once', label: 'Разовый заказ',
+    scale: 'Сколько букетов', scaleHint: '12',
+    budget: 'Бюджет на букет', budgetHint: '3 000 ₽', budgetUnit: 'на букет',
+    free: { label: 'Когда', hint: '8 марта' } },
 ];
 
 const MODE_WORD = Object.fromEntries(BIZ_MODES.map(m => [m.id, m.label]));
@@ -6486,6 +6587,7 @@ SCREENS.G1 = {
 SCREENS.G2 = {
   async enter() {
     const chosen = new Set();
+    const picked = new Set();      // что отмечаем · как часто
 
     const paintModes = () => {
       $('#g2-modes').innerHTML = BIZ_MODES.map(m =>
@@ -6494,17 +6596,40 @@ SCREENS.G2 = {
       $$('#g2-modes [data-m]').forEach(b => b.onclick = () => {
         const id = b.dataset.m;
         chosen.has(id) ? chosen.delete(id) : chosen.add(id);
+        picked.clear();            // сменили режим — прошлый ответ не про него
         paintModes();
       });
 
-      /* Подпись у «масштаба» идёт за выбором: у эйчара это сотрудники,
-         у пространства точки, у пула букеты. Спрашивать «масштаб»
-         вообще — значит получить пустое поле. */
-      const first = BIZ_MODES.find(m => chosen.has(m.id));
-      $('#g2-scale-lbl').textContent = first ? first.scale : 'Масштаб';
-      $('#g2-scale').placeholder = first
-        ? ({ hr: '40 сотрудников', pool: '50 букетов', space: '2 точки', once: '12 букетов' })[first.id]
-        : '40 сотрудников';
+      /* Все три вопроса идут за режимом, а не только масштаб. У эйчара
+         дни рождения весь год, у пространства расписание, у пула срок —
+         общее «Когда» осмысленно только у разового заказа. */
+      const m = BIZ_MODES.find(x => chosen.has(x.id));
+
+      $('#g2-scale-lbl').textContent = m ? m.scale : 'Масштаб';
+      $('#g2-scale').placeholder = m ? m.scaleHint : '50';
+      $('#g2-budget-lbl').textContent = m ? m.budget : 'Бюджет на букет';
+      $('#g2-budget').placeholder = m ? m.budgetHint : '3 000 ₽';
+
+      const pick = m && m.pick, free = m && m.free;
+      $('#g2-pick-wrap').classList.toggle('hidden', !pick);
+      $('#g2-free-wrap').classList.toggle('hidden', !!pick);
+
+      if (pick) {
+        $('#g2-pick-lbl').textContent = pick.label;
+        $('#g2-pick-hint').textContent = m.pickHint || '';
+        $('#g2-pick-hint').classList.toggle('hidden', !m.pickHint);
+        $('#g2-pick').innerHTML = pick.options.map(o =>
+          `<button class="chip ${picked.has(o) ? 'on' : ''}" data-p="${esc(o)}">${esc(o)}</button>`).join('');
+        $$('#g2-pick [data-p]').forEach(b => b.onclick = () => {
+          const v = b.dataset.p;
+          if (!pick.multi) picked.clear();
+          picked.has(v) ? picked.delete(v) : picked.add(v);
+          paintModes();
+        });
+      } else {
+        $('#g2-free-lbl').textContent = free ? free.label : 'Когда';
+        $('#g2-date').placeholder = free ? free.hint : '8 марта';
+      }
     };
     paintModes();
 
@@ -6557,6 +6682,8 @@ SCREENS.G2 = {
         modes: [...chosen],
         scale: $('#g2-scale').value.trim(),
         dateText: $('#g2-date').value.trim(),
+        occasions: [...picked],
+        budgetUnit: (BIZ_MODES.find(x => chosen.has(x.id)) || {}).budgetUnit || '',
         budget: $('#g2-budget').value.trim(),
         note: $('#g2-note').value.trim(),
         contactName: cname,
@@ -8051,44 +8178,28 @@ SCREENS.V1 = {
     });
 
     $('#o1-funnel').onclick = () => go('V2', {}, { replace: true });
-    /* Один вход во все чужие экраны вместо пяти разных.
+    /* Доска флориста и день курьера открываются из «Команды» — там же,
+       где сама команда. Кабинет компании открывается из клиентского
+       профиля строкой «Заказы для компании». Обе дороги уже есть,
+       и второй вход в них был бы не удобством, а лишней кнопкой.
 
-       Владельцу нужно уметь проверить всё: и что видит клиент,
-       и доску флориста, и день курьера, и кабинет компании. Раньше
-       клиентский режим жил здесь, доски — в «Команде», кабинет
-       компании — нигде, а возврат — в клиентском профиле. Пять мест
-       под одно действие: «покажи, как это выглядит у него».
+       Здесь остаётся то, чего больше нигде нет: стать клиентом
+       и заказать букет по-настоящему. */
+    $('#o1-client').onclick = switchToClient;
 
-       Смотреть — не то же, что действовать. Подмена («действую как»)
-       остаётся в боте и пишется в журнал: там владелец нажимает кнопки
-       за человека, и это надо знать. Здесь он только смотрит. */
-    $('#o1-look').onclick = () => {
-      const row = (id, title, sub) => `
-        <button class="card" data-look="${id}" style="border:0;width:100%;text-align:left;cursor:pointer">
-          <div style="font:600 13px/1.2 var(--sans)">${title}</div>
-          <div class="sub" style="margin-top:4px">${sub}</div>
-        </button>`;
-      sheet(`<div class="h2">Посмотреть глазами</div>
-        <p class="p">Вы только смотрите. Кнопки нажимаются по-настоящему, поэтому на живых заказах будьте осторожны.</p>
-        <div class="list" style="margin-top:12px">
-          ${row('client',  'Клиента',   'как выглядит заказ букета')}
-          ${row('florist', 'Флориста',  'доска дня и карточка заказа')}
-          ${row('courier', 'Курьера',   'маршрут, адреса и телефоны')}
-          ${row('biz',     'Компании',  'витрина, заявка и кабинет')}
-        </div>`);
-      $$('[data-look]').forEach(b => b.onclick = () => {
-        closeSheet();
-        const to = b.dataset.look;
-        if (to === 'florist' || to === 'courier') {
-          // Роль не меняем: доски и так открыты владельцу, и плашка
-          // «ВЛАДЕЛЕЦ» на них честно говорит, кто смотрит.
-          go(to === 'florist' ? 'F1' : 'K1');
-          return;
-        }
-        switchToClient();
-        if (to === 'biz') go('G1');
-      });
-    };
+    /* Компании — постоянный вход, а не только кнопка под заявкой.
+       Заявку легко пролистать в чате, а вернуться к ней нужно бывает
+       через неделю, после разговора. */
+    const biz = $('#o1-biz');
+    if (biz) {
+      biz.classList.toggle('hidden', !res.companies);
+      if (res.companies) {
+        biz.querySelector('.sub').textContent = res.companiesNew
+          ? `${res.companiesNew} ${plural(res.companiesNew, 'заявка ждёт', 'заявки ждут', 'заявок ждут')}`
+          : `${res.companies} ${plural(res.companies, 'компания', 'компании', 'компаний')}`;
+        biz.onclick = () => go('V8');
+      }
+    }
   },
 };
 
@@ -8943,6 +9054,196 @@ SCREENS.V7 = {
       const r = await team('exportMoney');
       if (!r.ok || !r.csv) { toast(errText(r)); return; }
       downloadCsv(`bloomind-${m.periodLabel || 'отчёт'}.csv`, r.csv);
+    };
+  },
+};
+
+/* ============================================================
+   V8 · V9 — КОМПАНИИ У ВЛАДЕЛЬЦА
+
+   Заявка приходила в бот и упиралась в тупик: поговорить можно,
+   одобрить негде. Здесь она становится компанией.
+
+   Цену и условия называет владелец после разговора — это и есть
+   та половина формы, которую нельзя отдавать компании. У неё поля
+   короткие и про себя; здесь поля про деньги и обязательства.
+   ============================================================ */
+
+/* Какие условия спрашиваем — зависит от режима. У пространства это
+   день недели и вазы, у эйчара день сверки, у пула потолок и срок.
+   Общего набора нет: таблица, где две трети колонок пустые, врёт
+   не меньше, чем отсутствие полей. */
+const TERM_FIELDS = {
+  hr: [
+    ['bouquet',   'Букет · цена',      '3 000 ₽'],
+    ['check_day', 'Сверка · число',    '25'],
+    ['pay_by',    'Оплата до числа',   '1'],
+    ['address',   'Куда везём одной точкой', 'Гагарина 20, оф. 4'],
+  ],
+  space: [
+    ['bouquet',   'Обслуживание · в месяц', '9 000 ₽'],
+    ['weekday',   'День недели',        'вторник'],
+    ['window',    'Окно',               '08:30–09:30'],
+    ['points',    'Точек',              '2'],
+    ['vases',     'Вазы',               'наши'],
+    ['address',   'Адрес',              'Ленина 40'],
+  ],
+  pool: [
+    ['cap',       'Потолок на букет',   '5 000 ₽'],
+    ['bouquet',   'Букетов в пуле',     '50'],
+    ['pay_by',    'Пул действует до',   '31 марта'],
+  ],
+  once: [
+    ['bouquet',   'Букет · цена',       '3 000 ₽'],
+    ['pay_by',    'Оплата до числа',    '1'],
+    ['address',   'Адрес',              'Гагарина 20'],
+  ],
+};
+
+const BIZ_STATUS = {
+  'Заявка':  { label: 'ЗАЯВКА',  color: 'var(--peach-text)', bg: 'var(--peach)' },
+  'Активна': { label: 'РАБОТАЕТ', color: 'var(--green)',     bg: 'var(--calm)' },
+  'Пауза':   { label: 'ПАУЗА',   color: 'var(--muted-3)',    bg: 'var(--unselected)' },
+};
+
+SCREENS.V8 = {
+  async enter() {
+    const res = await team('companies');
+    if (!res.ok) { toast(errText(res)); back(); return; }
+    const list = res.companies || [];
+
+    $('#v8-count').textContent = list.length
+      ? `КОМПАНИИ · ${list.length}` : 'КОМПАНИЙ ПОКА НЕТ';
+
+    $('#v8-list').innerHTML = list.length ? list.map(c => {
+      const st = BIZ_STATUS[c.status] || BIZ_STATUS['Пауза'];
+      return `
+        <div class="card" style="cursor:pointer" data-c="${c.id}">
+          <div class="between">
+            <div class="grow">
+              <div style="font:700 13px/1.25 var(--sans)">${esc(c.name)}</div>
+              <div class="sub" style="margin-top:4px">${esc(c.modesText || '—')}</div>
+              ${c.contact ? `<div class="sub" style="margin-top:4px">${esc(c.contact)}</div>` : ''}
+            </div>
+            <span class="lbl" style="flex:none;background:${st.bg};color:${st.color};padding:5px 8px;border-radius:8px">${st.label}</span>
+          </div>
+          ${c.status === 'Активна' && !c.terms_confirmed_at
+            ? '<div class="sub" style="margin-top:9px;color:var(--peach-text)">Условия отправлены, ждём подтверждения</div>' : ''}
+        </div>`;
+    }).join('')
+      : `<div class="hint" style="padding:24px 0">Заявки приходят в бот. Оттуда же и заводятся</div>`;
+
+    $$('#v8-list [data-c]').forEach(el =>
+      el.onclick = () => go('V9', { id: el.dataset.c }));
+  },
+};
+
+SCREENS.V9 = {
+  async enter(p) {
+    const res = await team('company', { companyId: p.id });
+    if (!res.ok) { toast(errText(res)); back(); return; }
+    const c = res.company;
+    const req = res.request || null;
+    let modes = [...(c.modes || [])];
+    const terms = { ...(c.terms || {}) };
+
+    $('#v9-title').textContent = c.status === 'Заявка' ? 'Завести компанию' : c.name;
+    $('#v9-name').value = c.name || '';
+
+    /* Что компания написала в заявке — целиком и рядом. Владелец
+       называет цену, глядя на её слова, а не вспоминая разговор. */
+    $('#v9-from').classList.toggle('hidden', !req);
+    if (req) {
+      $('#v9-from').innerHTML =
+        `<div style="font:700 13px/1.25 var(--sans)">Из заявки</div>` +
+        [req.scale && `${esc(req.scale)}`,
+         (req.occasions || []).length && esc((req.occasions || []).join(' · ')),
+         req.date_text && esc(req.date_text),
+         req.budget && `бюджет ${esc(req.budget)}${req.budget_unit ? ' ' + esc(req.budget_unit) : ''}`,
+        ].filter(Boolean).map(x => `<div class="sub" style="margin-top:6px">${x}</div>`).join('') +
+        (req.note ? `<div class="sub" style="margin-top:8px;color:var(--ink)">«${esc(req.note)}»</div>` : '');
+    }
+
+    const paint = () => {
+      $('#v9-modes').innerHTML = Object.keys(TERM_FIELDS).map(id =>
+        `<button class="chip ${modes.includes(id) ? 'on' : ''}" data-m="${id}">${
+          esc(MODE_WORD[id] || id)}</button>`).join('');
+      $$('#v9-modes [data-m]').forEach(b => b.onclick = () => {
+        const id = b.dataset.m;
+        modes.includes(id) ? modes = modes.filter(x => x !== id) : modes.push(id);
+        paint();
+      });
+
+      /* Поля условий — объединение по всем выбранным режимам. Салон,
+         который возит себе и дарит клиентам, получает оба набора
+         и один счёт: так это и описано в документе. */
+      const seen = new Set();
+      const fields = modes.flatMap(m => TERM_FIELDS[m] || [])
+        .filter(([k]) => !seen.has(k) && seen.add(k));
+
+      $('#v9-terms').innerHTML = fields.length ? fields.map(([k, label, hint]) => `
+        <div class="row" data-term="${k}">
+          <span class="k">${esc(label)}</span>
+          <span class="v">${terms[k]
+            ? esc(terms[k])
+            : `<span style="color:var(--muted-3);font-weight:500">задать · ${esc(hint)}</span>`}</span>
+        </div>`).join('')
+        : `<div class="sub">Отметьте режим — под него появятся условия</div>`;
+
+      $$('#v9-terms [data-term]').forEach(el => el.onclick = () => {
+        const k = el.dataset.term;
+        const f = fields.find(x => x[0] === k);
+        sheet(`<div class="h2">${esc(f[1])}</div>
+          <input class="field" id="tm" value="${esc(terms[k] || '')}" placeholder="${esc(f[2])}">
+          <button class="btn" id="tm-ok">Сохранить</button>`);
+        $('#tm-ok').onclick = () => { terms[k] = $('#tm').value.trim(); closeSheet(); paint(); };
+      });
+    };
+    paint();
+
+    $('#v9-contact').innerHTML = (res.people || []).map(x => `
+      <div class="row">
+        <span class="k">${esc(x.name || 'Контакт')}${x.post ? `<span style="display:block;font-size:11px;color:var(--muted-3)">${esc(x.post)}</span>` : ''}</span>
+        <span class="v">${x.phone ? `<a class="link" href="tel:${esc(String(x.phone).replace(/\s/g, ''))}">${esc(x.phone)}</a>` : '—'}</span>
+      </div>`).join('') || '<div class="sub">Контакта нет</div>';
+
+    $('#v9-save').textContent = c.status === 'Заявка'
+      ? 'Одобрить и открыть кабинет' : 'Сохранить условия';
+    $('#v9-pause').classList.toggle('hidden', c.status !== 'Активна');
+
+    $('#v9-save').onclick = async () => {
+      const name = $('#v9-name').value.trim();
+      const err = (t) => { $('#v9-err').textContent = t; $('#v9-err').classList.remove('hidden'); };
+      if (!name) return err('Как называется компания?');
+      if (!modes.length) return err('Отметьте хотя бы один режим');
+      /* Без цены одобрять нечего: компания откроет кабинет, увидит
+         пустые условия и не поймёт, что подтверждать. Остальные поля
+         можно дозаполнить позже — цену нет. */
+      if (!String(terms.bouquet || '').trim()) {
+        return err('Назовите цену — без неё компании нечего подтверждать');
+      }
+
+      const btn = $('#v9-save');
+      btn.disabled = true; btn.textContent = 'Сохраняем…';
+      const r = await team('approveCompany', { companyId: c.id, name, modes, terms });
+      btn.disabled = false;
+      if (!r.ok) { btn.textContent = 'Одобрить и открыть кабинет'; err(errText(r)); return; }
+
+      toast(c.status === 'Заявка' ? 'Кабинет открыт, условия ушли' : 'Условия сохранены');
+      go('V8', {}, { replace: true });
+    };
+
+    $('#v9-pause').onclick = async () => {
+      const ok = await confirmSheet({
+        title: 'Поставить на паузу?',
+        text: 'Кабинет останется, но заказы по нему приниматься не будут. Вернуть можно в любой момент.',
+        yes: 'Поставить на паузу',
+      });
+      if (!ok) return;
+      const r = await team('approveCompany', { companyId: c.id, pause: true });
+      if (!r.ok) { toast(errText(r)); return; }
+      toast('Компания на паузе');
+      go('V8', {}, { replace: true });
     };
   },
 };
