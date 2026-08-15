@@ -570,6 +570,14 @@ textarea.field.ta{min-height:60px}
 
     <div class="stack" style="gap:7px" id="n4-when"></div>
 
+    <!-- Окно доставки. Раньше его не было вовсе: «сегодня» жёстко
+         значило вечер, а заказ на другой день уходил без окна совсем —
+         курьер получал доставку без времени, а мощность дня не считалась. -->
+    <div class="hidden" id="n4-win-wrap">
+      <div class="lbl" style="margin-bottom:7px" id="n4-win-lbl">Когда привезти</div>
+      <div class="stack" style="gap:7px" id="n4-windows"></div>
+    </div>
+
     <div><div class="lbl" style="margin-bottom:7px" id="n4-addr-label">Адрес</div>
       <div class="stack" style="gap:7px" id="n4-addr"></div>
       <button class="btn ghost" id="n4-addr-new" style="margin-top:8px">Указать адрес</button>
@@ -1609,33 +1617,51 @@ textarea.field.ta{min-height:60px}
     <div class="h1">Цветы<br>для компании</div>
     <p class="p">Не каталог с корзиной. Мы держим у себя даты и списки, помним про них сами и привозим вовремя — вам остаётся подтвердить раз в месяц.</p>
 
-    <div class="lbl" style="margin-top:4px">ТРИ СПОСОБА РАБОТАТЬ</div>
-
-    <div class="card">
-      <div style="font:700 13px/1.25 var(--sans)">Даты сотрудников</div>
-      <div class="sub" style="margin-top:6px">Отдаёте список имён и дат один раз. Дальше мы считаем сами: 25-го присылаем, кто в следующем месяце и на какую сумму. Всё как обычно — отвечать не нужно.</div>
-      <div class="sub" style="margin-top:7px;color:var(--green)">Букеты привозим одной точкой вам, вручаете сами</div>
+    <!-- Один режим крупно, остальные строкой. Показывать три равными
+         значит обещать то, чего нет: обслуживание и пул не построены,
+         и первый же салон прождал бы неделю. Плюс продажа фокусируется
+         на том, что работает с первого дня и идёт круглый год. -->
+    <div class="card lg" style="background:var(--calm)">
+      <div class="lbl" style="color:var(--green)">ЧТО ДЕЛАЕМ СЕЙЧАС</div>
+      <div style="font:700 17px/1.3 var(--sans);margin-top:8px">Дни рождения сотрудников</div>
+      <div class="sub" style="margin-top:8px">Вы отдаёте список имён и дат один раз. Двадцать пятого числа присылаем сверку: кто в следующем месяце и на какую сумму. Подтверждаете кнопкой — дальше всё сами.</div>
+      <div class="sub" style="margin-top:8px;color:var(--green)">Букеты привозим одной точкой вам. Вручаете сами — вы лучше знаете, кто сегодня в офисе</div>
+      <!-- Числа здесь нет намеренно. Розничная цена на корпоративной
+           витрине — неверный якорь: при объёме букет стоит иначе, и
+           поставленное число пришлось бы держать. Бюджет называет
+           компания, владелец правит его при одобрении. -->
+      <div class="sub" style="margin-top:10px">Бюджет на букет называете вы — под него и собираем. От объёма зависит, посчитаем на звонке.</div>
     </div>
 
-    <div class="card">
-      <div style="font:700 13px/1.25 var(--sans)">Обслуживание пространства</div>
-      <div class="sub" style="margin-top:6px">Салон, кофейня, шоурум. Композиции по расписанию — день недели и окно выбираете вы, меняете когда угодно. Вазы наши, старые забираем и моем у себя.</div>
-      <div class="sub" style="margin-top:7px;color:var(--green)">Закрыты на праздники — жмёте «пропустить», счёт уменьшается</div>
+    <div class="card" style="padding:14px 15px">
+      <div class="lbl">ЕЩЁ УМЕЕМ</div>
+      <div class="sub" style="margin-top:7px"><b>Обслуживание пространства</b> — композиции в салоне или кофейне по расписанию, вазы наши.</div>
+      <div class="sub" style="margin-top:6px"><b>Подарки клиентам</b> — пакет букетов, гостям уходят именные ссылки без цен.</div>
+      <div class="sub" style="margin-top:8px;color:var(--muted-3)">Расскажем на звонке и посчитаем под вас</div>
     </div>
-
-    <div class="card">
-      <div style="font:700 13px/1.25 var(--sans)">Подарки клиентам и партнёрам</div>
-      <div class="sub" style="margin-top:6px">Покупаете пакет букетов, гостям уходят именные ссылки. Каждый сам выбирает день и настроение — вы видите, кто воспользовался, а кто ещё нет.</div>
-      <div class="sub" style="margin-top:7px;color:var(--green)">Цен гость не видит. Открытка от вашего бренда</div>
-    </div>
-
-    <div class="note">Режимов может быть несколько. Салон возит цветы себе и дарит клиентам — получает оба раздела и один счёт.</div>
 
     <div class="lbl" style="margin-top:4px">КАК НАЧИНАЕМ</div>
     <div class="card" style="padding:14px 15px">
       <div class="sub">1 · Вы оставляете заявку — минута, без ИНН и договора</div>
       <div class="sub" style="margin-top:8px">2 · Мы отвечаем в течение часа в рабочее время и договариваемся голосом</div>
       <div class="sub" style="margin-top:8px">3 · Вы подтверждаете условия одной кнопкой, и всё начинает работать</div>
+    </div>
+
+    <!-- Гарантия ровно на то, что делает код.
+
+         Не «фото каждого вручения»: букеты уходят одной партией, и
+         сорок снимков на передаче — работа ради работы. Флорист и так
+         снимает собранное; этот снимок уходит компании один раз, когда
+         партия выезжает. Так у неё есть минута сказать «не то», пока
+         букеты ещё у нас.
+
+         Про оплату здесь молчим: корпоративный заказ идёт в работу
+         только после оплаты счёта (openGroupOrder), а сам счёт и его
+         дробление — личная договорённость с владельцем. Обещать
+         «платите по факту» на витрине значило бы врать. -->
+    <div class="note peach">
+      <div style="font:700 13px/1.25 var(--sans)">А если не понравится</div>
+      <div style="margin-top:6px;font-weight:500">Перед выездом присылаем фото собранной партии. Что-то не так — переделаем до отправки, пока букеты ещё у нас.</div>
     </div>
 
     <div class="foot pad">
@@ -2528,6 +2554,17 @@ textarea.field.ta{min-height:60px}
     </div>
 
     <div class="card" id="v9-contact"></div>
+
+    <!-- Счета и закрывающие делаются руками: бухгалтерия, ИП, банк.
+         Здесь только отправка готового файла — и список того, что
+         уже ушло, чтобы не отправить март дважды. -->
+    <div class="card hidden" id="v9-docs-wrap">
+      <div class="between">
+        <span style="font:700 13px/1.25 var(--sans)">Документы</span>
+        <button class="link" type="button" id="v9-doc-send" style="border:0;background:0;cursor:pointer">отправить →</button>
+      </div>
+      <div style="margin-top:9px" id="v9-docs"></div>
+    </div>
 
     <div class="foot pad">
       <div class="err-text center hidden" id="v9-err"></div>
@@ -3745,9 +3782,9 @@ SCREENS.N4 = {
            и его опровержение в одной строке. */
         `<button class="opt ${evening && d.when === 'today' ? 'on' : ''}" data-w="today"
                  ${evening ? '' : 'disabled style="opacity:.45"'}>
-           <span>Сегодня, к вечеру<span class="sub" style="display:block;margin-top:4px;color:${
+           <span>Сегодня<span class="sub" style="display:block;margin-top:4px;color:${
              evening && d.when === 'today' ? 'var(--on-green)' : 'var(--muted-2)'}">${
-             evening ? 'окно ' + esc(evening) : 'сегодня уже не успеем — соберём завтра'}</span></span>
+             evening ? 'выберете время ниже' : 'сегодня уже не успеем — соберём завтра'}</span></span>
            <span class="tick">✓</span></button>`,
         `<button class="opt ${d.when === 'later' ? 'on' : ''}" data-w="later">
            <span>В другой день<span class="sub" style="display:block;margin-top:4px;color:${
@@ -3763,11 +3800,27 @@ SCREENS.N4 = {
                      onPick(v) { S.draft.fast.date = v; saveDraft(); } });
         } else {
           d.date = iso(new Date());
-          // Вот чего не хватало: выбор записывается, а не остаётся надписью.
-          d.window = d.when === 'today' ? (evening || '') : '';
         }
+        /* Окно человек выбирает сам — ниже. Раньше «сегодня» жёстко
+           значило вечер, хотя днём мы успеваем, а у заказа на другой
+           день окна не было вовсе. */
+        d.window = '';
         saveDraft(); paint();
       });
+
+      /* Окна показываем, как только известен день. Помощник сам гасит
+         прошедшие и те, в которые мы уже не успеваем, — и называет
+         причину разными словами, потому что это разные вещи. */
+      const needWindow = d.when === 'today' || (d.when === 'later' && d.date);
+      $('#n4-win-wrap').classList.toggle('hidden', !needWindow);
+      if (needWindow) {
+        const day = d.when === 'today' ? iso(new Date()) : d.date;
+        $('#n4-win-lbl').textContent = d.when === 'today'
+          ? 'Когда привезти сегодня' : 'Когда привезти';
+        renderWindows('#n4-windows', d.window, w => {
+          d.window = w; saveDraft(); paint();
+        }, day, d.kind === 'rush' ? 'rush' : null);
+      }
 
       $('#n4-addr-label').textContent = d.kind === 'self' ? 'Ваш адрес' : `Адрес${d.name ? ' ' + d.name : ''}`;
       $('#n4-addr').innerHTML = d.address
@@ -3800,7 +3853,9 @@ SCREENS.N4 = {
       }
 
       $('#n4-next').disabled =
-        !(d.when && (d.address || d.noAddress)) || (чужие && !d.dataOk);
+        !(d.when && (d.address || d.noAddress)) || (чужие && !d.dataOk)
+        // «Сейчас» окна не имеет — у срочного своё обещание по часам.
+        || (d.when !== 'now' && !d.window);
     };
     paint();
 
@@ -6819,6 +6874,9 @@ SCREENS.G3 = {
 
     $('#g3-sub').textContent = (c.modes || []).map(m => MODE_WORD[m] || m).join(' · ');
 
+    const docs = res.docs || [];
+    const bills = res.bills || [];
+
     /* Блоки под режимы. Пока заявка на рассмотрении, они рассказывают,
        что здесь появится, — теми же словами, что и в самом режиме. */
     const BLOCK = {
@@ -6866,15 +6924,44 @@ SCREENS.G3 = {
           <div class="sub" style="margin-top:7px">${esc(pending ? b.soon : b.ready(res.data || {}))}</div>
         </div>`;
     }).join('') + `
+      ${/* Пока заявка на рассмотрении, цен в кабинете нет вовсе:
+             цену называет владелец после разговора, и число, увиденное
+             раньше него, станет для компании обещанием. Счетов у заявки
+             и так не бывает, но пусть это держит условие, а не удача. */
+        !pending && bills.length ? `
+      <div class="card">
+        <div class="lbl">Счета</div>
+        <div style="margin-top:9px">${bills.map(i => `
+          <div class="row">
+            <span class="k">№${esc(i.number)}<br><span style="color:var(--muted-3)">до ${esc(i.due)}</span></span>
+            <span class="v">${i.status === 'Оплачен'
+              ? '<span style="color:var(--green)">оплачен</span>'
+              : (i.paid
+                /* Компании важнее остаток, чем внесённое: заплатить
+                   надо именно его, и считать в уме не должен никто. */
+                ? money(i.paid) + ' из ' + money(i.amount) + '<br><span style="color:var(--muted-3)">остаток ' + money(i.amount - i.paid) + '</span>'
+                : money(i.amount))}</span>
+          </div>`).join('')}</div>
+      </div>` : ''}
+
       <div class="card">
         <div class="between">
-          <span style="font:700 13px/1.25 var(--sans)">Счета</span>
+          <span style="font:700 13px/1.25 var(--sans)">Документы</span>
           ${pending ? '<span class="lbl" style="color:var(--muted-3)">СКОРО</span>' : ''}
         </div>
-        <div class="sub" style="margin-top:7px">${
-          pending
-            ? 'Счёт и закрывающие приходят сюда же и в бот. ИП, без НДС.'
-            : esc(res.invoiceLine || 'Пока счетов нет')}</div>
+        ${pending
+          ? '<div class="sub" style="margin-top:7px">Счета и закрывающие приходят в бот и остаются здесь. ИП, без НДС.</div>'
+          : (docs.length
+            /* Список с кнопкой «прислать» вместо ссылки на файл.
+               Файл живёт в Телеграме, а не у нас: хранилища и
+               подписанных ссылок ради счёта заводить незачем —
+               бот пришлёт его снова в одно нажатие. */
+            ? docs.map(d => `
+              <div class="row" data-doc="${d.id}" style="cursor:pointer">
+                <span class="k">${esc(d.title)}<br><span style="color:var(--muted-3)">${esc(d.when)}</span></span>
+                <span class="link" style="flex:none">прислать →</span>
+              </div>`).join('')
+            : '<div class="sub" style="margin-top:7px">Пока пусто. Счета и закрывающие придут сюда и в бот.</div>')}
       </div>`;
 
     /* Условия появляются, когда владелец их назначил. Подтверждение —
@@ -6899,6 +6986,11 @@ SCREENS.G3 = {
 
     $$('#g3-blocks [data-ev]').forEach(el =>
       el.onclick = () => go('G5', { id: el.dataset.ev }));
+
+    $$('#g3-blocks [data-doc]').forEach(el => el.onclick = async () => {
+      const r = await api('bizDocResend', { companyId: c.id, docId: +el.dataset.doc });
+      toast(r.ok ? 'Прислали в чат' : errText(r));
+    });
 
     $('#g3-support').onclick = openSupport;
     $('#g3-foot').textContent = pending
@@ -6983,7 +7075,7 @@ SCREENS.G4 = {
         text: e.left
           ? `${e.name} снова будет в списке, и букет ко дню рождения привезём.`
           : `${e.name} останется в списке серым. Букет не привезём и в счёт не поставим.`,
-        yes: e.left ? 'Вернуть' : 'Отметить',
+        ok: e.left ? 'Вернуть' : 'Отметить',
       });
       if (!ok) return;
       const r = await api('hrLeft', { companyId: id, employeeId: e.id, back: e.left });
@@ -8060,7 +8152,12 @@ SCREENS.K1a = {
     $('#k1a-title').textContent = 'Забрать букет · #' + d.id;
     $('#k1a-rows').innerHTML = [
       `<div class="row"><span class="k">У кого</span><span class="v">${esc(d.floristName || 'флорист')}</span></div>`,
-      d.floristPoint ? `<div class="row"><span class="k">Где</span><span class="v">${esc(d.floristPoint)}</span></div>` : '',
+      /* Адрес мастерской не задан — говорим прямо, а не прячем строку.
+         Пропавшая строка читается курьером как «так и надо», и он
+         едет неизвестно куда либо звонит владельцу. */
+      `<div class="row"><span class="k">Где</span><span class="v">${
+        d.floristPoint ? esc(d.floristPoint)
+                       : '<span style="color:var(--alarm)">адрес не задан — спросите владельца</span>'}</span></div>`,
       `<div class="row"><span class="k">Когда</span><span class="v">сегодня, до ${esc(d.pickupTime || '')}</span></div>`,
     ].filter(Boolean).join('');
 
@@ -8999,6 +9096,10 @@ SCREENS.V5 = {
         calcRow('quiet_from', 'Не пишем с', ':00'),
         calcRow('quiet_to', 'Пишем снова с', ':00'),
         // Куда ведёт «написать нам» на всех экранах.
+        /* Адрес мастерской. Без него в карточке курьера строка «Где»
+           не рисуется вовсе, и он видит «забрать у флориста» без
+           единого слова о том, куда ехать. */
+        numRow('florist_point', 'Где забирать букеты', 'адрес мастерской — его видит курьер'),
         numRow('support_username', 'Поддержка', 'telegram без собаки'),
         numRow('subscription_warn_days', 'Письмо перед списанием за', 'по подписке', ' дн.'),
         // За сколько дней спрашиваем компанию про праздник. Раньше —
@@ -9268,38 +9369,76 @@ SCREENS.V7 = {
         `<p class="p" style="margin-top:8px">Возврат делает владелец вручную в кабинете ЮKassa: обычной отмены после оплаты в сервисе нет.</p>`;
     }
 
-    // Счета компаний. Перевод по счёту банк нам не подтверждает —
-    // деньги на счёте видит только владелец, поэтому оплату отмечает он.
-    // До отметки букеты не уходят флористам и никто не собирает в долг.
+    /* Счета компаний. Перевод по счёту банк нам не подтверждает —
+       деньги на счёте видит только владелец, поэтому и сумму
+       проставляет он.
+
+       Не галочка «оплачено», а поле с суммой: корпоративная оплата
+       редко приходит одним платежом. Половина вперёд, половина после
+       доставки, остаток через неделю — всё это обычная жизнь, и
+       флажок её не описывает. Поле подставлено остатком: чаще всего
+       приходит именно он, и тогда достаточно одного нажатия. */
     const inv = await team('invoices');
     const list = ((inv.ok && inv.invoices) || []).filter(i => i.status !== 'Оплачен');
     $('#o7-invoices').classList.toggle('hidden', !list.length);
     if (list.length) {
       $('#o7-invoices').innerHTML =
         `<div class="lbl">Счета компаний · ${list.length}</div>` +
-        list.map(i => `
-          <div style="margin-top:10px">
-            <div class="between">
-              <span>
-                <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(i.company)} · ${money(i.amount)}</span>
-                <span class="sub" style="display:block;margin-top:4px;${i.overdue ? 'color:var(--alarm)' : ''}">
-                  Счёт №${esc(i.number)} · ${i.overdue ? 'срок прошёл' : 'до ' + esc(dateWords(i.due, false))}${
-                    i.eventDate ? ' · букеты ' + esc(dateWords(i.eventDate, false)) : ''}</span>
-              </span>
+        list.map(i => {
+          const left = i.amount - (i.paid || 0);
+          return `
+          <div style="margin-top:12px">
+            <div>
+              <span style="display:block;font:600 13px/1.2 var(--sans)">${esc(i.company)} · ${money(i.amount)}</span>
+              <span class="sub" style="display:block;margin-top:4px;${i.overdue ? 'color:var(--alarm)' : ''}">
+                Счёт №${esc(i.number)} · ${i.overdue ? 'срок прошёл' : 'до ' + esc(dateWords(i.due, false))}${
+                  i.eventDate ? ' · букеты ' + esc(dateWords(i.eventDate, false)) : ''}</span>
+              ${i.paid ? `<span class="sub" style="display:block;margin-top:4px;color:var(--green)">
+                Пришло ${money(i.paid)} · остаток ${money(left)}${i.started ? ' · букеты в работе' : ''}</span>` : ''}
             </div>
-            <button class="btn secondary" style="height:40px;font-size:13px;margin-top:8px" data-paid="${i.id}">Деньги пришли — в работу</button>
-          </div>`).join('');
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input class="field grow" inputmode="numeric" data-sum="${i.id}"
+                     value="${i.paid ? i.amount : left}" style="height:40px">
+              <button class="btn secondary" style="height:40px;font-size:13px;flex:none;padding:0 14px"
+                      data-mark="${i.id}">Отметить</button>
+            </div>
+          </div>`;
+        }).join('');
 
-      $$('#o7-invoices [data-paid]').forEach(b => b.onclick = async () => {
-        const ok = await confirmSheet({
-          title: 'Деньги пришли?',
-          text: 'Букеты уйдут флористам, и заказ станет рабочим. Отменить это одной кнопкой уже нельзя — проверьте выписку.',
-          ok: 'Да, деньги на счёте',
-        });
-        if (!ok) return;
-        const r = await team('invoicePaid', { id: b.dataset.paid });
+      $$('#o7-invoices [data-mark]').forEach(b => b.onclick = async () => {
+        const i = list.find(x => String(x.id) === b.dataset.mark);
+        const raw = $(`#o7-invoices [data-sum="${i.id}"]`).value.replace(/[^\d]/g, '');
+        const sum = parseInt(raw, 10);
+        if (!isFinite(sum)) { toast('Сколько пришло?'); return; }
+        if (sum > i.amount) { toast(`Больше счёта · максимум ${money(i.amount)}`); return; }
+
+        const full = sum >= i.amount;
+        let start = false;
+
+        if (full) {
+          const ok = await confirmSheet({
+            title: 'Счёт оплачен полностью?',
+            text: 'Букеты уйдут флористам, и заказ станет рабочим. Отменить это одной кнопкой уже нельзя — проверьте выписку.',
+            ok: 'Да, деньги на счёте',
+          });
+          if (!ok) return;
+        } else if (!i.started) {
+          /* Половину заплатили — начинать или ждать, решает владелец.
+             У давнего клиента это договорённость, у первой сделки —
+             риск. Из суммы это не выводится, поэтому спрашиваем. */
+          start = await confirmSheet({
+            title: `Пришло ${money(sum)} из ${money(i.amount)}`,
+            text: 'Запустить букеты в работу, не дожидаясь остатка? Если не уверены — отметим оплату и подождём доплаты.',
+            ok: 'Запустить в работу',
+            cancel: 'Только отметить',
+          });
+        }
+
+        const r = await team('invoiceMark', { id: i.id, amount: sum, start });
         if (!r.ok) { toast(errText(r)); return; }
-        toast(r.already ? 'Счёт уже был оплачен' : `${r.orders} ${plural(r.orders, 'букет ушёл', 'букета ушли', 'букетов ушли')} флористам`);
+        toast(r.orders
+          ? `${r.orders} ${plural(r.orders, 'букет ушёл', 'букета ушли', 'букетов ушли')} флористам`
+          : (r.full ? 'Счёт закрыт' : 'Отметили оплату'));
         SCREENS.V7.enter();
       });
     }
@@ -9489,6 +9628,26 @@ SCREENS.V9 = {
       ? 'Одобрить и открыть кабинет' : 'Сохранить условия';
     $('#v9-pause').classList.toggle('hidden', c.status !== 'Активна');
 
+    /* Документы появляются только у одобренной компании: заявке
+       счёт выставлять не за что. */
+    $('#v9-docs-wrap').classList.toggle('hidden', c.status === 'Заявка');
+    if (c.status !== 'Заявка') {
+      const dd = await team('bizDocs', { companyId: c.id });
+      const list = (dd.ok && dd.docs) || [];
+      $('#v9-docs').innerHTML = list.length
+        ? list.map(d => `
+          <div class="row">
+            <span class="k">${esc(d.title || d.file_name || 'Документ')}</span>
+            <span class="v">${esc(dateWords(String(d.sent_at).slice(0, 10)))}</span>
+          </div>`).join('')
+        : '<div class="sub">Пока ничего не отправляли</div>';
+
+      $('#v9-doc-send').onclick = async () => {
+        const r = await team('bizDocArm', { companyId: c.id });
+        toast(r.ok ? 'Пришлите файл в чат с ботом' : errText(r));
+      };
+    }
+
     $('#v9-save').onclick = async () => {
       const name = $('#v9-name').value.trim();
       const err = (t) => { $('#v9-err').textContent = t; $('#v9-err').classList.remove('hidden'); };
@@ -9515,7 +9674,7 @@ SCREENS.V9 = {
       const ok = await confirmSheet({
         title: 'Поставить на паузу?',
         text: 'Кабинет останется, но заказы по нему приниматься не будут. Вернуть можно в любой момент.',
-        yes: 'Поставить на паузу',
+        ok: 'Поставить на паузу',
       });
       if (!ok) return;
       const r = await team('approveCompany', { companyId: c.id, pause: true });
